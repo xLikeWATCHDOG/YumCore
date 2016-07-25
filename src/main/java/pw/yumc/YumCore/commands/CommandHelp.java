@@ -95,7 +95,7 @@ public class CommandHelp {
                         final String cmd = ci.getName() + (aliases.length() == 2 ? "" : "§7" + aliases);
                         final Help help = ci.getHelp();
                         // 帮助列表
-                        helpList.add(String.format(helpBody, label, cmd, help.possibleArguments(), help.description()));
+                        helpList.add(String.format(helpBody, label, cmd, help.possibleArguments(), help.value()));
                     }
                 }
             }

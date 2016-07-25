@@ -43,7 +43,7 @@ public class CommandInfo {
     public CommandInfo(final Method method, final Object origin, final Cmd command, final Help help, final boolean async, final int sort) {
         this.method = method;
         this.origin = origin;
-        this.name = "".equals(command.name()) ? method.getName().toLowerCase() : command.name();
+        this.name = "".equals(command.value()) ? method.getName().toLowerCase() : command.value();
         this.aliases = Arrays.asList(command.aliases());
         this.command = command;
         this.help = help;
@@ -77,7 +77,7 @@ public class CommandInfo {
             final Help help = method.getAnnotation(Help.class);
             final Async async = method.getAnnotation(Async.class);
             final Sort sort = method.getAnnotation(Sort.class);
-            return new CommandInfo(method, origin, command, help != null ? help : Help.DEFAULT, async != null, sort != null ? sort.sort() : 50);
+            return new CommandInfo(method, origin, command, help != null ? help : Help.DEFAULT, async != null, sort != null ? sort.value() : 50);
         }
         return null;
     }
@@ -184,11 +184,11 @@ public class CommandInfo {
         if (cmdArgs.getArgs().length < command.minimumArguments()) {
             Log.toSender(sender, cmdErr);
             Log.toSender(sender, String.format(cmdUse, cmdArgs.getAlias(), getName(), help.possibleArguments()));
-            Log.toSender(sender, String.format(cmdDes, help.description()));
+            Log.toSender(sender, String.format(cmdDes, help.value()));
         }
-        if (sender instanceof Player && command.onlyConsoleExecutable()) {
+        if (sender instanceof Player && command.onlyConsole()) {
             Log.toSender(sender, onlyConsole);
-        } else if (command.onlyPlayerExecutable()) {
+        } else if (command.onlyPlayer()) {
             Log.toSender(sender, onlyPlayer);
         }
         final String perm = command.permission();

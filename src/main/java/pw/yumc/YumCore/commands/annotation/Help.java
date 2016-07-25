@@ -22,7 +22,7 @@ public @interface Help {
         }
 
         @Override
-        public String description() {
+        public String value() {
             return "没写帮助信息";
         }
 
@@ -35,7 +35,7 @@ public @interface Help {
     /**
      * @return 命令描述
      */
-    String description();
+    String value();
 
     /**
      * @return 当前命令可能需要的参数
