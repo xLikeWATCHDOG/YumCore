@@ -2,6 +2,7 @@ package pw.yumc.YumCore.commands;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,20 +38,23 @@ public class CommandManager implements TabExecutor {
     /**
      * 命令列表
      */
-    Set<CommandInfo> cmdlist = new HashSet<>();
+    Set<CommandInfo> cmds = new HashSet<>();
     /**
      * Tab列表
      */
-    Set<TabInfo> tablist = new HashSet<>();
+    Set<TabInfo> tabs = new HashSet<>();
     /**
      * 命令缓存列表
      */
-    Map<String, CommandInfo> cmdcache = new HashMap<>();
+    Map<String, CommandInfo> cmdCache = new HashMap<>();
+    /**
+     * 命令名称缓存
+     */
+    List<String> cmdNameCache = new ArrayList<>();
     /**
      * 命令帮助
      */
-    CommandHelp help = new CommandHelp(cmdlist);
-
+    CommandHelp help;
     /**
      * 插件命令
      */
@@ -97,10 +101,6 @@ public class CommandManager implements TabExecutor {
         }
         final CommandArgument cmdArgs = new CommandArgument(sender, command, label, moveStrings(args, 1));
         final CommandInfo ci = checkCache(subcmd);
-        try {
-
-        } catch (final Exception e) {
-        }
         return ci.execute(cmdArgs);
     }
 
@@ -109,10 +109,9 @@ public class CommandManager implements TabExecutor {
         final List<String> completions = new ArrayList<>();
         final String token = args[args.length - 1];
         if (args.length == 1) {
-            final Set<String> commands = this.cmdcache.keySet();
-            StringUtil.copyPartialMatches(args[0], commands, completions);
+            StringUtil.copyPartialMatches(args[0], cmdNameCache, completions);
         } else if (args.length >= 2) {
-            for (final TabInfo tab : tablist) {
+            for (final TabInfo tab : tabs) {
                 StringUtil.copyPartialMatches(token, tab.execute(sender, command, token, args), completions);
             }
             StringUtil.copyPartialMatches(token, getPlayerTabComplete(sender, command, alias, args), completions);
@@ -135,7 +134,20 @@ public class CommandManager implements TabExecutor {
             }
             registerTab(method, clazz);
         }
-        help = new CommandHelp(cmdlist);
+        help = new CommandHelp(cmds);
+        buildCmdNameCache();
+    }
+
+    /**
+     * 构建命令列表缓存
+     */
+    private void buildCmdNameCache() {
+        cmdNameCache.clear();
+        for (final CommandInfo cmd : cmds) {
+            cmdNameCache.add(cmd.getName());
+            cmdNameCache.addAll(Arrays.asList(cmd.getCommand().aliases()));
+        }
+        cmdNameCache.add("help");
     }
 
     /**
@@ -146,18 +158,18 @@ public class CommandManager implements TabExecutor {
      * @return 命令信息
      */
     private CommandInfo checkCache(final String subcmd) {
-        if (!cmdcache.containsKey(subcmd)) {
-            for (final CommandInfo cmdinfo : cmdlist) {
+        if (!cmdCache.containsKey(subcmd)) {
+            for (final CommandInfo cmdinfo : cmds) {
                 if (cmdinfo.isValid(subcmd)) {
-                    cmdcache.put(subcmd, cmdinfo);
+                    cmdCache.put(subcmd, cmdinfo);
                     break;
                 }
             }
-            if (!cmdcache.containsKey(subcmd)) {
-                cmdcache.put(subcmd, CommandInfo.Unknow);
+            if (!cmdCache.containsKey(subcmd)) {
+                cmdCache.put(subcmd, CommandInfo.Unknow);
             }
         }
-        return cmdcache.get(subcmd);
+        return cmdCache.get(subcmd);
     }
 
     /**
@@ -215,8 +227,8 @@ public class CommandManager implements TabExecutor {
         if (ci != null) {
             final Class<?>[] params = method.getParameterTypes();
             if (params.length == 1 && params[0].equals(CommandArgument.class)) {
-                cmdlist.add(ci);
-                cmdcache.put(ci.getName(), ci);
+                cmds.add(ci);
+                cmdCache.put(ci.getName(), ci);
                 return true;
             }
             Log.warning(String.format(argumentTypeError, method.getName(), clazz.getClass().getName()));
@@ -237,7 +249,7 @@ public class CommandManager implements TabExecutor {
         final TabInfo ti = TabInfo.parse(method, clazz);
         if (ti != null) {
             if (method.getReturnType().equals(List.class)) {
-                tablist.add(ti);
+                tabs.add(ti);
                 return true;
             }
             Log.warning(String.format(returnTypeError, method.getName(), clazz.getClass().getName()));

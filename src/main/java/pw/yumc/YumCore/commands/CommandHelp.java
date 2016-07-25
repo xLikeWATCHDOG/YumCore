@@ -1,6 +1,5 @@
 package pw.yumc.YumCore.commands;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -79,7 +78,7 @@ public class CommandHelp {
         }
         final String helpkey = label + page;
         if (!cacheHelp.containsKey(helpkey)) {
-            final List<String> helpList = new ArrayList<>();
+            final List<String> helpList = new LinkedList<>();
             if (page > this.HELPPAGECOUNT || page < 1) {
                 // 帮助页面不存在
                 helpList.add(String.format(commandNotFound, HELPPAGECOUNT));
@@ -115,7 +114,13 @@ public class CommandHelp {
     static class CommandComparator implements Comparator<CommandInfo> {
         @Override
         public int compare(final CommandInfo o1, final CommandInfo o2) {
-            return Integer.valueOf(o1.getSort()).compareTo(Integer.valueOf(o2.getSort()));
+            if (o1.getSort() > o2.getSort()) {
+                return 1;
+            } else if (o1.getSort() == o2.getSort()) {
+                return 0;
+            } else {
+                return -1;
+            }
         }
     }
 }

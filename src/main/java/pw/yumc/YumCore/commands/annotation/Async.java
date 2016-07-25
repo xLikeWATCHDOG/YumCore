@@ -7,12 +7,11 @@ import java.lang.annotation.Target;
 
 /**
  * 异步命令注解
- * 
+ *
  * @since 2016年7月23日 上午9:00:27
  * @author 喵♂呜
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Async {
-
 }
