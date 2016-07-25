@@ -107,23 +107,25 @@ public class CommandInfo {
         if (method == null) {
             return false;
         }
-        check(cmdArgs);
-        final Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    method.invoke(origin, cmdArgs);
-                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                    throw new CommandException(e);
+        if (check(cmdArgs)) {
+            final Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        method.invoke(origin, cmdArgs);
+                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                        throw new CommandException(e);
+                    }
                 }
+            };
+            if (async) {
+                Bukkit.getScheduler().runTaskAsynchronously(P.instance, runnable);
+            } else {
+                runnable.run();
             }
-        };
-        if (async) {
-            Bukkit.getScheduler().runTaskAsynchronously(P.instance, runnable);
-        } else {
-            runnable.run();
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**
@@ -185,15 +187,19 @@ public class CommandInfo {
             Log.toSender(sender, cmdErr);
             Log.toSender(sender, String.format(cmdUse, cmdArgs.getAlias(), getName(), help.possibleArguments()));
             Log.toSender(sender, String.format(cmdDes, help.value()));
+            return false;
         }
         if (sender instanceof Player && command.onlyConsole()) {
             Log.toSender(sender, onlyConsole);
+            return false;
         } else if (command.onlyPlayer()) {
             Log.toSender(sender, onlyPlayer);
+            return false;
         }
         final String perm = command.permission();
         if (perm != null && !sender.hasPermission(perm)) {
             Log.toSender(sender, String.format(losePerm, perm));
+            return false;
         }
         return true;
     }
