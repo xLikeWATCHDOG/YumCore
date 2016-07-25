@@ -18,27 +18,27 @@ public @interface Help {
     public static Help DEFAULT = new Help() {
         @Override
         public Class<? extends Annotation> annotationType() {
-            return getClass();
-        }
-
-        @Override
-        public String value() {
-            return "没写帮助信息";
+            return Help.class;
         }
 
         @Override
         public String possibleArguments() {
             return "这家伙很懒";
         }
-    };
 
-    /**
-     * @return 命令描述
-     */
-    String value();
+        @Override
+        public String value() {
+            return "没写帮助信息";
+        }
+    };
 
     /**
      * @return 当前命令可能需要的参数
      */
     String possibleArguments() default "";
+
+    /**
+     * @return 命令描述
+     */
+    String value();
 }
