@@ -35,7 +35,7 @@ public @interface Help {
     /**
      * @return 命令描述
      */
-    String description() default "无";
+    String description();
 
     /**
      * @return 当前命令可能需要的参数

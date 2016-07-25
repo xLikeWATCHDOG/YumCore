@@ -9,5 +9,5 @@ public @interface Sort {
     /**
      * @return 命令排序
      */
-    int sort() default 50;
+    int sort();
 }
