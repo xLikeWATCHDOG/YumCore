@@ -1,10 +1,11 @@
 package pw.yumc.YumCore.bukkit;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.logging.Logger;
 
 import org.bukkit.command.PluginCommand;
-import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -30,19 +31,65 @@ public class P {
         }
     }
 
+    /**
+     * @param name
+     *            命令名称
+     *
+     * @return 插件命令
+     */
     public PluginCommand getCommand(final String name) {
         return instance.getCommand(name);
     }
 
-    public FileConfiguration getConfig() {
-        return instance.getConfig();
+    /**
+     * @return 获得插件配置文件
+     */
+    @SuppressWarnings("unchecked")
+    public <FC> FC getConfig() {
+        return (FC) instance.getConfig();
     }
 
+    /**
+     * @return 获得插件文件夹
+     */
+    public final File getDataFolder() {
+        return instance.getDataFolder();
+    }
+
+    /**
+     * @return 获得插件描述文件
+     */
+    public final PluginDescriptionFile getDescription() {
+        return instance.getDescription();
+    }
+
+    /**
+     * @return 获得插件日志器
+     */
     public final Logger getLogger() {
         return instance.getLogger();
     }
 
+    /**
+     * @return 插件名称
+     */
     public final String getName() {
         return instance.getName();
     }
+
+    /**
+     * @return 获得插件配置文件
+     */
+    @SuppressWarnings("unchecked")
+    public <PI> PI getPlugin() {
+        return (PI) instance;
+    }
+
+    /**
+     * @return 插件是否已启用
+     */
+    public final boolean isEnabled() {
+        return instance.isEnabled();
+    }
+
 }
