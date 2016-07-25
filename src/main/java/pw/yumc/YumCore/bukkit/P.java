@@ -1,7 +1,10 @@
 package pw.yumc.YumCore.bukkit;
 
 import java.lang.reflect.Field;
+import java.util.logging.Logger;
 
+import org.bukkit.command.PluginCommand;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -25,5 +28,21 @@ public class P {
         } catch (final Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public PluginCommand getCommand(final String name) {
+        return instance.getCommand(name);
+    }
+
+    public FileConfiguration getConfig() {
+        return instance.getConfig();
+    }
+
+    public final Logger getLogger() {
+        return instance.getLogger();
+    }
+
+    public final String getName() {
+        return instance.getName();
     }
 }
