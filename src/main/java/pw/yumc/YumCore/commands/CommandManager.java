@@ -20,7 +20,6 @@ import org.bukkit.util.StringUtil;
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.bukkit.compatible.C;
-import pw.yumc.YumCore.commands.api.CommandExecutor;
 
 /**
  * 命令管理类
@@ -96,19 +95,13 @@ public class CommandManager implements TabExecutor {
             help.send(sender, command, label, args);
             return true;
         }
-        final String[] subargs = moveStrings(args, 1);
-        if (!cmdcache.containsKey(label)) {
-            for (final CommandInfo cmdinfo : cmdlist) {
-                if (cmdinfo.isValid(subcmd)) {
-                    cmdcache.put(subcmd, cmdinfo);
-                    break;
-                }
-            }
-            if (!cmdcache.containsKey(subcmd)) {
-                cmdcache.put(subcmd, CommandInfo.Unknow);
-            }
+        final CommandArgument cmdArgs = new CommandArgument(sender, command, label, moveStrings(args, 1));
+        final CommandInfo ci = checkCache(subcmd);
+        try {
+
+        } catch (final Exception e) {
         }
-        return cmdcache.get(subcmd).execute(sender, command, label, subargs);
+        return ci.execute(cmdArgs);
     }
 
     @Override
@@ -143,6 +136,28 @@ public class CommandManager implements TabExecutor {
             registerTab(method, clazz);
         }
         help = new CommandHelp(cmdlist);
+    }
+
+    /**
+     * 检查缓存并获得命令
+     *
+     * @param subcmd
+     *            子命令
+     * @return 命令信息
+     */
+    private CommandInfo checkCache(final String subcmd) {
+        if (!cmdcache.containsKey(subcmd)) {
+            for (final CommandInfo cmdinfo : cmdlist) {
+                if (cmdinfo.isValid(subcmd)) {
+                    cmdcache.put(subcmd, cmdinfo);
+                    break;
+                }
+            }
+            if (!cmdcache.containsKey(subcmd)) {
+                cmdcache.put(subcmd, CommandInfo.Unknow);
+            }
+        }
+        return cmdcache.get(subcmd);
     }
 
     /**

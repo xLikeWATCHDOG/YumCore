@@ -2,13 +2,9 @@ package pw.yumc.YumCore.commands;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-
-import pw.yumc.YumCore.commands.exception.IllegalPermissionException;
-import pw.yumc.YumCore.commands.exception.IllegalSenderException;
 
 /**
- * 子命令调用事件类
+ * 子命令参数类
  *
  * @since 2015年8月22日上午8:29:44
  * @author 喵♂呜
@@ -26,52 +22,29 @@ public class CommandArgument {
         this.args = args;
     }
 
-    public boolean check(final CommandInfo info) {
-        if (sender instanceof Player) {
-            if (info.getCommand().onlyConsoleExecutable()) {
-                throw new IllegalSenderException("§c玩家无法使用此命令(§4请使用控制台执行§c)!");
-            }
-        } else if (info.getCommand().onlyPlayerExecutable()) {
-            throw new IllegalSenderException("§c玩家无法使用此命令(§4请使用控制台执行§c)!");
-        }
-        final String perm = info.getCommand().permission();
-        if (perm != null && !sender.hasPermission(perm)) {
-            throw new IllegalPermissionException("§c你需要有 " + perm + " 的权限才能执行此命令!");
-        }
-        return true;
-    }
-
     /**
-     * 命令别名
-     *
-     * @return alias
+     * @return 命令别名
      */
     public String getAlias() {
         return alias;
     }
 
     /**
-     * 命令参数
-     *
-     * @return args
+     * @return 命令参数
      */
     public String[] getArgs() {
         return args;
     }
 
     /**
-     * 命令实体
-     *
-     * @return command
+     * @return 命令实体
      */
     public Command getCommand() {
         return command;
     }
 
     /**
-     * 命令发送者
-     *
-     * @return sender
+     * @return 命令发送者
      */
     public CommandSender getSender() {
         return sender;

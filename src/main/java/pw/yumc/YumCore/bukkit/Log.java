@@ -52,6 +52,12 @@ public class Log {
         logger.severe(msg);
     }
 
+    public static void toSender(final CommandSender sender, final String... msg) {
+        for (final String str : msg) {
+            sender.sendMessage(prefix + str);
+        }
+    }
+
     public static void warning(final String msg) {
         logger.warning(msg);
     }
