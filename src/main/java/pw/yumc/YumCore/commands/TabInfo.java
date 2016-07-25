@@ -35,8 +35,7 @@ public class TabInfo {
      * @return {@link TabInfo}
      */
     public static TabInfo parse(final Method method, final Object origin) {
-        final Class<?> clazz = method.getClass();
-        final Tab tab = clazz.getAnnotation(Tab.class);
+        final Tab tab = method.getAnnotation(Tab.class);
         if (tab != null) {
             return new TabInfo(method, origin);
         }

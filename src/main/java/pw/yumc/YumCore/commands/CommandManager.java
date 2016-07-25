@@ -53,13 +53,18 @@ public class CommandManager implements TabExecutor {
     CommandHelp help = new CommandHelp(cmdlist);
 
     /**
+     * 插件命令
+     */
+    PluginCommand cmd;
+
+    /**
      * 命令管理器
      *
      * @param name
      *            注册的命令
      */
     public CommandManager(final String name) {
-        final PluginCommand cmd = plugin.getCommand(name);
+        cmd = plugin.getCommand(name);
         if (cmd == null) {
             throw new IllegalStateException("未找到命令 必须在plugin.yml先注册 " + name + " 命令!");
         }
@@ -77,7 +82,7 @@ public class CommandManager implements TabExecutor {
      */
     public CommandManager(final String name, final CommandExecutor executor) {
         this(name);
-        registerCommands(executor);
+        register(executor);
     }
 
     @Override
@@ -94,14 +99,16 @@ public class CommandManager implements TabExecutor {
         final String[] subargs = moveStrings(args, 1);
         if (!cmdcache.containsKey(label)) {
             for (final CommandInfo cmdinfo : cmdlist) {
-                if (cmdinfo.isValid(label)) {
-                    cmdcache.put(label, cmdinfo);
+                if (cmdinfo.isValid(subcmd)) {
+                    cmdcache.put(subcmd, cmdinfo);
                     break;
                 }
             }
-            cmdcache.put(label, CommandInfo.Unknow);
+            if (!cmdcache.containsKey(subcmd)) {
+                cmdcache.put(subcmd, CommandInfo.Unknow);
+            }
         }
-        return cmdcache.get(label).execute(sender, command, label, subargs);
+        return cmdcache.get(subcmd).execute(sender, command, label, subargs);
     }
 
     @Override
@@ -127,29 +134,13 @@ public class CommandManager implements TabExecutor {
      * @param clazz
      *            子命令处理类
      */
-    public void registerCommands(final CommandExecutor clazz) {
+    public void register(final CommandExecutor clazz) {
         final Method[] methods = clazz.getClass().getDeclaredMethods();
         for (final Method method : methods) {
-            final CommandInfo ci = CommandInfo.parse(method, clazz);
-            if (ci != null) {
-                final Class<?>[] params = method.getParameterTypes();
-                if (params.length == 1 && params[0].equals(CommandArgument.class)) {
-                    if (cmdlist.add(ci)) {
-                        cmdcache.put(ci.getName(), ci);
-                        continue;
-                    }
-                } else {
-                    Log.warning(String.format(argumentTypeError, method.getName(), clazz.getClass().getName()));
-                }
+            if (registerCommand(method, clazz)) {
+                continue;
             }
-            final TabInfo ti = TabInfo.parse(method, clazz);
-            if (ti != null) {
-                if (!method.getReturnType().equals(List.class)) {
-                    Log.warning(String.format(returnTypeError, method.getName(), clazz.getClass().getName()));
-                    continue;
-                }
-                tablist.add(ti);
-            }
+            registerTab(method, clazz);
         }
         help = new CommandHelp(cmdlist);
     }
@@ -195,4 +186,47 @@ public class CommandManager implements TabExecutor {
         return ret;
     }
 
+    /**
+     * 注册命令
+     *
+     * @param method
+     *            方法
+     * @param clazz
+     *            调用对象
+     * @return 是否成功
+     */
+    private boolean registerCommand(final Method method, final CommandExecutor clazz) {
+        final CommandInfo ci = CommandInfo.parse(method, clazz);
+        if (ci != null) {
+            final Class<?>[] params = method.getParameterTypes();
+            if (params.length == 1 && params[0].equals(CommandArgument.class)) {
+                cmdlist.add(ci);
+                cmdcache.put(ci.getName(), ci);
+                return true;
+            }
+            Log.warning(String.format(argumentTypeError, method.getName(), clazz.getClass().getName()));
+        }
+        return false;
+    }
+
+    /**
+     * 注册Tab补全
+     *
+     * @param method
+     *            方法
+     * @param clazz
+     *            调用对象
+     * @return 是否成功
+     */
+    private boolean registerTab(final Method method, final CommandExecutor clazz) {
+        final TabInfo ti = TabInfo.parse(method, clazz);
+        if (ti != null) {
+            if (method.getReturnType().equals(List.class)) {
+                tablist.add(ti);
+                return true;
+            }
+            Log.warning(String.format(returnTypeError, method.getName(), clazz.getClass().getName()));
+        }
+        return false;
+    }
 }

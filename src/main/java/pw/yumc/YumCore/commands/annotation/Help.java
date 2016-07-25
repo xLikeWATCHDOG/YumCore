@@ -23,12 +23,12 @@ public @interface Help {
 
         @Override
         public String description() {
-            return "这家伙很懒";
+            return "没写帮助信息";
         }
 
         @Override
         public String possibleArguments() {
-            return "没有帮助信息";
+            return "这家伙很懒";
         }
     };
 

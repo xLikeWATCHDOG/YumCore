@@ -56,12 +56,11 @@ public class CommandInfo {
     }
 
     public static CommandInfo parse(final Method method, final Object origin) {
-        final Class<?> clazz = method.getClass();
-        final Cmd command = clazz.getAnnotation(Cmd.class);
+        final Cmd command = method.getAnnotation(Cmd.class);
         if (command != null) {
-            final Help help = clazz.getAnnotation(Help.class);
-            final Async async = clazz.getAnnotation(Async.class);
-            final Sort sort = clazz.getAnnotation(Sort.class);
+            final Help help = method.getAnnotation(Help.class);
+            final Async async = method.getAnnotation(Async.class);
+            final Sort sort = method.getAnnotation(Sort.class);
             return new CommandInfo(method, origin, command, help != null ? help : Help.DEFAULT, async != null, sort != null ? sort.sort() : 50);
         }
         return null;
