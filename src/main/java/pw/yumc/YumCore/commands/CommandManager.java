@@ -83,7 +83,7 @@ public class CommandManager implements TabExecutor {
      * @param executor
      *            命令执行类
      */
-    public CommandManager(final String name, final CommandExecutor executor) {
+    public CommandManager(final String name, final CommandExecutor... executor) {
         this(name);
         register(executor);
     }
@@ -126,13 +126,15 @@ public class CommandManager implements TabExecutor {
      * @param clazz
      *            子命令处理类
      */
-    public void register(final CommandExecutor clazz) {
-        final Method[] methods = clazz.getClass().getDeclaredMethods();
-        for (final Method method : methods) {
-            if (registerCommand(method, clazz)) {
-                continue;
+    public void register(final CommandExecutor... clazzs) {
+        for (final CommandExecutor clazz : clazzs) {
+            final Method[] methods = clazz.getClass().getDeclaredMethods();
+            for (final Method method : methods) {
+                if (registerCommand(method, clazz)) {
+                    continue;
+                }
+                registerTab(method, clazz);
             }
-            registerTab(method, clazz);
         }
         help = new CommandHelp(cmds);
         buildCmdNameCache();
