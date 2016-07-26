@@ -18,46 +18,174 @@ public class Log {
     private static String prefix = String.format("§6[§b%s§6]§r ", P.instance.getName());
     private static CommandSender console = Bukkit.getConsoleSender();
 
+    /**
+     * Add a log Handler to receive logging messages.
+     * <p>
+     * By default, Loggers also send their output to their parent logger.
+     * Typically the root Logger is configured with a set of Handlers
+     * that essentially act as default handlers for all loggers.
+     *
+     * @param handler
+     *            a logging Handler
+     * @exception SecurityException
+     *                if a security manager exists and if
+     *                the caller does not have LoggingPermission("control").
+     */
     public static void addHandler(final Handler handler) throws SecurityException {
         logger.addHandler(handler);
     }
 
+    /**
+     * Sends console a message
+     *
+     * @param message
+     *            Message to be displayed
+     */
     public static void console(final String... msg) {
         for (final String str : msg) {
             console.sendMessage(prefix + str);
         }
     }
 
+    /**
+     * Log an INFO message.
+     * <p>
+     * If the logger is currently enabled for the INFO message
+     * level then the given message is forwarded to all the
+     * registered output Handler objects.
+     * <p>
+     *
+     * @param msg
+     *            The string message (or a key in the message catalog)
+     */
     public static void info(final String msg) {
         logger.info(msg);
     }
 
+    /**
+     * Log a message, with no arguments.
+     * <p>
+     * If the logger is currently enabled for the given message
+     * level then the given message is forwarded to all the
+     * registered output Handler objects.
+     * <p>
+     *
+     * @param level
+     *            One of the message level identifiers, e.g., SEVERE
+     * @param msg
+     *            The string message (or a key in the message catalog)
+     */
     public static void log(final Level level, final String msg) {
         logger.log(level, msg);
     }
 
+    /**
+     * Log a message, with one object parameter.
+     * <p>
+     * If the logger is currently enabled for the given message
+     * level then a corresponding LogRecord is created and forwarded
+     * to all the registered output Handler objects.
+     * <p>
+     *
+     * @param level
+     *            One of the message level identifiers, e.g., SEVERE
+     * @param msg
+     *            The string message (or a key in the message catalog)
+     * @param param1
+     *            parameter to the message
+     */
     public static void log(final Level level, final String msg, final Object param1) {
         logger.log(level, msg, param1);
     }
 
+    /**
+     * Log a message, with an array of object arguments.
+     * <p>
+     * If the logger is currently enabled for the given message
+     * level then a corresponding LogRecord is created and forwarded
+     * to all the registered output Handler objects.
+     * <p>
+     *
+     * @param level
+     *            One of the message level identifiers, e.g., SEVERE
+     * @param msg
+     *            The string message (or a key in the message catalog)
+     * @param params
+     *            array of parameters to the message
+     */
     public static void log(final Level level, final String msg, final Object[] params) {
         logger.log(level, msg, params);
     }
 
+    /**
+     * Log a message, with associated Throwable information.
+     * <p>
+     * If the logger is currently enabled for the given message
+     * level then the given arguments are stored in a LogRecord
+     * which is forwarded to all registered output handlers.
+     * <p>
+     * Note that the thrown argument is stored in the LogRecord thrown
+     * property, rather than the LogRecord parameters property. Thus is it
+     * processed specially by output Formatters and is not treated
+     * as a formatting parameter to the LogRecord message property.
+     * <p>
+     *
+     * @param level
+     *            One of the message level identifiers, e.g., SEVERE
+     * @param msg
+     *            The string message (or a key in the message catalog)
+     * @param thrown
+     *            Throwable associated with log message.
+     */
     public static void log(final Level level, final String msg, final Throwable thrown) {
         logger.log(level, msg, thrown);
     }
 
+    /**
+     * Log a SEVERE message.
+     * <p>
+     * If the logger is currently enabled for the SEVERE message level then the given message is forwarded to all the registered output Handler objects.
+     *
+     * @param msg
+     *            The string message (or a key in the message catalog)
+     */
     public static void severe(final String msg) {
         logger.severe(msg);
     }
 
-    public static void toSender(final CommandSender sender, final String... msg) {
+    /**
+     * Sends this sender a message
+     *
+     * @param message
+     *            Message to be displayed
+     */
+    public static void toSender(final CommandSender sender, final String msg) {
+        sender.sendMessage(prefix + msg);
+    }
+
+    /**
+     * Sends this sender a message
+     *
+     * @param message
+     *            Message to be displayed
+     */
+    public static void toSender(final CommandSender sender, final String[] msg) {
         for (final String str : msg) {
-            sender.sendMessage(prefix + str);
+            toSender(sender, str);
         }
     }
 
+    /**
+     * Log a WARNING message.
+     * <p>
+     * If the logger is currently enabled for the WARNING message
+     * level then the given message is forwarded to all the
+     * registered output Handler objects.
+     * <p>
+     *
+     * @param msg
+     *            The string message (or a key in the message catalog)
+     */
     public static void warning(final String msg) {
         logger.warning(msg);
     }
