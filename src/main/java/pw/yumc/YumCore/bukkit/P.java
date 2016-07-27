@@ -37,7 +37,7 @@ public class P {
      *
      * @return 插件命令
      */
-    public PluginCommand getCommand(final String name) {
+    public static PluginCommand getCommand(final String name) {
         return instance.getCommand(name);
     }
 
@@ -45,35 +45,35 @@ public class P {
      * @return 获得插件配置文件
      */
     @SuppressWarnings("unchecked")
-    public <FC> FC getConfig() {
+    public static <FC> FC getConfig() {
         return (FC) instance.getConfig();
     }
 
     /**
      * @return 获得插件文件夹
      */
-    public final File getDataFolder() {
+    public static final File getDataFolder() {
         return instance.getDataFolder();
     }
 
     /**
      * @return 获得插件描述文件
      */
-    public final PluginDescriptionFile getDescription() {
+    public static final PluginDescriptionFile getDescription() {
         return instance.getDescription();
     }
 
     /**
      * @return 获得插件日志器
      */
-    public final Logger getLogger() {
+    public static final Logger getLogger() {
         return instance.getLogger();
     }
 
     /**
      * @return 插件名称
      */
-    public final String getName() {
+    public static final String getName() {
         return instance.getName();
     }
 
@@ -81,14 +81,14 @@ public class P {
      * @return 获得插件配置文件
      */
     @SuppressWarnings("unchecked")
-    public <PI> PI getPlugin() {
+    public static <PI> PI getPlugin() {
         return (PI) instance;
     }
 
     /**
      * @return 插件是否已启用
      */
-    public final boolean isEnabled() {
+    public static final boolean isEnabled() {
         return instance.isEnabled();
     }
 
