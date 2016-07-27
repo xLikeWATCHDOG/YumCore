@@ -78,7 +78,7 @@ public class P {
     }
 
     /**
-     * @return 获得插件配置文件
+     * @return 获得插件
      */
     @SuppressWarnings("unchecked")
     public static <PI> PI getPlugin() {
