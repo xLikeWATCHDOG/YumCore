@@ -64,7 +64,6 @@ public class C {
                 // getOfflinePlayer end
             } catch (NoSuchMethodException | SecurityException | ClassNotFoundException e) {
                 Log.warning(Player.class.getSimpleName() + "兼容性工具初始化失败 可能造成部分功能不可用!");
-                e.printStackTrace();
             }
         }
 
@@ -80,7 +79,7 @@ public class C {
                 final Object gameProfile = gameProfileConstructor.newInstance(new Object[] { UUID.nameUUIDFromBytes(("OfflinePlayer:" + playerName).getBytes(Charsets.UTF_8)), playerName });
                 final Object offlinePlayer = craftOfflinePlayerConstructor.newInstance(new Object[] { Bukkit.getServer(), gameProfile });
                 return (OfflinePlayer) offlinePlayer;
-            } catch (final Throwable var5) {
+            } catch (final Throwable e) {
                 return Bukkit.getOfflinePlayer(playerName);
             }
         }
