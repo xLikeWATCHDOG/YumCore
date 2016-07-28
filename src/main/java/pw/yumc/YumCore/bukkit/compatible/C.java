@@ -23,7 +23,7 @@ import pw.yumc.YumCore.bukkit.Log;
 public class C {
     /**
      * Bukkit Player兼容类
-     * 
+     *
      * @since 2016年7月23日 下午4:33:40
      * @author 喵♂呜
      */
@@ -39,7 +39,11 @@ public class C {
                 // getOnlinePlayers start
                 getOnlinePlayers = Bukkit.class.getDeclaredMethod("getOnlinePlayers");
                 if (getOnlinePlayers.getReturnType() != Player[].class) {
-                    getOnlinePlayers = Bukkit.class.getDeclaredMethod("_INVALID_getOnlinePlayers");
+                    for (final Method method : Bukkit.class.getDeclaredMethods()) {
+                        if (method.getReturnType() == Player[].class && method.getName().endsWith("getOnlinePlayers")) {
+                            getOnlinePlayers = method;
+                        }
+                    }
                 }
                 // getOnlinePlayers end
                 // getOfflinePlayer start
@@ -60,6 +64,7 @@ public class C {
                 // getOfflinePlayer end
             } catch (NoSuchMethodException | SecurityException | ClassNotFoundException e) {
                 Log.warning(Player.class.getSimpleName() + "兼容性工具初始化失败 可能造成部分功能不可用!");
+                e.printStackTrace();
             }
         }
 
