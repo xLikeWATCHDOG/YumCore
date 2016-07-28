@@ -156,8 +156,10 @@ public class Log {
     /**
      * Sends this sender a message
      *
-     * @param message
-     *            Message to be displayed
+     * @param sender
+     *            命令发送者
+     * @param msg
+     *            消息
      */
     public static void toSender(final CommandSender sender, final String msg) {
         sender.sendMessage(prefix + msg);
@@ -166,8 +168,10 @@ public class Log {
     /**
      * Sends this sender a message
      *
-     * @param message
-     *            Message to be displayed
+     * @param sender
+     *            命令发送者
+     * @param msg
+     *            消息
      */
     public static void toSender(final CommandSender sender, final String[] msg) {
         for (final String str : msg) {
