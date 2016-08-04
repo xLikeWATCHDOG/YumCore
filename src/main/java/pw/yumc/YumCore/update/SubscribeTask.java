@@ -24,15 +24,24 @@ import pw.yumc.YumCore.bukkit.P;
  */
 public class SubscribeTask implements Runnable {
     private final static String url = "https://coding.net/u/502647092/p/%s/git/raw/%s/pom.xml";
-    private final static String download = "http://ci.yumc.pw/job/%1$s/lastSuccessfulBuild/artifact/target/%1$s.jar";
+    private final static String direct = "http://ci.yumc.pw/job/%1$s/lastSuccessfulBuild/artifact/target/%1$s.jar";
+    private final static String maven = "http://ci.yumc.pw/plugin/repository/everything/%1$s/%2$s/%3$s-%2$s.jar";
 
     private final String branch;
+    private final boolean isMaven;
 
     /**
      * 自动更新
      */
     public SubscribeTask() {
-        this("master");
+        this(false);
+    }
+
+    /**
+     * 自动更新
+     */
+    public SubscribeTask(final boolean isMaven) {
+        this("master", isMaven);
     }
 
     /**
@@ -41,9 +50,10 @@ public class SubscribeTask implements Runnable {
      * @param branch
      *            更新分支
      */
-    public SubscribeTask(final String branch) {
+    public SubscribeTask(final String branch, final boolean isMaven) {
+        this.isMaven = isMaven;
         this.branch = branch;
-        Bukkit.getScheduler().runTaskTimerAsynchronously(P.instance, this, 0, 20 * 60 * 5);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(P.instance, this, 0, 24000);
     }
 
     /**
@@ -110,7 +120,13 @@ public class SubscribeTask implements Runnable {
                     } catch (final Exception e) {
                     }
                 }
-                Files.copy(new URL(String.format(download, P.getName())).openStream(), temp.toPath());
+                String durl = null;
+                if (isMaven) {
+                    durl = String.format(maven, P.instance.getClass().getPackage().getName().replaceAll(".", "/"), result, P.getName());
+                } else {
+                    durl = String.format(direct, P.getName());
+                }
+                Files.copy(new URL(durl).openStream(), temp.toPath());
                 temp.renameTo(target);
             }
         } catch (final Exception e) {
