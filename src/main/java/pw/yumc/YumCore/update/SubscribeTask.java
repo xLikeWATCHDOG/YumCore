@@ -23,8 +23,11 @@ import pw.yumc.YumCore.bukkit.P;
  * @author 喵♂呜
  */
 public class SubscribeTask implements Runnable {
+    public static boolean navite = false;
+    public static boolean debug = false;
     private final static String url = "https://coding.net/u/502647092/p/%s/git/raw/%s/pom.xml";
     private final static String direct = "http://ci.yumc.pw/job/%1$s/lastSuccessfulBuild/artifact/target/%1$s.jar";
+    private final static String pom = "http://ci.yumc.pw/job/%s/lastSuccessfulBuild/artifact/pom.xml";
     private final static String maven = "http://ci.yumc.pw/plugin/repository/everything/%1$s/%2$s/%3$s-%2$s.jar";
 
     private final String branch;
@@ -106,7 +109,7 @@ public class SubscribeTask implements Runnable {
         try {
             final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             final DocumentBuilder builder = factory.newDocumentBuilder();
-            final String result = builder.parse(String.format(url, P.getName(), branch)).getElementsByTagName("version").item(0).getTextContent().split("-")[0];
+            final String result = builder.parse(String.format(navite ? pom : url, P.getName(), branch)).getElementsByTagName("version").item(0).getTextContent().split("-")[0];
             if (needUpdate(result, P.getDescription().getVersion().split("-")[0])) {
                 final File target = new File("plugins/update/" + getPluginFile(P.instance).getName());
                 final File temp = new File("plugins/update/" + getPluginFile(P.instance).getName() + ".downloading");
@@ -122,7 +125,7 @@ public class SubscribeTask implements Runnable {
                 }
                 String durl = null;
                 if (isMaven) {
-                    durl = String.format(maven, P.instance.getClass().getPackage().getName().replaceAll(".", "/"), result, P.getName());
+                    durl = String.format(maven, P.instance.getClass().getPackage().getName().replaceAll("\\.", "/"), result, P.getName());
                 } else {
                     durl = String.format(direct, P.getName());
                 }
@@ -130,6 +133,9 @@ public class SubscribeTask implements Runnable {
                 temp.renameTo(target);
             }
         } catch (final Exception e) {
+            if (debug) {
+                e.printStackTrace();
+            }
         }
     }
 }
