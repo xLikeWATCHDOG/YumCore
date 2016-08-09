@@ -36,6 +36,10 @@ public class CommandManager implements TabExecutor {
      */
     JavaPlugin plugin = P.instance;
     /**
+     * 默认命令
+     */
+    CommandInfo defCmd = null;
+    /**
      * 命令列表
      */
     Set<CommandInfo> cmds = new HashSet<>();
@@ -91,6 +95,9 @@ public class CommandManager implements TabExecutor {
     @Override
     public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
         if (args.length == 0) {
+            if (defCmd != null) {
+                return defCmd.execute(new CommandArgument(sender, command, label, args));
+            }
             help.send(sender, command, label, args);
             return true;
         }
@@ -229,6 +236,10 @@ public class CommandManager implements TabExecutor {
         if (ci != null) {
             final Class<?>[] params = method.getParameterTypes();
             if (params.length == 1 && params[0].equals(CommandArgument.class)) {
+                if (method.getReturnType() == boolean.class) {
+                    defCmd = ci;
+                    return true;
+                }
                 cmds.add(ci);
                 cmdCache.put(ci.getName(), ci);
                 return true;

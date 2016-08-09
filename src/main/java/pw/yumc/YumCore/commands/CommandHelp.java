@@ -37,6 +37,10 @@ public class CommandHelp {
     String helpBody = "§6/%1$s §a%2$s §e%3$s §6- §b%4$s";
     String helpFooter = "§6查看更多的帮助页面 §b请输入 /%s help §e1-%s";
     /**
+     * 默认命令
+     */
+    CommandInfo defCmd;
+    /**
      * 已排序的命令列表
      */
     List<CommandInfo> cmdlist;
@@ -53,10 +57,45 @@ public class CommandHelp {
      */
     private final Map<String, String[]> cacheHelp = new HashMap<>();
 
+    /**
+     * 命令帮助
+     *
+     * @param list
+     *            子命令列表
+     */
     public CommandHelp(final Collection<? extends CommandInfo> list) {
+        this(null, list);
+    }
+
+    /**
+     * 命令帮助
+     *
+     * @param defCmd
+     *            默认命令
+     * @param list
+     *            子命令列表
+     */
+    public CommandHelp(final CommandInfo defCmd, final Collection<? extends CommandInfo> list) {
+        this.defCmd = defCmd;
         cmdlist = new LinkedList<>(list);
         Collections.sort(cmdlist, new CommandComparator());
-        this.HELPPAGECOUNT = (int) Math.ceil((double) cmdlist.size() / LINES_PER_PAGE);
+        HELPPAGECOUNT = (int) Math.ceil((double) cmdlist.size() / LINES_PER_PAGE);
+    }
+
+    /**
+     * 格式化命令信息
+     *
+     * @param ci
+     *            命令信息
+     * @param label
+     *            命令
+     * @return 格式化后的字串
+     */
+    public String formatCommand(final CommandInfo ci, final String label) {
+        final String aliases = Arrays.toString(ci.getCommand().aliases());
+        final String cmd = ci.getName() + (aliases.length() == 2 ? "" : "§7" + aliases);
+        final Help help = ci.getHelp();
+        return String.format(helpBody, label, cmd, help.possibleArguments(), help.value());
     }
 
     /**
@@ -85,16 +124,15 @@ public class CommandHelp {
             } else {
                 // 帮助标题
                 helpList.add(helpTitle);
+                if (page == 1 && defCmd != null) {
+                    helpList.add(formatCommand(defCmd, label));
+                }
                 final int start = this.LINES_PER_PAGE * (page - 1);
                 final int end = start + this.LINES_PER_PAGE;
                 for (int i = start; i < end; i++) {
                     if (this.cmdlist.size() > i) {
-                        final CommandInfo ci = cmdlist.get(i);
-                        final String aliases = Arrays.toString(ci.getCommand().aliases());
-                        final String cmd = ci.getName() + (aliases.length() == 2 ? "" : "§7" + aliases);
-                        final Help help = ci.getHelp();
                         // 帮助列表
-                        helpList.add(String.format(helpBody, label, cmd, help.possibleArguments(), help.value()));
+                        helpList.add(formatCommand(cmdlist.get(i), label));
                     }
                 }
             }
