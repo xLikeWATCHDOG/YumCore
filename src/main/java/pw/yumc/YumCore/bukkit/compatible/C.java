@@ -204,9 +204,9 @@ public class C {
             try {
                 // getOnlinePlayers start
                 getOnlinePlayers = Bukkit.class.getDeclaredMethod("getOnlinePlayers");
-                if (getOnlinePlayers.getReturnType() != Player[].class) {
+                if (getOnlinePlayers.getReturnType() != org.bukkit.entity.Player[].class) {
                     for (final Method method : Bukkit.class.getDeclaredMethods()) {
-                        if (method.getReturnType() == Player[].class && method.getName().endsWith("getOnlinePlayers")) {
+                        if (method.getReturnType() == org.bukkit.entity.Player[].class && method.getName().endsWith("getOnlinePlayers")) {
                             getOnlinePlayers = method;
                         }
                     }
@@ -273,7 +273,7 @@ public class C {
          * @throws Exception
          *             异常
          */
-        public static void reset(final Player recoverPlayer) throws Exception {
+        public static void reset(final org.bukkit.entity.Player recoverPlayer) throws Exception {
             // Send timings first
             final Object player = getHandle.invoke(recoverPlayer);
             final Object connection = playerConnection.get(player);
@@ -292,7 +292,7 @@ public class C {
          * @param subtitle
          *            子标题
          */
-        public static void send(final Player receivingPacket, final String title, final String subtitle) {
+        public static void send(final org.bukkit.entity.Player receivingPacket, final String title, final String subtitle) {
             send(receivingPacket, title, subtitle, 1, 2, 1);
         }
 
@@ -312,7 +312,7 @@ public class C {
          * @param fadeOutTime
          *            淡出时间
          */
-        public static void send(final Player receivingPacket, final String title, final String subtitle, final int fadeInTime, final int stayTime, final int fadeOutTime) {
+        public static void send(final org.bukkit.entity.Player receivingPacket, final String title, final String subtitle, final int fadeInTime, final int stayTime, final int fadeOutTime) {
             if (packetTitle != null) {
                 try {
                     // First reset previous settings
