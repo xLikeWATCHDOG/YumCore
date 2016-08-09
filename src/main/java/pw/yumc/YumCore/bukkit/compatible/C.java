@@ -37,29 +37,42 @@ public class C {
     private static String version;
     private static Field playerConnection;
     private static Method sendPacket;
-
     static {
         try {
-            version = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
+            version = getNMSVersion();
             final boolean newversion = Integer.parseInt(version.split("_")[1]) > 7;
-            nmsChatSerializer = Class.forName(a(newversion ? "ChatSerializer" : "IChatBaseComponent$ChatSerializer"));
+            nmsChatSerializer = Class.forName(a(newversion ? "IChatBaseComponent$ChatSerializer" : "ChatSerializer"));
             nmsIChatBaseComponent = Class.forName(a("IChatBaseComponent"));
             packetType = Class.forName(a("PacketPlayOutChat"));
-            packetActions = Class.forName(a(newversion ? "EnumTitleAction" : "PacketPlayOutTitle$EnumTitleAction"));
+            packetActions = Class.forName(a(newversion ? "PacketPlayOutTitle$EnumTitleAction" : "EnumTitleAction"));
             packetTitle = Class.forName(a("PacketPlayOutTitle"));
-            final Class<?> typeCraftPlayer = Class.forName(a("CraftPlayer"));
+            final Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
             final Class<?> typeNMSPlayer = Class.forName(a("EntityPlayer"));
             final Class<?> typePlayerConnection = Class.forName(a("PlayerConnection"));
             getHandle = typeCraftPlayer.getMethod("getHandle");
             playerConnection = typeNMSPlayer.getField("playerConnection");
             sendPacket = typePlayerConnection.getMethod("sendPacket", Class.forName(a("Packet")));
         } catch (final Exception e) {
-            Log.warning(Player.class.getSimpleName() + "兼容性工具初始化失败 可能造成部分功能不可用!");
+            Log.warning(C.class.getSimpleName() + " 兼容性工具初始化失败 可能造成部分功能不可用!");
+            e.printStackTrace();
         }
     }
 
     public static String a(final String str) {
         return "net.minecraft.server." + version + "." + str;
+    }
+
+    public static String b(final String str) {
+        return "org.bukkit.craftbukkit." + version + "." + str;
+    }
+
+    /**
+     * 获得NMS版本号
+     *
+     * @return NMS版本号
+     */
+    public static String getNMSVersion() {
+        return Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
     }
 
     public static class ActionBar {
