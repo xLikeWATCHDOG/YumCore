@@ -124,6 +124,7 @@ public class Statistics {
         }
         this.guid = config.getString("guid");
         this.debug = config.getBoolean("debug", false);
+        start();
     }
 
     /**
