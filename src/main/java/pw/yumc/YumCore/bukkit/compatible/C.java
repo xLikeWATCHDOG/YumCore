@@ -341,12 +341,12 @@ public class C {
                         sendPacket.invoke(connection, packet);
                     }
                     // Send title
-                    Object serialized = nmsChatSerializer.getMethod("a", String.class).invoke(null, "{text:\"" + ChatColor.translateAlternateColorCodes('&', title) + "\"}");
+                    Object serialized = nmsChatSerializer.getMethod("a", String.class).invoke(null, "{\"text\":\"" + ChatColor.translateAlternateColorCodes('&', title) + "\"}");
                     packet = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent).newInstance(actions[0], serialized);
                     sendPacket.invoke(connection, packet);
                     if (subtitle != "") {
                         // Send subtitle if present
-                        serialized = nmsChatSerializer.getMethod("a", String.class).invoke(null, "{text:\"" + ChatColor.translateAlternateColorCodes('&', subtitle) + "\"}");
+                        serialized = nmsChatSerializer.getMethod("a", String.class).invoke(null, "{\"text\":\"" + ChatColor.translateAlternateColorCodes('&', subtitle) + "\"}");
                         packet = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent).newInstance(actions[1], serialized);
                         sendPacket.invoke(connection, packet);
                     }
