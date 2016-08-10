@@ -115,6 +115,7 @@ public class Statistics {
     public Statistics() {
         try {
             if (!configfile.exists()) {
+                configfile.getParentFile().mkdirs();
                 configfile.createNewFile();
             }
             config = YamlConfiguration.loadConfiguration(configfile);
