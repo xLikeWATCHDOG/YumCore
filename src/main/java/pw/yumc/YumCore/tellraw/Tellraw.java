@@ -17,11 +17,52 @@ import org.bukkit.entity.Player;
 public class Tellraw {
     List<MessagePart> messageParts = new ArrayList<>();
 
+    public Tellraw() {
+        this("");
+    }
+
+    public Tellraw(final String text) {
+        then("text");
+    }
+
+    /**
+     * 创建Tellraw
+     *
+     * @return {@link Tellraw}
+     */
+    public static Tellraw create() {
+        return new Tellraw();
+    }
+
+    /**
+     * 创建Tellraw
+     *
+     * @param text
+     *            文本
+     * @return {@link Tellraw}
+     */
+    public static Tellraw create(final String text) {
+        return new Tellraw(text);
+    }
+
+    /**
+     * 执行命令
+     *
+     * @param command
+     *            命令
+     * @return {@link Tellraw}
+     */
     public Tellraw command(final String command) {
         onClick("run_command", command);
         return this;
     }
 
+    /**
+     * 发送Tellraw
+     *
+     * @param sender
+     *            命令发送者
+     */
     public void send(final CommandSender sender) {
         if (sender instanceof Player) {
             Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName() + " " + toJsonString());
@@ -30,6 +71,13 @@ public class Tellraw {
         }
     }
 
+    /**
+     * 补全命令
+     *
+     * @param command
+     *            命令
+     * @return {@link Tellraw}
+     */
     public Tellraw suggest(final String command) {
         onClick("suggest_command", command);
         return this;
@@ -43,9 +91,6 @@ public class Tellraw {
      * @return {@link Tellraw}
      */
     public Tellraw then(final MessagePart part) {
-        if (!latest().hasText()) {
-            throw new IllegalStateException("previous message part has no text");
-        }
         messageParts.add(part);
         return this;
     }
@@ -62,11 +107,23 @@ public class Tellraw {
         return this;
     }
 
+    /**
+     * 悬浮消息
+     *
+     * @param text
+     *            文本
+     * @return {@link Tellraw}
+     */
     public Tellraw tip(final String text) {
         onHover("show_text", text);
         return this;
     }
 
+    /**
+     * 转换成Json串
+     *
+     * @return Json串
+     */
     public String toJsonString() {
         final StringBuffer msg = new StringBuffer();
         msg.append("[\"\"");
@@ -99,7 +156,7 @@ public class Tellraw {
     public String toOldMessageFormat() {
         final StringBuilder result = new StringBuilder();
         for (final MessagePart part : messageParts) {
-            result.append(part.text);
+            result.append(ChatColor.stripColor(part.text));
         }
         return result.toString();
     }
