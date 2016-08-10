@@ -24,13 +24,37 @@ import pw.yumc.YumCore.bukkit.P;
  */
 public class SubscribeTask implements Runnable {
     public static boolean navite = false;
+    /**
+     * 调试模式
+     */
     public static boolean debug = false;
+    /**
+     * 检查间隔
+     */
+    private final static int interval = 25;
+    /**
+     * 直链POM
+     */
     private final static String url = "https://coding.net/u/502647092/p/%s/git/raw/%s/pom.xml";
+    /**
+     * 直链下载
+     */
     private final static String direct = "http://ci.yumc.pw/job/%1$s/lastSuccessfulBuild/artifact/target/%1$s.jar";
+    /**
+     * 构建POM
+     */
     private final static String pom = "http://ci.yumc.pw/job/%s/lastSuccessfulBuild/artifact/pom.xml";
+    /**
+     * 构建下载
+     */
     private final static String maven = "http://ci.yumc.pw/plugin/repository/everything/%1$s/%2$s/%3$s-%2$s.jar";
-
+    /**
+     * 分支
+     */
     private final String branch;
+    /**
+     * 是否为Maven
+     */
     private final boolean isMaven;
 
     /**
@@ -56,7 +80,7 @@ public class SubscribeTask implements Runnable {
     public SubscribeTask(final String branch, final boolean isMaven) {
         this.isMaven = isMaven;
         this.branch = branch;
-        Bukkit.getScheduler().runTaskTimerAsynchronously(P.instance, this, 0, 24000);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(P.instance, this, 0, interval * 1200);
     }
 
     /**
