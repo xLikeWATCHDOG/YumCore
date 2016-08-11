@@ -24,8 +24,13 @@ public class MessagePart {
      */
     public String hoverActionName;
     /**
+     * 悬浮数据
      */
     public String hoverActionData;
+    /**
+     * 插入数据
+     */
+    public String insertionData;
 
     public MessagePart() {
         this("");
@@ -35,15 +40,19 @@ public class MessagePart {
         this.text = text;
     }
 
+    /**
+     * 是否有文本
+     */
     public boolean hasText() {
         return text != null && !text.isEmpty();
     }
 
-    // {
-    // "text":"TestClick",
-    // "clickEvent":{"action":"run_command","value":"yum list"},
-    // "hoverEvent":{"action":"show_text","value":{"text":"§a点击查看插件列表"}}
-    // }
+    /**
+     * 写入Json
+     *
+     * @param str
+     *            流对象
+     */
     public void writeJson(final StringBuffer str) {
         str.append("{");
         str.append("\"text\":\"" + text + "\"");
@@ -53,7 +62,11 @@ public class MessagePart {
         }
         if (hoverActionName != null) {
             str.append(",");
-            str.append(String.format("\"hoverEvent\":{\"action\":\"%s\",\"value\":{\"text\":\"%s\"}", clickActionName, clickActionData));
+            str.append(String.format("\"hoverEvent\":{\"action\":\"%s\",\"value\":{\"text\":\"%s\"}}", hoverActionName, hoverActionData));
+        }
+        if (insertionData != null) {
+            str.append(",");
+            str.append(String.format(" \"insertion\":\"%s\"", insertionData));
         }
         str.append("}");
     }

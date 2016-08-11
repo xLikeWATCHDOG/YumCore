@@ -1,6 +1,7 @@
 package pw.yumc.YumCore.tellraw;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.Bukkit;
@@ -17,12 +18,8 @@ import org.bukkit.entity.Player;
 public class Tellraw {
     List<MessagePart> messageParts = new ArrayList<>();
 
-    public Tellraw() {
-        this("");
-    }
-
     public Tellraw(final String text) {
-        then("text");
+        messageParts.add(new MessagePart(text));
     }
 
     /**
@@ -31,7 +28,7 @@ public class Tellraw {
      * @return {@link Tellraw}
      */
     public static Tellraw create() {
-        return new Tellraw();
+        return create("");
     }
 
     /**
@@ -45,6 +42,10 @@ public class Tellraw {
         return new Tellraw(text);
     }
 
+    public static void main(final String[] args) {
+        System.out.println(Tellraw.create("命令").command("yum list").tip("点击查看插件列表").toJsonString());
+    }
+
     /**
      * 执行命令
      *
@@ -53,8 +54,34 @@ public class Tellraw {
      * @return {@link Tellraw}
      */
     public Tellraw command(final String command) {
-        onClick("run_command", command);
+        return onClick("run_command", command);
+    }
+
+    /**
+     * 打开文件
+     *
+     * @param path
+     *            文件路径
+     * @return {@link Tellraw}
+     */
+    public Tellraw file(final String path) {
+        return onClick("open_file", path);
+    }
+
+    public Tellraw insertion(final String data) {
+        latest().insertionData = data;
         return this;
+    }
+
+    /**
+     * 打开URL
+     *
+     * @param url
+     *            地址
+     * @return {@link Tellraw}
+     */
+    public Tellraw link(final String url) {
+        return onClick("open_url", url);
     }
 
     /**
@@ -79,19 +106,18 @@ public class Tellraw {
      * @return {@link Tellraw}
      */
     public Tellraw suggest(final String command) {
-        onClick("suggest_command", command);
-        return this;
+        return onClick("suggest_command", command);
     }
 
     /**
-     * 结束上一串消息 开始下一串数据
-     *
-     * @param part
-     *            下一段内容
+     * 修改当前串文本
+     * 
+     * @param text
+     *            文本
      * @return {@link Tellraw}
      */
-    public Tellraw then(final MessagePart part) {
-        messageParts.add(part);
+    public Tellraw text(final String text) {
+        latest().text = text;
         return this;
     }
 
@@ -103,8 +129,22 @@ public class Tellraw {
      * @return {@link Tellraw}
      */
     public Tellraw then(final String text) {
-        then(new MessagePart(text));
-        return this;
+        return then(new MessagePart(text));
+    }
+
+    /**
+     * 悬浮消息
+     *
+     * @param text
+     *            文本
+     * @return {@link Tellraw}
+     */
+    public Tellraw tip(final List<String> texts) {
+        final StringBuffer text = new StringBuffer();
+        for (final String t : texts) {
+            text.append(t).append("\n");
+        }
+        return tip(text.toString().substring(0, text.length() - 2));
     }
 
     /**
@@ -115,8 +155,18 @@ public class Tellraw {
      * @return {@link Tellraw}
      */
     public Tellraw tip(final String text) {
-        onHover("show_text", text);
-        return this;
+        return onHover("show_text", text);
+    }
+
+    /**
+     * 悬浮消息
+     *
+     * @param text
+     *            文本
+     * @return {@link Tellraw}
+     */
+    public Tellraw tip(final String... texts) {
+        return tip(Arrays.asList(texts));
     }
 
     /**
@@ -132,7 +182,7 @@ public class Tellraw {
             messagePart.writeJson(msg);
         }
         msg.append("]");
-        return null;
+        return msg.toString();
     }
 
     /**
@@ -177,11 +227,13 @@ public class Tellraw {
      *            点击名称
      * @param data
      *            点击操作
+     * @return {@link Tellraw}
      */
-    private void onClick(final String name, final String data) {
+    private Tellraw onClick(final String name, final String data) {
         final MessagePart latest = latest();
         latest.clickActionName = name;
         latest.clickActionData = data;
+        return this;
     }
 
     /**
@@ -191,10 +243,28 @@ public class Tellraw {
      *            悬浮显示
      * @param data
      *            显示内容
+     * @return {@link Tellraw}
      */
-    private void onHover(final String name, final String data) {
+    private Tellraw onHover(final String name, final String data) {
         final MessagePart latest = latest();
         latest.hoverActionName = name;
         latest.hoverActionData = data;
+        return this;
+    }
+
+    /**
+     * 结束上一串消息 开始下一串数据
+     *
+     * @param part
+     *            下一段内容
+     * @return {@link Tellraw}
+     */
+    private Tellraw then(final MessagePart part) {
+        final MessagePart last = latest();
+        if (!last.hasText()) {
+            last.text = part.text;
+        }
+        messageParts.add(part);
+        return this;
     }
 }
