@@ -201,7 +201,7 @@ public class CommandInfo {
             }
         }
         final String perm = command.permission();
-        if (perm != null && !sender.hasPermission(perm)) {
+        if (perm != null && !"".equals(perm) && !sender.hasPermission(perm)) {
             Log.toSender(sender, String.format(losePerm, perm));
             return false;
         }
