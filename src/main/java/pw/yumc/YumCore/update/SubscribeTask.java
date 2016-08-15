@@ -23,6 +23,7 @@ import pw.yumc.YumCore.bukkit.P;
  * @author 喵♂呜
  */
 public class SubscribeTask implements Runnable {
+    @Deprecated
     public static boolean navite = false;
     /**
      * 调试模式
@@ -56,6 +57,10 @@ public class SubscribeTask implements Runnable {
      * 是否为Maven
      */
     private final boolean isMaven;
+    /**
+     * 是否非公开
+     */
+    private final boolean isSecret;
 
     /**
      * 自动更新
@@ -68,7 +73,14 @@ public class SubscribeTask implements Runnable {
      * 自动更新
      */
     public SubscribeTask(final boolean isMaven) {
-        this("master", isMaven);
+        this("master", false, isMaven);
+    }
+
+    /**
+     * 自动更新
+     */
+    public SubscribeTask(final boolean isSecret, final boolean isMaven) {
+        this("master", isSecret, isMaven);
     }
 
     /**
@@ -77,9 +89,10 @@ public class SubscribeTask implements Runnable {
      * @param branch
      *            更新分支
      */
-    public SubscribeTask(final String branch, final boolean isMaven) {
-        this.isMaven = isMaven;
+    public SubscribeTask(final String branch, final boolean isSecret, final boolean isMaven) {
         this.branch = branch;
+        this.isSecret = isSecret;
+        this.isMaven = isMaven;
         Bukkit.getScheduler().runTaskTimerAsynchronously(P.instance, this, 0, interval * 1200);
     }
 
@@ -133,7 +146,7 @@ public class SubscribeTask implements Runnable {
         try {
             final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             final DocumentBuilder builder = factory.newDocumentBuilder();
-            final String result = builder.parse(String.format(navite ? pom : url, P.getName(), branch)).getElementsByTagName("version").item(0).getTextContent().split("-")[0];
+            final String result = builder.parse(String.format(navite || isSecret ? pom : url, P.getName(), branch)).getElementsByTagName("version").item(0).getTextContent().split("-")[0];
             if (needUpdate(result, P.getDescription().getVersion().split("-")[0])) {
                 final File target = new File("plugins/update/" + getPluginFile(P.instance).getName());
                 final File temp = new File("plugins/update/" + getPluginFile(P.instance).getName() + ".downloading");
