@@ -189,12 +189,16 @@ public class CommandInfo {
             Log.toSender(sender, String.format(cmdDes, help.value()));
             return false;
         }
-        if (sender instanceof Player && command.onlyConsole()) {
-            Log.toSender(sender, onlyConsole);
-            return false;
-        } else if (command.onlyPlayer()) {
-            Log.toSender(sender, onlyPlayer);
-            return false;
+        if (sender instanceof Player) {
+            if (command.onlyConsole()) {
+                Log.toSender(sender, onlyConsole);
+                return false;
+            }
+        } else {
+            if (command.onlyPlayer()) {
+                Log.toSender(sender, onlyPlayer);
+                return false;
+            }
         }
         final String perm = command.permission();
         if (perm != null && !sender.hasPermission(perm)) {
