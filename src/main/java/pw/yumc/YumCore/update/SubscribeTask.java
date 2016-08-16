@@ -2,6 +2,7 @@ package pw.yumc.YumCore.update;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Field;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
@@ -13,8 +14,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginDescriptionFile;
-
-import pw.yumc.YumCore.bukkit.P;
+import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * 自动更新程序
@@ -23,6 +23,22 @@ import pw.yumc.YumCore.bukkit.P;
  * @author 喵♂呜
  */
 public class SubscribeTask implements Runnable {
+    /**
+     * 插件实例
+     */
+    public static JavaPlugin instance;
+
+    static {
+        final Object pluginClassLoader = SubscribeTask.class.getClassLoader();
+        try {
+            final Field field = pluginClassLoader.getClass().getDeclaredField("plugin");
+            field.setAccessible(true);
+            instance = (JavaPlugin) field.get(pluginClassLoader);
+        } catch (final Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Deprecated
     public static boolean navite = false;
     /**
@@ -93,7 +109,7 @@ public class SubscribeTask implements Runnable {
         this.branch = branch;
         this.isSecret = isSecret;
         this.isMaven = isMaven;
-        Bukkit.getScheduler().runTaskTimerAsynchronously(P.instance, this, 0, interval * 1200);
+        Bukkit.getScheduler().runTaskTimerAsynchronously(instance, this, 0, interval * 1200);
     }
 
     /**
@@ -146,13 +162,13 @@ public class SubscribeTask implements Runnable {
         try {
             final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             final DocumentBuilder builder = factory.newDocumentBuilder();
-            final String result = builder.parse(String.format(navite || isSecret ? pom : url, P.getName(), branch)).getElementsByTagName("version").item(0).getTextContent().split("-")[0];
-            if (needUpdate(result, P.getDescription().getVersion().split("-")[0])) {
-                final File target = new File("plugins/update/" + getPluginFile(P.instance).getName());
-                final File temp = new File("plugins/update/" + getPluginFile(P.instance).getName() + ".downloading");
+            final String result = builder.parse(String.format(navite || isSecret ? pom : url, instance.getName(), branch)).getElementsByTagName("version").item(0).getTextContent().split("-")[0];
+            if (needUpdate(result, instance.getDescription().getVersion().split("-")[0])) {
+                final File target = new File("plugins/update/" + getPluginFile(instance).getName());
+                final File temp = new File("plugins/update/" + getPluginFile(instance).getName() + ".downloading");
                 if (target.exists()) {
                     try {
-                        final PluginDescriptionFile desc = P.instance.getPluginLoader().getPluginDescription(target);
+                        final PluginDescriptionFile desc = instance.getPluginLoader().getPluginDescription(target);
                         if (!needUpdate(result, desc.getVersion().split("-")[0])) {
                             return;
                         }
@@ -162,9 +178,9 @@ public class SubscribeTask implements Runnable {
                 }
                 String durl = null;
                 if (isMaven) {
-                    durl = String.format(maven, P.instance.getClass().getPackage().getName().replaceAll("\\.", "/"), result, P.getName());
+                    durl = String.format(maven, instance.getClass().getPackage().getName().replaceAll("\\.", "/"), result, instance.getName());
                 } else {
-                    durl = String.format(direct, P.getName());
+                    durl = String.format(direct, instance.getName());
                 }
                 Files.copy(new URL(durl).openStream(), temp.toPath());
                 temp.renameTo(target);
