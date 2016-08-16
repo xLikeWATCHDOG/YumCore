@@ -29,8 +29,6 @@ import org.bukkit.scheduler.BukkitTask;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
-import pw.yumc.YumCore.bukkit.P;
-
 /**
  * Yum数据中心 数据统计类
  *
@@ -73,7 +71,7 @@ public class Statistics {
                     }
                 }
             }
-            final Object pluginClassLoader = P.class.getClassLoader();
+            final Object pluginClassLoader = Statistics.class.getClassLoader();
             final Field field = pluginClassLoader.getClass().getDeclaredField("plugin");
             field.setAccessible(true);
             plugin = (JavaPlugin) field.get(pluginClassLoader);
@@ -216,7 +214,7 @@ public class Statistics {
      * @return 是否运行成功.
      */
     public boolean start() {
-        if (task != null) {
+        if (task != null || !plugin.isEnabled()) {
             return true;
         }
         timer = new StatisticsTimer();
