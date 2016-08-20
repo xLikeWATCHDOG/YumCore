@@ -109,7 +109,9 @@ public class SubscribeTask implements Runnable {
         this.branch = branch;
         this.isSecret = isSecret;
         this.isMaven = isMaven;
-        Bukkit.getScheduler().runTaskTimerAsynchronously(instance, this, 0, interval * 1200);
+        if (instance.isEnabled()) {
+            Bukkit.getScheduler().runTaskTimerAsynchronously(instance, this, 0, interval * 1200);
+        }
     }
 
     /**
