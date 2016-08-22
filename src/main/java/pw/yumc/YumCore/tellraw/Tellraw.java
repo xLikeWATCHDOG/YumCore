@@ -160,7 +160,7 @@ public class Tellraw {
         for (final String t : texts) {
             text.append(t).append("\n");
         }
-        return tip(text.toString().substring(0, text.length() - 2));
+        return tip(text.toString().substring(0, text.length() - 1));
     }
 
     /**
