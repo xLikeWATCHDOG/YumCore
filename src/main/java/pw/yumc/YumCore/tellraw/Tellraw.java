@@ -47,6 +47,19 @@ public class Tellraw {
     }
 
     /**
+     * 命令与提示
+     *
+     * @param command
+     *            命令
+     * @param tip
+     *            提示
+     * @return {@link Tellraw}
+     */
+    public Tellraw cmd_tip(final String command, final String... tip) {
+        return command(command).tip(tip);
+    }
+
+    /**
      * 执行命令
      *
      * @param command
@@ -111,7 +124,7 @@ public class Tellraw {
 
     /**
      * 修改当前串文本
-     * 
+     *
      * @param text
      *            文本
      * @return {@link Tellraw}
@@ -140,6 +153,9 @@ public class Tellraw {
      * @return {@link Tellraw}
      */
     public Tellraw tip(final List<String> texts) {
+        if (texts.size() == 0) {
+            return this;
+        }
         final StringBuffer text = new StringBuffer();
         for (final String t : texts) {
             text.append(t).append("\n");
