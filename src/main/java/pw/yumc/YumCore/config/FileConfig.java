@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 
 import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -57,7 +58,6 @@ public class FileConfig extends AbstractConfig {
     public FileConfig(final File file) {
         Validate.notNull(file, "文件不能为 null");
         this.file = file;
-        check(file);
         init(file);
     }
 
@@ -70,7 +70,9 @@ public class FileConfig extends AbstractConfig {
      *            配置文件名称
      */
     public FileConfig(final String filename) {
-        this(new File(plugin.getDataFolder(), filename));
+        this.file = new File(plugin.getDataFolder(), filename);
+        check(file);
+        init(file);
     }
 
     /**
@@ -166,6 +168,31 @@ public class FileConfig extends AbstractConfig {
     }
 
     /**
+     * 获得Location
+     *
+     * @param key
+     *            键
+     * @return {@link Location}
+     */
+    public Location getLocation(final String key) {
+        return getLocation(key, null);
+    }
+
+    /**
+     * 获得Location
+     *
+     * @param key
+     *            键
+     * @param def
+     *            默认地点
+     * @return {@link Location}
+     */
+    public Location getLocation(final String path, final Location def) {
+        final Object val = get(path, def);
+        return val instanceof Location ? (Location) val : def;
+    }
+
+    /**
      * 获得已颜色转码的文本
      *
      * @param path
@@ -173,11 +200,7 @@ public class FileConfig extends AbstractConfig {
      * @return 颜色转码后的文本
      */
     public String getMessage(final String path) {
-        String message = this.getString(path);
-        if (message != null) {
-            message = ChatColor.translateAlternateColorCodes('&', message);
-        }
-        return message;
+        return getMessage(path, null);
     }
 
     /**
@@ -205,15 +228,14 @@ public class FileConfig extends AbstractConfig {
      * @return 颜色转码后的文本
      */
     public List<String> getMessageList(final String path) {
-        final List<String> message = new ArrayList<String>();
         final List<String> cfgmsg = this.getStringList(path);
         if (cfgmsg == null) {
             return null;
         }
-        for (final String msg : cfgmsg) {
-            message.add(ChatColor.translateAlternateColorCodes('&', msg));
+        for (int i = 0; i < cfgmsg.size(); i++) {
+            cfgmsg.set(i, ChatColor.translateAlternateColorCodes('&', cfgmsg.get(i)));
         }
-        return message;
+        return cfgmsg;
     }
 
     /**

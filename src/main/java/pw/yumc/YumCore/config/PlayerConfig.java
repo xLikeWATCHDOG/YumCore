@@ -3,7 +3,6 @@ package pw.yumc.YumCore.config;
 import java.io.File;
 
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
 /**
  * 玩家配置管理类
@@ -15,16 +14,6 @@ public class PlayerConfig extends FileConfig {
     private static String CONFIG_FOLDER = "userdata";
 
     /**
-     * 获得玩家配置(保存在 PLUGINHELPER 文件夹)
-     *
-     * @param playername
-     *            玩家名称
-     */
-    public PlayerConfig(final Player playername) {
-        super(playername.getName());
-    }
-
-    /**
      * 获得玩家配置(保存在 CONFIG_FOLDER 文件夹)
      *
      * @param plugin
@@ -32,8 +21,8 @@ public class PlayerConfig extends FileConfig {
      * @param playername
      *            玩家名称
      */
-    public PlayerConfig(final Plugin plugin, final Player playername) {
-        super(new File(plugin.getDataFolder(), CONFIG_FOLDER + File.separatorChar + playername.getName()));
+    public PlayerConfig(final Player player) {
+        this(player.getName());
     }
 
     /**
@@ -44,18 +33,7 @@ public class PlayerConfig extends FileConfig {
      * @param player
      *            玩家
      */
-    public PlayerConfig(final Plugin plugin, final String player) {
-        super(new File(plugin.getDataFolder(), CONFIG_FOLDER + File.separatorChar + player));
+    public PlayerConfig(final String playername) {
+        super(new File(plugin.getDataFolder(), CONFIG_FOLDER + File.separatorChar + playername + ".yml"));
     }
-
-    /**
-     * 获得玩家配置(保存在 PLUGINHELPER 文件夹)
-     *
-     * @param player
-     *            玩家
-     */
-    public PlayerConfig(final String player) {
-        super(player);
-    }
-
 }
