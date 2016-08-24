@@ -20,8 +20,6 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 
-import com.google.common.io.Files;
-
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 
@@ -354,7 +352,6 @@ public class FileConfig extends AbstractConfig {
     @Override
     public void save(final File file) throws IOException {
         Validate.notNull(file, "文件不得为 null");
-        Files.createParentDirs(file);
         if (commentConfig != null) {
             data = commentConfig.saveToString();
         } else {
@@ -383,8 +380,7 @@ public class FileConfig extends AbstractConfig {
      */
     private boolean needUpdate(final FileConfig newcfg, final FileConfig oldcfg) throws IOException {
         final String newver = newcfg.getString(CHECK_FIELD);
-        final String oldver = oldcfg.getString(CHECK_FIELD);
-        return newver != null && !newver.equalsIgnoreCase(oldver);
+        return newver != null && !newver.equalsIgnoreCase(oldcfg.getString(CHECK_FIELD));
     }
 
     /**
@@ -396,8 +392,8 @@ public class FileConfig extends AbstractConfig {
                 final String filename = file.getName();
                 final InputStream filestream = plugin.getResource(file.getName());
                 final String errFileName = this.getErrName(filename);
-                loger.warning("错误的配置文件: " + filename + " 已备份为 " + errFileName);
                 file.renameTo(new File(file.getParent(), errFileName));
+                loger.warning(String.format("错误的配置文件: %s 已备份为 %s !", filename, errFileName));
                 if (filestream == null) {
                     file.createNewFile();
                 } else {
@@ -416,10 +412,11 @@ public class FileConfig extends AbstractConfig {
         final String filename = oldcfg.getConfigName();
         try {
             final String newCfgName = this.getBakName(filename);
-            oldcfg.save(new File(file.getParent(), newCfgName));
-            loger.warning("配置: " + filename + " 已备份为 " + newCfgName);
+            final File newcfg = new File(file.getParent(), newCfgName);
+            oldcfg.save(newcfg);
+            loger.warning(String.format("配置: %s 已备份为 %s !", filename, newCfgName));
         } catch (final IOException e) {
-            loger.warning("配置: " + filename + "备份失败!");
+            loger.warning(String.format("配置: %s 备份失败 异常: %s !", filename, e.getMessage()));
         }
     }
 

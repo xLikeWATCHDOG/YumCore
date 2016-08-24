@@ -86,6 +86,9 @@ public class AbstractConfig extends YamlConfiguration {
     public void save(final File file) throws IOException {
         Validate.notNull(file, "文件不得为 null");
         Files.createParentDirs(file);
+        if (!file.exists()) {
+            file.createNewFile();
+        }
         final Writer writer = new OutputStreamWriter(new FileOutputStream(file), UTF_8);
         try {
             writer.write(data);
