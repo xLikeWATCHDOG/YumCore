@@ -1,5 +1,6 @@
 package pw.yumc.YumCore.bukkit;
 
+import java.io.File;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,6 +15,7 @@ import org.bukkit.command.CommandSender;
  * @author 喵♂呜
  */
 public class Log {
+    private static boolean debug = new File("plugins/YumCore/debug").exists();
     private static Logger logger = P.instance.getLogger();
     private static String prefix = String.format("§6[§b%s§6]§r ", P.instance.getName());
     private static CommandSender console = Bukkit.getConsoleSender();
@@ -44,6 +46,32 @@ public class Log {
     public static void console(final String... msg) {
         for (final String str : msg) {
             console.sendMessage(prefix + str);
+        }
+    }
+
+    /**
+     * 调试消息
+     *
+     * @param msg
+     *            消息
+     */
+    public static void debug(final String msg) {
+        if (debug) {
+            logger.info("[DEBUG] " + msg);
+        }
+    }
+
+    /**
+     * 调试消息
+     *
+     * @param msg
+     *            消息
+     * @param object
+     *            参数
+     */
+    public static void debug(final String msg, final Object... object) {
+        if (debug) {
+            logger.log(Level.SEVERE, "[DEBUG] " + msg, object);
         }
     }
 
