@@ -15,6 +15,11 @@ import java.lang.annotation.Target;
 public @interface ConfigNode {
 
     /**
+     * @return 是否允许为空
+     */
+    boolean notNull() default false;
+
+    /**
      * Defines the path to the node if it has another as the variable name.
      * Every indention is separated with an dot ('.')
      *

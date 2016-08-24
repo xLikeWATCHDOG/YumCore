@@ -72,8 +72,8 @@ public abstract class InjectConfig extends AbstractInjectConfig {
             } catch (final IllegalAccessException ex) {
                 Log.log(Level.SEVERE, "自动注入配置错误!", ex);
             }
-        } else {
-            Log.debug("配置节点 {0} 丢失!", realPath);
+        } else if (field.getAnnotation(Nullable.class) == null) {
+            Log.warning(String.format("配置节点 %s 丢失!", realPath));
         }
     }
 }
