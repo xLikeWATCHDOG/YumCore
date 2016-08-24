@@ -14,7 +14,6 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.apache.commons.lang.Validate;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -35,10 +34,9 @@ import pw.yumc.YumCore.bukkit.P;
 public class FileConfig extends AbstractConfig {
     protected static String CHECK_FIELD = "Version";
     protected static String PLUGINHELPER = "PluginHelper";
+    protected static Plugin plugin = P.instance;
 
     protected Logger loger = P.getLogger();
-
-    protected Plugin plugin;
     protected File file;
 
     private CommentConfig commentConfig;
@@ -47,45 +45,17 @@ public class FileConfig extends AbstractConfig {
      * 实例化空的配置文件
      */
     public FileConfig() {
+        this("config.yml");
     }
 
     /**
      * 从文件载入配置
      *
      * @param file
-     *            配置文件
+     *            配置文件名称
      */
     public FileConfig(final File file) {
-        this.file = file;
-        init(file);
-    }
-
-    /**
-     * 从文件载入配置(默认为config.yml)
-     *
-     * @param plugin
-     *            插件
-     */
-    public FileConfig(final Plugin plugin) {
-        Validate.notNull(plugin, "插件不能为 null");
-        this.plugin = plugin;
-        this.file = new File(plugin.getDataFolder(), "config.yml");
-        check(file);
-        init(file);
-    }
-
-    /**
-     * 从文件载入配置
-     *
-     * @param plugin
-     *            插件
-     * @param file
-     *            配置文件名称
-     */
-    public FileConfig(final Plugin plugin, final File file) {
         Validate.notNull(file, "文件不能为 null");
-        Validate.notNull(plugin, "插件不能为 null");
-        this.plugin = plugin;
         this.file = file;
         check(file);
         init(file);
@@ -98,27 +68,9 @@ public class FileConfig extends AbstractConfig {
      *            插件
      * @param filename
      *            配置文件名称
-     */
-    public FileConfig(final Plugin plugin, final String filename) {
-        this(plugin, new File(plugin.getDataFolder(), filename));
-    }
-
-    /**
-     * 从PluginHelper目录载入配置
-     *
-     * @param filename
-     *            配置文件
      */
     public FileConfig(final String filename) {
-        this.file = new File(Bukkit.getUpdateFolderFile().getParentFile(), PLUGINHELPER + File.separator + filename);
-        if (!file.exists()) {
-            try {
-                loger.info("配置 " + file.getName() + " 不存在 创建新文件...");
-                file.createNewFile();
-            } catch (final IOException e) {
-            }
-        }
-        init(file);
+        this(new File(plugin.getDataFolder(), filename));
     }
 
     /**
