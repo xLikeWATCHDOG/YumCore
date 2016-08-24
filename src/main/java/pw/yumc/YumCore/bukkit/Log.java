@@ -76,6 +76,13 @@ public class Log {
     }
 
     /**
+     * @return 获得插件前缀
+     */
+    public static String getPrefix() {
+        return prefix;
+    }
+
+    /**
      * Log an INFO message.
      * <p>
      * If the logger is currently enabled for the INFO message
