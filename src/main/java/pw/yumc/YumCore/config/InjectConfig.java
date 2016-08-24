@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.util.logging.Level;
 
 import pw.yumc.YumCore.bukkit.Log;
-import pw.yumc.YumCore.bukkit.P;
 
 /**
  * 配置自动载入类
@@ -16,12 +15,12 @@ public abstract class InjectConfig extends AbstractInjectConfig {
     protected FileConfig config;
 
     public InjectConfig() {
-        config = new FileConfig(P.instance);
+        config = new FileConfig();
         inject();
     }
 
     public InjectConfig(final String name) {
-        config = new FileConfig(P.instance, name);
+        config = new FileConfig(name);
         inject();
     }
 

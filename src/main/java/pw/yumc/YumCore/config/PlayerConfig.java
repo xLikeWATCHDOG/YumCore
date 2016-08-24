@@ -33,7 +33,7 @@ public class PlayerConfig extends FileConfig {
      *            玩家名称
      */
     public PlayerConfig(final Plugin plugin, final Player playername) {
-        super(plugin, new File(plugin.getDataFolder(), CONFIG_FOLDER + File.separatorChar + playername.getName()));
+        super(new File(plugin.getDataFolder(), CONFIG_FOLDER + File.separatorChar + playername.getName()));
     }
 
     /**
@@ -45,7 +45,7 @@ public class PlayerConfig extends FileConfig {
      *            玩家
      */
     public PlayerConfig(final Plugin plugin, final String player) {
-        super(plugin, new File(plugin.getDataFolder(), CONFIG_FOLDER + File.separatorChar + player));
+        super(new File(plugin.getDataFolder(), CONFIG_FOLDER + File.separatorChar + player));
     }
 
     /**
