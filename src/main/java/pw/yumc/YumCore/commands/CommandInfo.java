@@ -13,6 +13,7 @@ import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.commands.annotation.Async;
 import pw.yumc.YumCore.commands.annotation.Cmd;
+import pw.yumc.YumCore.commands.annotation.Cmd.Executor;
 import pw.yumc.YumCore.commands.annotation.Help;
 import pw.yumc.YumCore.commands.annotation.Sort;
 import pw.yumc.YumCore.commands.exception.CommandException;
@@ -27,6 +28,7 @@ public class CommandInfo {
     public static final CommandInfo Unknow = new CommandInfo();
     private static final String onlyPlayer = "§c控制台无法使用此命令(§4请在游戏内执行§c)!";
     private static final String onlyConsole = "§c玩家无法使用此命令(§4请使用控制台执行§c)!";
+    private static final String onlyExecutor = "§c当前命令仅允许 §b%s §c执行!";
     private static final String losePerm = "§c你需要有 %s 的权限才能执行此命令!";
     private static final String cmdErr = "§6错误原因: §4命令参数不正确!";
     private static final String cmdUse = "§6使用方法: §e/%s %s %s";
@@ -35,6 +37,8 @@ public class CommandInfo {
     private final Method method;
     private final String name;
     private final List<String> aliases;
+    private final List<Executor> executors;
+    private final String executorStr;
     private final boolean async;
     private final Cmd command;
     private final Help help;
@@ -45,6 +49,8 @@ public class CommandInfo {
         this.origin = origin;
         this.name = "".equals(command.value()) ? method.getName().toLowerCase() : command.value();
         this.aliases = Arrays.asList(command.aliases());
+        this.executors = Arrays.asList(command.executor());
+        this.executorStr = eS(executors);
         this.command = command;
         this.help = help;
         this.async = async;
@@ -56,6 +62,8 @@ public class CommandInfo {
         this.origin = null;
         this.name = "unknow";
         this.aliases = null;
+        this.executors = null;
+        this.executorStr = null;
         this.command = null;
         this.help = null;
         this.async = false;
@@ -93,15 +101,9 @@ public class CommandInfo {
     /**
      * 执行命令
      *
-     * @param sender
-     *            命令发送者
-     * @param command
-     *            主命令
-     * @param label
-     *            主命令别名
-     * @param args
-     *            子命令参数
-     * @return
+     * @param cmdArgs
+     *            命令参数
+     * @return 是否执行成功
      */
     public boolean execute(final CommandArgument cmdArgs) {
         if (method == null) {
@@ -183,10 +185,31 @@ public class CommandInfo {
      */
     private boolean check(final CommandArgument cmdArgs) {
         final CommandSender sender = cmdArgs.getSender();
+        return checkArgs(sender, cmdArgs) && checkSender(sender) && checkPerm(sender);
+    }
+
+    private boolean checkArgs(final CommandSender sender, final CommandArgument cmdArgs) {
         if (cmdArgs.getArgs().length < command.minimumArguments()) {
             Log.toSender(sender, cmdErr);
             Log.toSender(sender, String.format(cmdUse, cmdArgs.getAlias(), getName(), help.possibleArguments()));
             Log.toSender(sender, String.format(cmdDes, help.value()));
+            return false;
+        }
+        return true;
+    }
+
+    private boolean checkPerm(final CommandSender sender) {
+        final String perm = command.permission();
+        if (perm != null && !"".equals(perm) && !sender.hasPermission(perm)) {
+            Log.toSender(sender, String.format(losePerm, perm));
+            return false;
+        }
+        return true;
+    }
+
+    private boolean checkSender(final CommandSender sender) {
+        if (!executors.contains(Executor.ALL) && !executors.contains(Executor.valueOf(sender))) {
+            Log.toSender(sender, String.format(onlyExecutor, executorStr));
             return false;
         }
         if (sender instanceof Player) {
@@ -200,11 +223,15 @@ public class CommandInfo {
                 return false;
             }
         }
-        final String perm = command.permission();
-        if (perm != null && !"".equals(perm) && !sender.hasPermission(perm)) {
-            Log.toSender(sender, String.format(losePerm, perm));
-            return false;
-        }
         return true;
+    }
+
+    private String eS(final List<Executor> executors) {
+        final StringBuffer str = new StringBuffer();
+        for (final Executor executor : executors) {
+            str.append(executor.getName());
+            str.append(", ");
+        }
+        return str.toString().substring(0, str.length() - 2);
     }
 }
