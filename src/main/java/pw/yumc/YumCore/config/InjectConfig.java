@@ -1,5 +1,6 @@
 package pw.yumc.YumCore.config;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.logging.Level;
 
@@ -16,6 +17,11 @@ public abstract class InjectConfig extends AbstractInjectConfig {
 
     public InjectConfig() {
         config = new FileConfig();
+        inject();
+    }
+
+    public InjectConfig(final File file) {
+        config = new FileConfig(file);
         inject();
     }
 
