@@ -14,6 +14,18 @@ public class PlayerConfig extends FileConfig {
     private static String CONFIG_FOLDER = "userdata";
 
     /**
+     * 获得玩家配置(保存在 指定 文件夹)
+     *
+     * @param plugin
+     *            插件
+     * @param player
+     *            玩家
+     */
+    public PlayerConfig(final File dir, final String playername) {
+        super(new File(dir, CONFIG_FOLDER + File.separatorChar + playername + ".yml"));
+    }
+
+    /**
      * 获得玩家配置(保存在 CONFIG_FOLDER 文件夹)
      *
      * @param plugin
