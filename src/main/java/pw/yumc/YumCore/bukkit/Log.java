@@ -76,6 +76,19 @@ public class Log {
     }
 
     /**
+     * 调试消息
+     *
+     * @param msg
+     *            消息
+     */
+    public static void debug(final String msg, final Throwable e) {
+        if (debug) {
+            logger.info("[DEBUG] " + msg);
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * @return 获得插件前缀
      */
     public static String getPrefix() {
