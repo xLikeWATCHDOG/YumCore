@@ -18,6 +18,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.file.YamlConstructor;
 import org.bukkit.configuration.file.YamlRepresenter;
+import org.bukkit.plugin.Plugin;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
@@ -25,14 +26,27 @@ import org.yaml.snakeyaml.representer.Representer;
 
 import com.google.common.io.Files;
 
+import pw.yumc.YumCore.bukkit.Log;
+import pw.yumc.YumCore.bukkit.P;
+
 /**
  * 抽象配置文件
  *
  * @since 2016年3月12日 下午4:46:45
  * @author 喵♂呜
  */
-public class AbstractConfig extends YamlConfiguration {
-    public static final Charset UTF_8 = Charset.forName("UTF-8");
+public abstract class AbstractConfig extends YamlConfiguration {
+    private static final String CONTENT_NOT_BE_NULL = "内容不能为 null";
+    private static final String TOP_KEY_MUST_BE_MAP = "顶层键值必须是Map.";
+
+    protected static final Charset UTF_8 = Charset.forName("UTF-8");
+
+    protected static final String FILE_NOT_BE_NULL = "文件不能为 NULL";
+    protected static final String CREATE_NEW_CONFIG = "配置: 创建新的文件 %s ...";
+    protected static final String newLine = "\n";
+
+    protected static Plugin plugin = P.instance;
+
     protected final DumperOptions yamlOptions = new DumperOptions();
     protected final Representer yamlRepresenter = new YamlRepresenter();
     protected final Yaml yamlz = new Yaml(new YamlConstructor(), yamlRepresenter, yamlOptions);
@@ -41,7 +55,7 @@ public class AbstractConfig extends YamlConfiguration {
 
     @Override
     public void load(final File file) throws FileNotFoundException, IOException, InvalidConfigurationException {
-        Validate.notNull(file, "文件不能为null");
+        Validate.notNull(file, FILE_NOT_BE_NULL);
         final FileInputStream stream = new FileInputStream(file);
         load(new InputStreamReader(stream, UTF_8));
     }
@@ -54,7 +68,7 @@ public class AbstractConfig extends YamlConfiguration {
             String line;
             while ((line = input.readLine()) != null) {
                 builder.append(line);
-                builder.append('\n');
+                builder.append(newLine);
             }
         } finally {
             input.close();
@@ -64,14 +78,14 @@ public class AbstractConfig extends YamlConfiguration {
 
     @Override
     public void loadFromString(final String contents) throws InvalidConfigurationException {
-        Validate.notNull(contents, "内容不能为 null");
+        Validate.notNull(contents, CONTENT_NOT_BE_NULL);
         Map<?, ?> input;
         try {
             input = (Map<?, ?>) yamlz.load(contents);
         } catch (final YAMLException e) {
             throw new InvalidConfigurationException(e);
         } catch (final ClassCastException e) {
-            throw new InvalidConfigurationException("顶层键值必须是Map.");
+            throw new InvalidConfigurationException(TOP_KEY_MUST_BE_MAP);
         }
         final String header = parseHeader(contents);
         if (header.length() > 0) {
@@ -84,10 +98,11 @@ public class AbstractConfig extends YamlConfiguration {
 
     @Override
     public void save(final File file) throws IOException {
-        Validate.notNull(file, "文件不得为 null");
+        Validate.notNull(file, FILE_NOT_BE_NULL);
         Files.createParentDirs(file);
         if (!file.exists()) {
             file.createNewFile();
+            Log.info(String.format(CREATE_NEW_CONFIG, file.toPath()));
         }
         final Writer writer = new OutputStreamWriter(new FileOutputStream(file), UTF_8);
         try {

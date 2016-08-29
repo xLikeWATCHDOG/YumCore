@@ -16,18 +16,27 @@ import pw.yumc.YumCore.bukkit.Log;
  * @author 喵♂呜
  */
 public abstract class AbstractInjectConfig {
+    private static final String DATA_FORMAT_ERROR = "配置节点 {0} 数据类型不匹配 应该为: {1} 但实际为: {2}!";
+    private static final String INJECT_ERROR = "自动注入配置错误!";
+    private static final String DATE_PARSE_ERROR = "配置节点 {0} 日期解析失败 格式应该为: {1} 但输入值为: {2}!";
+    private static final String PATH_NOT_FOUND = "配置节点 %s 丢失!";
+    private static final String DATA_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final SimpleDateFormat df = new SimpleDateFormat(DATA_FORMAT);
+    private ConfigurationSection config;
+
     /**
      * 注入配置数据
      */
-    public void inject() {
+    public void inject(final ConfigurationSection config) {
+        this.config = config;
         for (final Field field : getClass().getDeclaredFields()) {
             if (Modifier.isTransient(field.getModifiers()) || field.getType().isPrimitive()) {
                 continue;
             }
             final ConfigNode node = field.getAnnotation(ConfigNode.class);
             String path = field.getName();
-            if (node != null && !node.path().isEmpty()) {
-                path = node.path();
+            if (node != null && !node.value().isEmpty()) {
+                path = node.value();
             }
             field.setAccessible(true);
             setField(path, field);
@@ -45,35 +54,37 @@ public abstract class AbstractInjectConfig {
      * @throws IllegalArgumentException
      * @throws IllegalAccessException
      */
-    protected boolean commonParse(final ConfigurationSection config, final String path, final Field field) throws IllegalArgumentException, IllegalAccessException {
-        final String typeName = field.getType().getName();
-        switch (typeName) {
-        case "java.util.Date":
-            final String format = "yyyy-MM-dd HH:mm:ss";
-            final String value = config.getString(path);
-            try {
-                field.set(this, new SimpleDateFormat(format).parse(value));
-            } catch (final ParseException e) {
-                final Object[] obj = new Object[] { path, format, value };
-                Log.log(Level.INFO, "配置节点 {0} 日期解析失败 格式应该为: {1} 但输入值为: {2}!", obj);
+    protected void setField(final String path, final Field field) {
+        Object value = config.get(path);
+        final Default def = field.getAnnotation(Default.class);
+        if (value == null) {
+            if (def != null) {
+                value = def.value();
+            } else if (field.getAnnotation(Nullable.class) == null) {
+                Log.warning(String.format(PATH_NOT_FOUND, path));
+                return;
             }
-            return true;
-        case "java.util.List":
-            field.set(this, config.getList(path));
-            return true;
-        default:
-            return false;
+        }
+        try {
+            final String typeName = field.getType().getName();
+            switch (typeName) {
+            case "java.util.Date":
+                try {
+                    value = df.parse((String) value);
+                } catch (final ParseException e) {
+                    final Object[] obj = new Object[] { path, DATA_FORMAT, value };
+                    Log.log(Level.INFO, DATE_PARSE_ERROR, obj);
+                }
+            case "java.util.List":
+                value = config.getList(path);
+            default:
+            }
+            field.set(this, value);
+        } catch (final IllegalArgumentException ex) {
+            final Object[] obj = new Object[] { path, field.getType().getName(), value.getClass().getName() };
+            Log.log(Level.INFO, DATA_FORMAT_ERROR, obj);
+        } catch (final IllegalAccessException ex) {
+            Log.log(Level.SEVERE, INJECT_ERROR, ex);
         }
     }
-
-    /**
-     * 设置字段数据
-     *
-     * @param path
-     *            配置路径
-     * @param field
-     *            字段
-     * @throws IllegalArgumentException
-     */
-    protected abstract void setField(final String path, final Field field) throws IllegalArgumentException;
 }

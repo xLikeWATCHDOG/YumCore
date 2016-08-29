@@ -7,23 +7,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Specializes a non-default path for config node
+ * 配置节点路径
  */
 @Target(ElementType.FIELD)
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ConfigNode {
-
     /**
-     * @return 是否允许为空
-     */
-    boolean notNull() default false;
-
-    /**
-     * Defines the path to the node if it has another as the variable name.
-     * Every indention is separated with an dot ('.')
+     * 定义配置文件路径节点路径.
+     * 通常用于配置节点 ('.')
      *
-     * @return the path to the node
+     * @return 节点路径
      */
-    String path() default "";
+    String value();
 }

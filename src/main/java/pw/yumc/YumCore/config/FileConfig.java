@@ -11,17 +11,14 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
 
 import pw.yumc.YumCore.bukkit.Log;
-import pw.yumc.YumCore.bukkit.P;
 
 /**
  * 一个继承于 {@link YamlConfiguration} 的配置文件类
@@ -33,20 +30,34 @@ import pw.yumc.YumCore.bukkit.P;
  */
 @SuppressWarnings({ "unchecked" })
 public class FileConfig extends AbstractConfig {
-    protected static String CHECK_FIELD = "Version";
-    protected static String PLUGINHELPER = "PluginHelper";
-    protected static Plugin plugin = P.instance;
+    protected static final String VERSION = "Version";
 
-    protected Logger loger = P.getLogger();
+    private static final char ALT_COLOR_CHAR = '&';
+    private static final String DEFAULT = "config.yml";
+    private static final String DATA_FORMANT = "yyyyMMddHHmmss";
+    private static final String CONFIG_BACKUP = "配置: %s 已备份为 %s !";
+    private static final String CONFIG_UPDATED = "配置: %s 升级成功 版本 %S !";
+    private static final String CONFIG_OVERRIDE = "配置: %s 将覆盖原有字段数据...";
+    private static final String CONFIG_READ_ERROR = "配置: %s 读取错误...";
+    private static final String CONFIG_SAVE_ERROR = "配置: %s 保存错误...";
+    private static final String CONFIG_UPDATE_WARN = "配置: %s 版本 %s 过低 正在升级到 %s ...";
+    private static final String CONFIG_CREATE_ERROR = "配置: %s 创建失败...";
+    private static final String CONFIG_FORMAT_ERROR = "配置: %s 格式错误...";
+    private static final String CONFIG_BACKUP_ERROR = "配置: %s 备份失败 异常: %s !";
+    private static final String CONFIG_BACKUP_AND_RESET = "配置: %s 格式错误 已备份为 %s 并恢复默认配置!";
+    private static final String CONFIG_NOT_FOUND_IN_JAR = "配置: 从插件内部未找到预置的 %s 文件!";
+    private static final String CONFIG_READ_COMMENT_ERROR = "配置: 读取文件注释信息失败!";
+    private static final String STREAM_NOT_BE_NULL = "数据流不能为 NULL";
+
     protected File file;
 
     private CommentConfig commentConfig;
 
     /**
-     * 实例化空的配置文件
+     * 实例化默认配置文件
      */
     public FileConfig() {
-        this("config.yml");
+        this(DEFAULT);
     }
 
     /**
@@ -56,7 +67,7 @@ public class FileConfig extends AbstractConfig {
      *            配置文件名称
      */
     public FileConfig(final File file) {
-        Validate.notNull(file, "文件不能为 null");
+        Validate.notNull(file, FILE_NOT_BE_NULL);
         this.file = file;
         init(file);
     }
@@ -233,7 +244,7 @@ public class FileConfig extends AbstractConfig {
             return null;
         }
         for (int i = 0; i < cfgmsg.size(); i++) {
-            cfgmsg.set(i, ChatColor.translateAlternateColorCodes('&', cfgmsg.get(i)));
+            cfgmsg.set(i, ChatColor.translateAlternateColorCodes(ALT_COLOR_CHAR, cfgmsg.get(i)));
         }
         return cfgmsg;
     }
@@ -255,7 +266,7 @@ public class FileConfig extends AbstractConfig {
             commentConfig = new CommentConfig();
             commentConfig.loadFromString(contents);
         } catch (final Exception e) {
-            Log.debug("读取配置文件注释信息失败!");
+            Log.debug(CONFIG_READ_COMMENT_ERROR);
             commentConfig = null;
         }
         super.loadFromString(contents);
@@ -317,7 +328,7 @@ public class FileConfig extends AbstractConfig {
             this.save(file);
             return true;
         } catch (final IOException e) {
-            loger.warning("配置 " + file.getName() + " 保存错误...");
+            Log.warning(String.format(CONFIG_SAVE_ERROR, file.getName()));
             e.printStackTrace();
             return false;
         }
@@ -325,7 +336,7 @@ public class FileConfig extends AbstractConfig {
 
     @Override
     public void save(final File file) throws IOException {
-        Validate.notNull(file, "文件不得为 null");
+        Validate.notNull(file, FILE_NOT_BE_NULL);
         if (commentConfig != null) {
             data = commentConfig.saveToString();
         } else {
@@ -353,8 +364,8 @@ public class FileConfig extends AbstractConfig {
      * @throws IOException
      */
     private boolean needUpdate(final FileConfig newcfg, final FileConfig oldcfg) throws IOException {
-        final String newver = newcfg.getString(CHECK_FIELD);
-        return newver != null && !newver.equalsIgnoreCase(oldcfg.getString(CHECK_FIELD));
+        final String newver = newcfg.getString(VERSION);
+        return newver != null && !newver.equalsIgnoreCase(oldcfg.getString(VERSION));
     }
 
     /**
@@ -367,18 +378,17 @@ public class FileConfig extends AbstractConfig {
                 final InputStream filestream = plugin.getResource(file.getName());
                 final String errFileName = this.getErrName(filename);
                 file.renameTo(new File(file.getParent(), errFileName));
-                loger.warning(String.format("错误的配置文件: %s 已备份为 %s !", filename, errFileName));
                 if (filestream == null) {
                     file.createNewFile();
                 } else {
                     plugin.saveResource(filename, true);
                 }
-                loger.warning("从插件内部读取并保存正确的配置文件...");
-            } catch (final IOException ex) {
-                loger.warning("从插件内部获取或保存配置文件时出错: " + ex.getMessage());
+                Log.warning(String.format(CONFIG_BACKUP_AND_RESET, filename, errFileName));
+            } catch (final IOException | IllegalArgumentException e) {
+                throw new IllegalArgumentException(e);
             }
         } else {
-            loger.warning("从插件内部未找到预置的 " + (file != null ? file.getName() : "") + " 配置文件!");
+            Log.warning(String.format(CONFIG_NOT_FOUND_IN_JAR, file != null ? file.getName() : ""));
         }
     }
 
@@ -388,9 +398,9 @@ public class FileConfig extends AbstractConfig {
             final String newCfgName = this.getBakName(filename);
             final File newcfg = new File(file.getParent(), newCfgName);
             oldcfg.save(newcfg);
-            loger.warning(String.format("配置: %s 已备份为 %s !", filename, newCfgName));
+            Log.warning(String.format(CONFIG_BACKUP, filename, newCfgName));
         } catch (final IOException e) {
-            loger.warning(String.format("配置: %s 备份失败 异常: %s !", filename, e.getMessage()));
+            Log.warning(String.format(CONFIG_BACKUP_ERROR, filename, e.getMessage()));
         }
     }
 
@@ -408,10 +418,8 @@ public class FileConfig extends AbstractConfig {
                 file.getParentFile().mkdirs();
                 if (stream == null) {
                     file.createNewFile();
-                    loger.info("配置 " + filename + " 不存在 创建新文件...");
                 } else {
                     plugin.saveResource(filename, true);
-                    loger.info("配置 " + filename + " 不存在 从插件释放...");
                 }
             } else {
                 if (stream == null) {
@@ -425,16 +433,16 @@ public class FileConfig extends AbstractConfig {
                 }
             }
         } catch (final IOException e) {
-            loger.warning("配置 " + filename + " 创建失败...");
+            Log.warning(String.format(CONFIG_CREATE_ERROR, filename));
         }
     }
 
     protected String getBakName(final String cfgname) {
-        return cfgname + "." + getStringDate("yyyyMMddHHmmss") + ".bak";
+        return cfgname + "." + getStringDate(DATA_FORMANT) + ".bak";
     }
 
     protected String getErrName(final String cfgname) {
-        return cfgname + "." + getStringDate("yyyyMMddHHmmss") + ".err";
+        return cfgname + "." + getStringDate(DATA_FORMANT) + ".err";
     }
 
     /**
@@ -456,13 +464,12 @@ public class FileConfig extends AbstractConfig {
      * @return FileConfig
      */
     protected FileConfig init(final File file) {
-        Validate.notNull(file, "文件不能为 null");
+        Validate.notNull(file, FILE_NOT_BE_NULL);
         FileInputStream stream;
         try {
             stream = new FileInputStream(file);
             init(stream);
         } catch (final FileNotFoundException e) {
-            loger.warning("配置 " + file.getName() + " 不存在...");
         }
         return this;
     }
@@ -475,21 +482,21 @@ public class FileConfig extends AbstractConfig {
      * @return FileConfig
      */
     protected FileConfig init(final InputStream stream) {
-        Validate.notNull(stream, "数据流不能为 null");
+        Validate.notNull(stream, STREAM_NOT_BE_NULL);
         try {
             this.load(new InputStreamReader(stream, UTF_8));
         } catch (final InvalidConfigurationException | IllegalArgumentException ex) {
             if (file == null) {
-                throw new RuntimeException("数据流转换格式时发生错误...", ex);
+                throw new IllegalArgumentException(ex);
             }
-            loger.warning("配置 " + file.getName() + " 格式错误...");
-            loger.warning(ex.getMessage());
+            Log.warning(String.format(CONFIG_FORMAT_ERROR, file.getName()));
+            Log.warning(ex.getMessage());
             saveFromJar();
         } catch (final IOException ex) {
             if (file == null) {
-                throw new RuntimeException("数据流读取时发生错误...", ex);
+                throw new IllegalStateException(ex);
             }
-            loger.warning("配置 " + file.getName() + " 读取错误...");
+            Log.warning(String.format(CONFIG_READ_ERROR, file.getName()));
         }
         return this;
     }
@@ -517,22 +524,22 @@ public class FileConfig extends AbstractConfig {
      */
     protected FileConfig updateConfig(final FileConfig newCfg, final FileConfig oldCfg, final boolean force) {
         final String filename = oldCfg.getConfigName();
-        final String newver = newCfg.getString(CHECK_FIELD);
-        final String oldver = oldCfg.getString(CHECK_FIELD);
+        final String newver = newCfg.getString(VERSION);
+        final String oldver = oldCfg.getString(VERSION);
         final Set<String> oldConfigKeys = oldCfg.getKeys(true);
-        loger.warning("配置: " + filename + " 版本 " + oldver + " 过低 正在升级到 " + newver + " ...");
+        Log.warning(String.format(CONFIG_UPDATE_WARN, filename, oldver, newver));
         // 保留版本字段 不更新
-        oldConfigKeys.remove("Version");
+        oldConfigKeys.remove(VERSION);
         // 强制更新 去除新版本存在的字段
         if (force) {
-            loger.warning("配置: " + filename + " 将覆盖原有字段数据...");
+            Log.warning(String.format(CONFIG_OVERRIDE, filename));
             oldConfigKeys.removeAll(newCfg.getKeys(true));
         }
         // 复制旧的数据
         for (final String string : oldConfigKeys) {
             newCfg.set(string, oldCfg.get(string));
         }
-        loger.info("配置: " + filename + " 升级成功 版本 " + newver + " !");
+        Log.info(String.format(CONFIG_UPDATED, filename, newver));
         return newCfg;
     }
 }

@@ -26,8 +26,6 @@ public class CommentConfig extends AbstractConfig {
 
     protected static final int commentSplitWidth = 90;
 
-    protected static final String newLine = "\n";
-
     private static String[] split(final String string, final int partLength) {
         final String[] array = new String[string.length() / partLength + 1];
         for (int i = 0; i < array.length; i++) {

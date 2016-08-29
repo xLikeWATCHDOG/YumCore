@@ -21,8 +21,20 @@ public class PlayerConfig extends FileConfig {
      * @param player
      *            玩家
      */
+    public PlayerConfig(final File dir, final Player player) {
+        this(plugin.getDataFolder(), player.getName());
+    }
+
+    /**
+     * 获得玩家配置(保存在 指定 文件夹)
+     *
+     * @param plugin
+     *            插件
+     * @param playername
+     *            玩家名称
+     */
     public PlayerConfig(final File dir, final String playername) {
-        super(new File(dir, CONFIG_FOLDER + File.separatorChar + playername + ".yml"));
+        super(new File(dir, String.format("%s%s%s.yml", CONFIG_FOLDER, File.separatorChar, playername)));
     }
 
     /**
@@ -46,6 +58,6 @@ public class PlayerConfig extends FileConfig {
      *            玩家
      */
     public PlayerConfig(final String playername) {
-        super(new File(plugin.getDataFolder(), CONFIG_FOLDER + File.separatorChar + playername + ".yml"));
+        this(plugin.getDataFolder(), playername);
     }
 }
