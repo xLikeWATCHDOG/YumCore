@@ -47,6 +47,15 @@ public class Tellraw {
     }
 
     /**
+     * 发送Tellraw公告
+     */
+    public void broadcast() {
+        for (final Player player : Bukkit.getOnlinePlayers()) {
+            send(player);
+        }
+    }
+
+    /**
      * 命令与提示
      *
      * @param command
