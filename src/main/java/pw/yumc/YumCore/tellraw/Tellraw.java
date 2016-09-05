@@ -121,6 +121,19 @@ public class Tellraw {
     }
 
     /**
+     * 命令建议与提示
+     *
+     * @param command
+     *            建议命令
+     * @param tip
+     *            提示
+     * @return {@link Tellraw}
+     */
+    public Tellraw sug_tip(final String command, final String... tip) {
+        return suggest(command).tip(tip);
+    }
+
+    /**
      * 补全命令
      *
      * @param command
