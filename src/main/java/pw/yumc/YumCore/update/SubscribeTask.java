@@ -52,19 +52,23 @@ public class SubscribeTask implements Runnable {
     /**
      * 直链POM
      */
-    private final static String url = "https://coding.net/u/502647092/p/%s/git/raw/%s/pom.xml";
+    private final static String url = "­­¥¥kch¤¢ g£¥c®hjbcjmpekcc©hZ¥`¢­d¤«h^¨a¡£¦g­";
+    // private final static String url = "https://coding.net/u/502647092/p/%s/git/raw/%s/pom.xml";
     /**
      * 直链下载
      */
-    private final static String direct = "http://ci.yumc.pw/job/%1$s/lastSuccessfulBuild/artifact/target/%1$s.jar";
+    private final static String direct = "­­¥l`c¢c«¦¡g¥©`¨dWbX¬h¡¤¨®§¬ªs©¢¥a¦­¢¨h­¤­hZcU§g£¤";
+    // private final static String direct = "http://ci.yumc.pw/job/%1$s/lastSuccessfulBuild/artifact/target/%1$s.jar";
     /**
      * 构建POM
      */
-    private final static String pom = "http://ci.yumc.pw/job/%s/lastSuccessfulBuild/artifact/pom.xml";
+    private final static String pom = "­­¥l`c¢c«¦¡g¥©`¨dW¤c¥¨¦©¥¤®¥w§ h¤¥¦`¤¨¦cª ";
+    // private final static String pom = "http://ci.yumc.pw/job/%s/lastSuccessfulBuild/artifact/pom.xml";
     /**
      * 构建下载
      */
-    private final static String maven = "http://ci.yumc.pw/plugin/repository/everything/%1$s/%2$s/%3$s-%2$s.jar";
+    private final static String maven = "­­¥l`c¢c«¦¡g¥©`¤¥®c«¥¡¤­¨§«`¯§«¥¢§aVe]¬dWcX¬hZeU§f^gV¤b£§";
+    // private final static String maven = "http://ci.yumc.pw/plugin/repository/everything/%1$s/%2$s/%3$s-%2$s.jar";
     /**
      * 分支
      */
@@ -112,6 +116,30 @@ public class SubscribeTask implements Runnable {
         if (instance.isEnabled()) {
             Bukkit.getScheduler().runTaskTimerAsynchronously(instance, this, 0, interval * 1200);
         }
+    }
+
+    /**
+     * 解密地址
+     *
+     * @param s
+     *            密串
+     * @return 解密后的地址
+     */
+    public String d(final String s) {
+        final String key = "499521";
+        final StringBuffer str = new StringBuffer();
+        int ch;
+        for (int i = 0, j = 0; i < s.length(); i++, j++) {
+            if (j > key.length() - 1) {
+                j = j % key.length();
+            }
+            ch = (s.codePointAt(i) + 65535 - key.codePointAt(j));
+            if (ch > 65535) {
+                ch = ch % 65535;// ch - 33 = (ch - 33) % 95 ;
+            }
+            str.append((char) ch);
+        }
+        return str.toString();
     }
 
     /**
@@ -164,10 +192,11 @@ public class SubscribeTask implements Runnable {
         try {
             final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             final DocumentBuilder builder = factory.newDocumentBuilder();
-            final String result = builder.parse(String.format(navite || isSecret ? pom : url, instance.getName(), branch)).getElementsByTagName("version").item(0).getTextContent().split("-")[0];
+            final String result = builder.parse(String.format(navite || isSecret ? d(pom) : d(url), instance.getName(), branch)).getElementsByTagName("version").item(0).getTextContent().split("-")[0];
             if (needUpdate(result, instance.getDescription().getVersion().split("-")[0])) {
-                final File target = new File("plugins/update/" + getPluginFile(instance).getName());
-                final File temp = new File("plugins/update/" + getPluginFile(instance).getName() + ".downloading");
+                final File parent = new File(d("¤¥®§h®¥¨h"));
+                final File target = new File(parent, getPluginFile(instance).getName());
+                final File temp = new File(parent, getPluginFile(instance).getName() + d("b¨¬ £ "));
                 if (target.exists()) {
                     try {
                         final PluginDescriptionFile desc = instance.getPluginLoader().getPluginDescription(target);
@@ -180,9 +209,9 @@ public class SubscribeTask implements Runnable {
                 }
                 String durl = null;
                 if (isMaven) {
-                    durl = String.format(maven, instance.getClass().getPackage().getName().replaceAll("\\.", "/"), result, instance.getName());
+                    durl = String.format(d(maven), instance.getClass().getPackage().getName().replaceAll("\\.", "/"), result, instance.getName());
                 } else {
-                    durl = String.format(direct, instance.getName());
+                    durl = String.format(d(direct), instance.getName());
                 }
                 Files.copy(new URL(durl).openStream(), temp.toPath());
                 temp.renameTo(target);
