@@ -301,8 +301,9 @@ public class Tellraw {
         final MessagePart last = latest();
         if (!last.hasText()) {
             last.text = part.text;
+        } else {
+            messageParts.add(part);
         }
-        messageParts.add(part);
         return this;
     }
 }
