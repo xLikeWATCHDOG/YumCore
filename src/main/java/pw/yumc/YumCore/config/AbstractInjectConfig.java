@@ -60,8 +60,10 @@ public abstract class AbstractInjectConfig {
         if (value == null) {
             if (def != null) {
                 value = def.value();
-            } else if (field.getAnnotation(Nullable.class) == null) {
-                Log.warning(String.format(PATH_NOT_FOUND, path));
+            } else {
+                if (field.getAnnotation(Nullable.class) == null) {
+                    Log.warning(String.format(PATH_NOT_FOUND, path));
+                }
                 return;
             }
         }
