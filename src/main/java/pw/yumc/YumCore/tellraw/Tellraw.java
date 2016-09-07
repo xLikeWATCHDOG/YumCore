@@ -9,6 +9,8 @@ import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import pw.yumc.YumCore.bukkit.compatible.C;
+
 /**
  * TellRaw简易处理类
  *
@@ -50,7 +52,7 @@ public class Tellraw {
      * 发送Tellraw公告
      */
     public void broadcast() {
-        for (final Player player : Bukkit.getOnlinePlayers()) {
+        for (final Player player : C.Player.getOnlinePlayers()) {
             send(player);
         }
     }
