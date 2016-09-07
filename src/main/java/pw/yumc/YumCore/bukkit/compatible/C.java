@@ -52,7 +52,7 @@ public class C {
             getHandle = typeCraftPlayer.getMethod("getHandle");
             playerConnection = typeNMSPlayer.getField("playerConnection");
             sendPacket = typePlayerConnection.getMethod("sendPacket", Class.forName(a("Packet")));
-        } catch (final Exception e) {
+        } catch (final Throwable e) {
             Log.warning(C.class.getSimpleName() + " 兼容性工具初始化失败 可能造成部分功能不可用!");
             e.printStackTrace();
         }
@@ -144,7 +144,8 @@ public class C {
                     } while (time > 0);
 
                 }
-            }).start();;
+            }).start();
+            ;
         }
 
         /**
@@ -337,7 +338,11 @@ public class C {
                     Object packet = null;
                     // Send if set
                     if ((fadeInTime != -1) && (fadeOutTime != -1) && (stayTime != -1)) {
-                        packet = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent, Integer.TYPE, Integer.TYPE, Integer.TYPE).newInstance(actions[2], null, fadeInTime * 20, stayTime * 20, fadeOutTime * 20);
+                        packet = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent, Integer.TYPE, Integer.TYPE, Integer.TYPE).newInstance(actions[2],
+                                null,
+                                fadeInTime * 20,
+                                stayTime * 20,
+                                fadeOutTime * 20);
                         sendPacket.invoke(connection, packet);
                     }
                     // Send title
