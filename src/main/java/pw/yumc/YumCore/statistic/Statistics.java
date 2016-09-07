@@ -44,7 +44,7 @@ public class Statistics {
     /**
      * 统计插件基础配置文件
      */
-    private final static File configfile = new File("plugins" + File.separatorChar + "PluginHelper", "config.yml");
+    private final static File configfile = new File(String.format("plugins%1$sPluginHelper%1$sconfig.yml", File.separatorChar));
 
     /**
      * UTF-8编码
@@ -285,7 +285,7 @@ public class Statistics {
     }
 
     public class StatisticsTimer implements Runnable {
-        private final LinkedList<Double> history = new LinkedList<Double>();
+        private final LinkedList<Double> history = new LinkedList<>();
         private transient long lastPoll = System.nanoTime();
 
         public double getAverageTPS() {

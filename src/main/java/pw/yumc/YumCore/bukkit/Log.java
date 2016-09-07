@@ -15,7 +15,7 @@ import org.bukkit.command.CommandSender;
  * @author 喵♂呜
  */
 public class Log {
-    private static boolean debug = new File("plugins/YumCore/debug").exists();
+    private static boolean debug = new File(String.format("plugins%1$sYumCore%1$sdebug", File.separatorChar)).exists();
     private static Logger logger = P.instance.getLogger();
     private static String prefix = String.format("§6[§b%s§6]§r ", P.instance.getName());
     private static CommandSender console = Bukkit.getConsoleSender();

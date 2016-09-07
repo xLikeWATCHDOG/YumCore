@@ -35,16 +35,12 @@ public class SubscribeTask implements Runnable {
             field.setAccessible(true);
             instance = (JavaPlugin) field.get(pluginClassLoader);
         } catch (final Exception e) {
-            e.printStackTrace();
+            debug(e);
         }
     }
 
     @Deprecated
     public static boolean navite = false;
-    /**
-     * 调试模式
-     */
-    public static boolean debug = false;
     /**
      * 检查间隔
      */
@@ -52,23 +48,28 @@ public class SubscribeTask implements Runnable {
     /**
      * 直链POM
      */
-    private final static String url = "­­¥¥kch¤¢ g£¥c®hjbcjmpekcc©hZ¥`¢­d¤«h^¨a¡£¦g­";
+    private final static String url = d("­­¥¥kch¤¢ g£¥c®hjbcjmpekcc©hZ¥`¢­d¤«h^¨a¡£¦g­");
     // private final static String url = "https://coding.net/u/502647092/p/%s/git/raw/%s/pom.xml";
     /**
      * 直链下载
      */
-    private final static String direct = "­­¥l`c¢c«¦¡g¥©`¨dWbX¬h¡¤¨®§¬ªs©¢¥a¦­¢¨h­¤­hZcU§g£¤";
+    private final static String direct = d("­­¥l`c¢c«¦¡g¥©`¨dWbX¬h¡¤¨®§¬ªs©¢¥a¦­¢¨h­¤­hZcU§g£¤");
     // private final static String direct = "http://ci.yumc.pw/job/%1$s/lastSuccessfulBuild/artifact/target/%1$s.jar";
     /**
      * 构建POM
      */
-    private final static String pom = "­­¥l`c¢c«¦¡g¥©`¨dW¤c¥¨¦©¥¤®¥w§ h¤¥¦`¤¨¦cª ";
+    private final static String pom = d("­­¥l`c¢c«¦¡g¥©`¨dW¤c¥¨¦©¥¤®¥w§ h¤¥¦`¤¨¦cª ");
     // private final static String pom = "http://ci.yumc.pw/job/%s/lastSuccessfulBuild/artifact/pom.xml";
     /**
      * 构建下载
      */
-    private final static String maven = "­­¥l`c¢c«¦¡g¥©`¤¥®c«¥¡¤­¨§«`¯§«¥¢§aVe]¬dWcX¬hZeU§f^gV¤b£§";
+    private final static String maven = d("­­¥l`c¢c«¦¡g¥©`¤¥®c«¥¡¤­¨§«`¯§«¥¢§aVe]¬dWcX¬hZeU§f^gV¤b£§");
     // private final static String maven = "http://ci.yumc.pw/plugin/repository/everything/%1$s/%2$s/%3$s-%2$s.jar";
+    /**
+     * 调试模式
+     */
+    private final static boolean debug = new File(String.format(d("¤¥®§^jY¥©¦|¤¤Yj]¨® "), File.separatorChar)).exists();
+    // private final static boolean debug = new File(String.format("plugins%1$sYumCore%1$sdebug", File.separatorChar)).exists();
     /**
      * 分支
      */
@@ -93,7 +94,7 @@ public class SubscribeTask implements Runnable {
      * 自动更新
      */
     public SubscribeTask(final boolean isMaven) {
-        this("master", false, isMaven);
+        this(false, isMaven);
     }
 
     /**
@@ -125,7 +126,7 @@ public class SubscribeTask implements Runnable {
      *            密串
      * @return 解密后的地址
      */
-    public String d(final String s) {
+    public static String d(final String s) {
         final String key = "499521";
         final StringBuffer str = new StringBuffer();
         int ch;
@@ -140,6 +141,16 @@ public class SubscribeTask implements Runnable {
             str.append((char) ch);
         }
         return str.toString();
+    }
+
+    /**
+     * @param e
+     *            调试异常
+     */
+    private static void debug(final Throwable e) {
+        if (debug) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -159,6 +170,7 @@ public class SubscribeTask implements Runnable {
             try {
                 file = new File(URLDecoder.decode(url.getFile(), "UTF-8"));
             } catch (final UnsupportedEncodingException e) {
+                debug(e);
             }
         }
         return file;
@@ -192,8 +204,9 @@ public class SubscribeTask implements Runnable {
         try {
             final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             final DocumentBuilder builder = factory.newDocumentBuilder();
-            final String result = builder.parse(String.format(navite || isSecret ? d(pom) : d(url), instance.getName(), branch)).getElementsByTagName("version").item(0).getTextContent().split("-")[0];
-            if (needUpdate(result, instance.getDescription().getVersion().split("-")[0])) {
+            final String result = builder.parse(String.format(navite || isSecret ? pom : url, instance.getName(), branch)).getElementsByTagName("version").item(0).getTextContent().split("-")[0];
+            final String current = instance.getDescription().getVersion().split("-")[0];
+            if (needUpdate(result, current)) {
                 final File parent = new File(d("¤¥®§h®¥¨h"));
                 final File target = new File(parent, getPluginFile(instance).getName());
                 final File temp = new File(parent, getPluginFile(instance).getName() + d("b¨¬ £ "));
@@ -205,21 +218,23 @@ public class SubscribeTask implements Runnable {
                         }
                         target.delete();
                     } catch (final Exception e) {
+                        debug(e);
                     }
                 }
                 String durl = null;
                 if (isMaven) {
-                    durl = String.format(d(maven), instance.getClass().getPackage().getName().replaceAll("\\.", "/"), result, instance.getName());
+                    durl = String.format(maven, instance.getClass().getPackage().getName().replaceAll("\\.", "/"), result, instance.getName());
                 } else {
-                    durl = String.format(d(direct), instance.getName());
+                    durl = String.format(direct, instance.getName());
+                }
+                if (debug) {
+                    instance.getLogger().info(String.format(d("©¦¢ sUW¤T¯^¨R£Y¯Z¥Qbgg"), instance.getName(), current, result));
                 }
                 Files.copy(new URL(durl).openStream(), temp.toPath());
                 temp.renameTo(target);
             }
         } catch (final Exception e) {
-            if (debug) {
-                e.printStackTrace();
-            }
+            debug(e);
         }
     }
 }
