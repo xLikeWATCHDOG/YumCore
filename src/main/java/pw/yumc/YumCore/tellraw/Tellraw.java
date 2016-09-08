@@ -12,6 +12,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.bukkit.compatible.C;
 
 /**
@@ -149,7 +150,16 @@ public class Tellraw {
      */
     public void send(final CommandSender sender) {
         if (sender instanceof Player) {
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName() + " " + toJsonString());
+            if (!Bukkit.isPrimaryThread()) {
+                Bukkit.getScheduler().runTask(P.instance, new Runnable() {
+                    @Override
+                    public void run() {
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName() + " " + toJsonString());
+                    }
+                });
+            } else {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName() + " " + toJsonString());
+            }
         } else {
             sender.sendMessage(toOldMessageFormat());
         }
