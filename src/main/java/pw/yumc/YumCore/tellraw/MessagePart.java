@@ -62,7 +62,7 @@ public class MessagePart {
         }
         if (hoverActionName != null) {
             str.append(",");
-            str.append(String.format("\"hoverEvent\":{\"action\":\"%s\",\"value\":{\"text\":\"%s\"}}", hoverActionName, hoverActionData));
+            str.append(String.format("\"hoverEvent\":{\"action\":\"%s\",\"value\":\"%s\"}", hoverActionName, hoverActionData));
         }
         if (insertionData != null) {
             str.append(",");

@@ -11,6 +11,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.bukkit.compatible.C;
 
@@ -21,6 +22,7 @@ import pw.yumc.YumCore.bukkit.compatible.C;
  * @author 喵♂呜
  */
 public class Tellraw {
+    static boolean isPaper = Bukkit.getVersion().contains("Paper");
     List<MessagePart> messageParts = new ArrayList<>();
 
     public Tellraw(final String text) {
@@ -142,7 +144,7 @@ public class Tellraw {
      */
     public void send(final CommandSender sender) {
         if (sender instanceof Player) {
-            if (!Bukkit.isPrimaryThread()) {
+            if (isPaper && !Bukkit.isPrimaryThread()) {
                 Bukkit.getScheduler().runTask(P.instance, new Runnable() {
                     @Override
                     public void run() {
@@ -257,6 +259,7 @@ public class Tellraw {
             messagePart.writeJson(msg);
         }
         msg.append("]");
+        Log.debug(msg.toString());
         return msg.toString();
     }
 

@@ -11,18 +11,21 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import pw.yumc.YumCore.bukkit.Log;
+
 /**
  *
  * @since 2016年9月9日 下午3:47:17
  * @author 喵♂呜
  */
 public abstract class ItemSerialize {
-    static ItemSerialize itemSerialize;
+    static ItemSerialize itemSerialize = new Manual();
     static {
         try {
             itemSerialize = new Automatic();
         } catch (ClassNotFoundException | NoSuchMethodException | SecurityException e) {
             itemSerialize = new Manual();
+            Log.debug("初始化自动物品序列化失败!", e);
         }
     }
 
@@ -47,7 +50,7 @@ public abstract class ItemSerialize {
         }
 
         public Class<?> getNMSClass(final String cname) throws ClassNotFoundException {
-            return Class.forName("net.minecraft.server" + ver + "." + cname);
+            return Class.forName("net.minecraft.server." + ver + "." + cname);
         }
 
         public Class<?> getOBCClass(final String cname) throws ClassNotFoundException {
@@ -57,7 +60,9 @@ public abstract class ItemSerialize {
         @Override
         public String parse(final ItemStack item) {
             try {
-                return nmsSaveNBTMethod.invoke(asNMSCopyMethod.invoke(null, item), nmsNBTTagCompound.newInstance()).toString();
+                final JsonBuilder j = new JsonBuilder();
+                j.append(nmsSaveNBTMethod.invoke(asNMSCopyMethod.invoke(null, item), nmsNBTTagCompound.newInstance()).toString());
+                return j.toString();
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | InstantiationException e) {
                 itemSerialize = new Manual();
                 return itemSerialize.parse(item);
@@ -86,6 +91,10 @@ public abstract class ItemSerialize {
             json = new StringBuffer();
         }
 
+        public JsonBuilder(final String string) {
+            json = new StringBuffer(string);
+        }
+
         public void append(final String value) {
             int last = 0;
             final int length = value.length();
@@ -105,22 +114,27 @@ public abstract class ItemSerialize {
                     continue;
                 }
                 if (last < i) {
-                    json.append(value, last, i - last);
+                    json.append(value, last, i);
                 }
                 json.append(replacement);
                 last = i + 1;
             }
             if (last < length) {
-                json.append(value, last, length - last);
+                json.append(value, last, length);
             }
         }
 
         public void deleteCharAt(final int length) {
-            json.deleteCharAt(length);
+            json.deleteCharAt(length - 1);
         }
 
         public int length() {
             return json.length();
+        }
+
+        @Override
+        public String toString() {
+            return json.toString();
         }
     }
 
@@ -139,20 +153,24 @@ public abstract class ItemSerialize {
          * @return 获取显示序列化
          */
         private String getDisplay(final ItemMeta im) {
-            final JsonBuilder display = new JsonBuilder();
+            final StringBuffer display = new StringBuffer();
             display.append("{");
             if (im.hasDisplayName()) {
                 display.append(String.format("Name:\"%s\",", im.getDisplayName()));
             }
             if (im.hasLore()) {
                 display.append("Lore:[");
+                int i = 0;
                 for (final String line : im.getLore()) {
-                    display.append(String.format("\"%s\",", line));
+                    final JsonBuilder j = new JsonBuilder();
+                    j.append(line);
+                    display.append(String.format("%s:%s,", i, j.toString()));
+                    i++;
                 }
-                display.deleteCharAt(display.length());
+                display.deleteCharAt(display.length() - 1);
                 display.append("],");
             }
-            display.deleteCharAt(display.length());
+            display.deleteCharAt(display.length() - 1);
             display.append("}");
             return display.toString();
         }
@@ -169,7 +187,7 @@ public abstract class ItemSerialize {
             for (final Map.Entry<Enchantment, Integer> ench : set) {
                 enchs.append(String.format("{id:%s,lvl:%s},", ench.getKey().getId(), ench.getValue()));
             }
-            enchs.deleteCharAt(enchs.length());
+            enchs.deleteCharAt(enchs.length() - 1);
             return enchs.toString();
         }
 
@@ -181,7 +199,7 @@ public abstract class ItemSerialize {
          * @return 获得属性序列化
          */
         private String getTag(final ItemMeta im) {
-            final StringBuffer meta = new StringBuffer();
+            final StringBuffer meta = new StringBuffer("{");
             if (im.hasEnchants()) {
                 meta.append(String.format("ench:[%s],", getEnch(im.getEnchants().entrySet())));
             }
@@ -189,7 +207,8 @@ public abstract class ItemSerialize {
             if (im.hasDisplayName() || im.hasLore()) {
                 meta.append(String.format("display:%s,", getDisplay(im)));
             }
-            meta.deleteCharAt(meta.length());
+            meta.deleteCharAt(meta.length() - 1);
+            meta.append("}");
             return meta.toString();
         }
 
@@ -201,10 +220,10 @@ public abstract class ItemSerialize {
          * @return 物品字符串
          */
         private String serialize(final ItemStack item) {
-            final StringBuffer json = new StringBuffer("{");
+            final JsonBuilder json = new JsonBuilder("{");
             json.append(String.format("id:\"%s\",Damage:\"%s\"", item.getTypeId(), item.getDurability()));
             if (item.getAmount() > 1) {
-                json.append(String.format(",Count:\"%s\"", item.getAmount()));
+                json.append(String.format(",Count:%s", item.getAmount()));
             }
             if (item.hasItemMeta()) {
                 json.append(String.format(",tag:%s", getTag(item.getItemMeta())));
