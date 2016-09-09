@@ -1,13 +1,12 @@
 package pw.yumc.YumCore.tellraw;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -22,14 +21,6 @@ import pw.yumc.YumCore.bukkit.compatible.C;
  * @author 喵♂呜
  */
 public class Tellraw {
-    static ItemSerialize is;
-    static {
-        try {
-            is = new Automatic();
-        } catch (ClassNotFoundException | NoSuchMethodException | SecurityException e) {
-            is = new Manual();
-        }
-    }
     List<MessagePart> messageParts = new ArrayList<>();
 
     public Tellraw(final String text) {
@@ -57,7 +48,8 @@ public class Tellraw {
     }
 
     public static void main(final String[] args) {
-        System.out.println(Tellraw.create("命令").command("yum list").tip("点击查看插件列表").toJsonString());
+        final ItemStack item = new ItemStack(Material.DIAMOND_SWORD);
+        System.out.println(Tellraw.create("命令").command("yum list").item(item).toJsonString());
     }
 
     /**
@@ -117,7 +109,7 @@ public class Tellraw {
      * @return {@link Tellraw}
      */
     public Tellraw item(final ItemStack item) {
-        return item(is.$(item));
+        return item(ItemSerialize.$(item));
     }
 
     /**
@@ -350,49 +342,5 @@ public class Tellraw {
             messageParts.add(part);
         }
         return this;
-    }
-
-    static class Automatic implements ItemSerialize {
-        Method asNMSCopyMethod;
-        Method nmsSaveNBTMethod;
-        Class<?> nmsNBTTagCompound;
-        String ver = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
-
-        public Automatic() throws ClassNotFoundException, NoSuchMethodException, SecurityException {
-            final Class<?> cis = getOBCClass("inventory.CraftItemStack");
-            asNMSCopyMethod = cis.getMethod("asNMSCopy", ItemStack.class);
-            final Class<?> nmsItemStack = getNMSClass("ItemStack");
-            nmsNBTTagCompound = getNMSClass("NBTTagCompound");
-            nmsSaveNBTMethod = nmsItemStack.getMethod("save", nmsNBTTagCompound);
-        }
-
-        @Override
-        public String $(final ItemStack item) {
-            try {
-                return nmsSaveNBTMethod.invoke(asNMSCopyMethod.invoke(null, item), nmsNBTTagCompound.newInstance()).toString();
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | InstantiationException e) {
-                is = new Manual();
-                return is.$(item);
-            }
-        }
-
-        public Class<?> getNMSClass(final String cname) throws ClassNotFoundException {
-            return Class.forName("net.minecraft.server" + ver + "." + cname);
-        }
-
-        public Class<?> getOBCClass(final String cname) throws ClassNotFoundException {
-            return Class.forName("org.bukkit.craftbukkit." + ver + "." + cname);
-        }
-    }
-
-    static interface ItemSerialize {
-        public String $(ItemStack item);
-    }
-
-    static class Manual implements ItemSerialize {
-        @Override
-        public String $(final ItemStack item) {
-            return null;
-        }
     }
 }
