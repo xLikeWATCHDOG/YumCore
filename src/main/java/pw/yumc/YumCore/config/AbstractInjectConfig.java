@@ -28,6 +28,10 @@ public abstract class AbstractInjectConfig {
      * 注入配置数据
      */
     public void inject(final ConfigurationSection config) {
+        if (config == null) {
+            Log.warning("尝试注入 ConfigurationSection 为 Null 的数据!");
+            return;
+        }
         this.config = config;
         for (final Field field : getClass().getDeclaredFields()) {
             if (Modifier.isTransient(field.getModifiers()) || field.getType().isPrimitive()) {
