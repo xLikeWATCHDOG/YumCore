@@ -7,6 +7,10 @@ package pw.yumc.YumCore.tellraw;
  * @author 喵♂呜
  */
 public class MessagePart {
+    private static final String TEXT_FORMAT = "\"text\":\"%s\"";
+    private static final String CLICK_FORMAT = "\"clickEvent\":{\"action\":\"%s\",\"value\":\"%s\"}";
+    private static final String HOVER_FORMAT = "\"hoverEvent\":{\"action\":\"%s\",\"value\":\"%s\"}";
+    private static final String INSERT_FORMAT = " \"insertion\":\"%s\"";
     /**
      * 消息文本
      */
@@ -55,18 +59,18 @@ public class MessagePart {
      */
     public void writeJson(final StringBuffer str) {
         str.append("{");
-        str.append("\"text\":\"" + text + "\"");
+        str.append(String.format(TEXT_FORMAT, text));
         if (clickActionName != null) {
             str.append(",");
-            str.append(String.format("\"clickEvent\":{\"action\":\"%s\",\"value\":\"%s\"}", clickActionName, clickActionData));
+            str.append(String.format(CLICK_FORMAT, clickActionName, clickActionData));
         }
         if (hoverActionName != null) {
             str.append(",");
-            str.append(String.format("\"hoverEvent\":{\"action\":\"%s\",\"value\":\"%s\"}", hoverActionName, hoverActionData));
+            str.append(String.format(HOVER_FORMAT, hoverActionName, hoverActionData));
         }
         if (insertionData != null) {
             str.append(",");
-            str.append(String.format(" \"insertion\":\"%s\"", insertionData));
+            str.append(String.format(INSERT_FORMAT, insertionData));
         }
         str.append("}");
     }

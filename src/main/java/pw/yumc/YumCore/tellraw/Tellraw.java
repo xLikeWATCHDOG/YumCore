@@ -117,8 +117,8 @@ public class Tellraw {
     /**
      * 悬浮物品
      *
-     * @param text
-     *            文本
+     * @param json
+     *            物品Json串
      * @return {@link Tellraw}
      */
     public Tellraw item(final String json) {
@@ -133,6 +133,17 @@ public class Tellraw {
      * @return {@link Tellraw}
      */
     public Tellraw link(final String url) {
+        return onClick("open_url", url);
+    }
+
+    /**
+     * 打开网址
+     * 
+     * @param url
+     *            网址
+     * @return {@link Tellraw}
+     */
+    public Tellraw openurl(final String url) {
         return onClick("open_url", url);
     }
 
@@ -204,6 +215,19 @@ public class Tellraw {
      */
     public Tellraw then(final String text) {
         return then(new MessagePart(text));
+    }
+
+    /**
+     * 悬浮物品
+     *
+     * @param name
+     *            物品名称
+     * @param item
+     *            {@link ItemStack}
+     * @return {@link Tellraw}
+     */
+    public Tellraw then(final String name, final ItemStack item) {
+        return then(name).item(ItemSerialize.$(item));
     }
 
     /**

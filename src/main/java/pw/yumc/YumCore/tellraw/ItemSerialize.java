@@ -60,81 +60,11 @@ public abstract class ItemSerialize {
         @Override
         public String parse(final ItemStack item) {
             try {
-                final JsonBuilder j = new JsonBuilder();
-                j.append(nmsSaveNBTMethod.invoke(asNMSCopyMethod.invoke(null, item), nmsNBTTagCompound.newInstance()).toString());
-                return j.toString();
+                return new JsonBuilder((nmsSaveNBTMethod.invoke(asNMSCopyMethod.invoke(null, item), nmsNBTTagCompound.newInstance()).toString())).toString();
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | InstantiationException e) {
                 itemSerialize = new Manual();
                 return itemSerialize.parse(item);
             }
-        }
-    }
-
-    static class JsonBuilder {
-        public static final String[] REPLACEMENT_CHARS;
-        static {
-            REPLACEMENT_CHARS = new String[128];
-            for (int i = 0; i <= 0x1f; i++) {
-                REPLACEMENT_CHARS[i] = String.format("\\u%04x", i);
-            }
-            REPLACEMENT_CHARS['"'] = "\\\"";
-            REPLACEMENT_CHARS['\\'] = "\\\\";
-            REPLACEMENT_CHARS['\t'] = "\\t";
-            REPLACEMENT_CHARS['\b'] = "\\b";
-            REPLACEMENT_CHARS['\n'] = "\\n";
-            REPLACEMENT_CHARS['\r'] = "\\r";
-            REPLACEMENT_CHARS['\f'] = "\\f";
-        }
-        StringBuffer json;
-
-        public JsonBuilder() {
-            json = new StringBuffer();
-        }
-
-        public JsonBuilder(final String string) {
-            json = new StringBuffer(string);
-        }
-
-        public void append(final String value) {
-            int last = 0;
-            final int length = value.length();
-            for (int i = 0; i < length; i++) {
-                final char c = value.charAt(i);
-                String replacement;
-                if (c < 128) {
-                    replacement = REPLACEMENT_CHARS[c];
-                    if (replacement == null) {
-                        continue;
-                    }
-                } else if (c == '\u2028') {
-                    replacement = "\\u2028";
-                } else if (c == '\u2029') {
-                    replacement = "\\u2029";
-                } else {
-                    continue;
-                }
-                if (last < i) {
-                    json.append(value, last, i);
-                }
-                json.append(replacement);
-                last = i + 1;
-            }
-            if (last < length) {
-                json.append(value, last, length);
-            }
-        }
-
-        public void deleteCharAt(final int length) {
-            json.deleteCharAt(length - 1);
-        }
-
-        public int length() {
-            return json.length();
-        }
-
-        @Override
-        public String toString() {
-            return json.toString();
         }
     }
 
@@ -162,9 +92,7 @@ public abstract class ItemSerialize {
                 display.append("Lore:[");
                 int i = 0;
                 for (final String line : im.getLore()) {
-                    final JsonBuilder j = new JsonBuilder();
-                    j.append(line);
-                    display.append(String.format("%s:%s,", i, j.toString()));
+                    display.append(String.format("%s:%s,", i, new JsonBuilder(line).toString()));
                     i++;
                 }
                 display.deleteCharAt(display.length() - 1);
