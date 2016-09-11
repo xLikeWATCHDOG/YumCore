@@ -8,7 +8,7 @@ import org.bukkit.configuration.ConfigurationSection;
  * @since 2016年7月5日 上午8:53:57
  * @author 喵♂呜
  */
-public class InjectConfigurationSection extends AbstractInjectConfig {
+public abstract class InjectConfigurationSection extends AbstractInjectConfig {
 
     public InjectConfigurationSection(final ConfigurationSection config) {
         inject(config);

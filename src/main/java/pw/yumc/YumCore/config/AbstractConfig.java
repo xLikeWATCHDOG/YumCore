@@ -51,7 +51,22 @@ public abstract class AbstractConfig extends YamlConfiguration {
     protected final Representer yamlRepresenter = new YamlRepresenter();
     protected final Yaml yamlz = new Yaml(new YamlConstructor(), yamlRepresenter, yamlOptions);
 
+    /**
+     * 配置文件内容MAP
+     */
+    protected Map<?, ?> contentsMap;
+
+    /**
+     * 配置内容字符串
+     */
     protected String data;
+
+    /**
+     * @return 获得配置内容
+     */
+    public Map<?, ?> getContentMap() {
+        return contentsMap;
+    }
 
     @Override
     public void load(final File file) throws FileNotFoundException, IOException, InvalidConfigurationException {
@@ -79,9 +94,8 @@ public abstract class AbstractConfig extends YamlConfiguration {
     @Override
     public void loadFromString(final String contents) throws InvalidConfigurationException {
         Validate.notNull(contents, CONTENT_NOT_BE_NULL);
-        Map<?, ?> input;
         try {
-            input = (Map<?, ?>) yamlz.load(contents);
+            contentsMap = (Map<?, ?>) yamlz.load(contents);
         } catch (final YAMLException e) {
             throw new InvalidConfigurationException(e);
         } catch (final ClassCastException e) {
@@ -91,8 +105,8 @@ public abstract class AbstractConfig extends YamlConfiguration {
         if (header.length() > 0) {
             options().header(header);
         }
-        if (input != null) {
-            convertMapsToSections(input, this);
+        if (contentsMap != null) {
+            convertMapsToSections(contentsMap, this);
         }
     }
 

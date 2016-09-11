@@ -36,8 +36,9 @@ public class FileConfig extends AbstractConfig {
     private static final String DEFAULT = "config.yml";
     private static final String DATA_FORMANT = "yyyyMMddHHmmss";
     private static final String CONFIG_BACKUP = "配置: %s 已备份为 %s !";
-    private static final String CONFIG_UPDATED = "配置: %s 升级成功 版本 %S !";
+    private static final String CONFIG_UPDATED = "配置: %s 升级成功 版本 %s !";
     private static final String CONFIG_OVERRIDE = "配置: %s 将覆盖原有字段数据...";
+    private static final String CONFIG_NOT_FOUND = "配置: 文件 %s 不存在!";
     private static final String CONFIG_READ_ERROR = "配置: %s 读取错误...";
     private static final String CONFIG_SAVE_ERROR = "配置: %s 保存错误...";
     private static final String CONFIG_UPDATE_WARN = "配置: %s 版本 %s 过低 正在升级到 %s ...";
@@ -68,22 +69,19 @@ public class FileConfig extends AbstractConfig {
      */
     public FileConfig(final File file) {
         Validate.notNull(file, FILE_NOT_BE_NULL);
-        this.file = file;
         init(file);
     }
 
     /**
      * 从文件载入配置
      *
-     * @param plugin
-     *            插件
+     * @param parent
+     *            文件夹
      * @param filename
      *            配置文件名称
      */
-    public FileConfig(final String filename) {
-        this.file = new File(plugin.getDataFolder(), filename);
-        check(file);
-        init(file);
+    public FileConfig(final File parent, final String filename) {
+        init(new File(parent, filename), true);
     }
 
     /**
@@ -92,8 +90,30 @@ public class FileConfig extends AbstractConfig {
      * @param stream
      *            数据流
      */
-    private FileConfig(final InputStream stream) {
+    public FileConfig(final InputStream stream) {
         init(stream);
+    }
+
+    /**
+     * 从文件载入配置
+     *
+     * @param filename
+     *            配置文件名称
+     */
+    public FileConfig(final String filename) {
+        init(new File(plugin.getDataFolder(), filename), true);
+    }
+
+    /**
+     * 从文件载入配置
+     *
+     * @param parent
+     *            文件夹
+     * @param filename
+     *            配置文件名称
+     */
+    public FileConfig(final String parent, final String filename) {
+        init(new File(parent, filename), true);
     }
 
     /**
@@ -110,7 +130,7 @@ public class FileConfig extends AbstractConfig {
     public <E> FileConfig addToList(final String path, final E obj) {
         List<E> l = (List<E>) this.getList(path);
         if (null == l) {
-            l = new ArrayList<E>();
+            l = new ArrayList<>();
         }
         l.add(obj);
         return this;
@@ -159,7 +179,7 @@ public class FileConfig extends AbstractConfig {
      * @return 颜色转码后的文本
      */
     public List<String> getColorList(final List<String> cfgmsg) {
-        final List<String> message = new ArrayList<String>();
+        final List<String> message = new ArrayList<>();
         if (cfgmsg == null) {
             return null;
         }
@@ -273,6 +293,32 @@ public class FileConfig extends AbstractConfig {
     }
 
     /**
+     * 比较版本号
+     *
+     * @param 新版本
+     * @param 旧版本
+     * @return 是否需要更新
+     */
+    public boolean needUpdate(final String newver, final String oldver) {
+        if (newver == null || oldver == null) {
+            return false;
+        }
+        final String[] va1 = newver.split("\\.");// 注意此处为正则匹配，不能用"."；
+        final String[] va2 = oldver.split("\\.");
+        int idx = 0;
+        final int minLength = Math.min(va1.length, va2.length);// 取最小长度值
+        int diff = 0;
+        while (idx < minLength
+                && (diff = va1[idx].length() - va2[idx].length()) == 0// 先比较长度
+                && (diff = va1[idx].compareTo(va2[idx])) == 0) {// 再比较字符
+            ++idx;
+        }
+        // 如果已经分出大小，则直接返回，如果未分出大小，则再比较位数，有子版本的为大；
+        diff = (diff != 0) ? diff : va1.length - va2.length;
+        return diff > 0;
+    }
+
+    /**
      * 重新载入配置文件
      *
      * @return 是否载入成功
@@ -351,21 +397,6 @@ public class FileConfig extends AbstractConfig {
             commentConfig.set(path, value);
         }
         super.set(path, value);
-    }
-
-    /**
-     * 检查配置文件版本
-     *
-     * @param newcfg
-     *            新配置文件
-     * @param oldcfg
-     *            旧配置文件
-     * @return 是否需要升级
-     * @throws IOException
-     */
-    private boolean needUpdate(final FileConfig newcfg, final FileConfig oldcfg) throws IOException {
-        final String newver = newcfg.getString(VERSION);
-        return newver != null && !newver.equalsIgnoreCase(oldcfg.getString(VERSION));
     }
 
     /**
@@ -464,12 +495,26 @@ public class FileConfig extends AbstractConfig {
      * @return FileConfig
      */
     protected FileConfig init(final File file) {
+        init(file, false);
+        return this;
+    }
+
+    /**
+     * 初始化FileConfig
+     *
+     * @param file
+     *            配置文件
+     * @return FileConfig
+     */
+    protected FileConfig init(final File file, final boolean check) {
         Validate.notNull(file, FILE_NOT_BE_NULL);
-        FileInputStream stream;
+        if (check) {
+            check(file);
+        }
         try {
-            stream = new FileInputStream(file);
-            init(stream);
+            init(new FileInputStream(file));
         } catch (final FileNotFoundException e) {
+            Log.debug(String.format(CONFIG_NOT_FOUND, file.toPath()));
         }
         return this;
     }
@@ -499,6 +544,20 @@ public class FileConfig extends AbstractConfig {
             Log.warning(String.format(CONFIG_READ_ERROR, file.getName()));
         }
         return this;
+    }
+
+    /**
+     * 检查配置文件版本
+     *
+     * @param newcfg
+     *            新配置文件
+     * @param oldcfg
+     *            旧配置文件
+     * @return 是否需要升级
+     * @throws IOException
+     */
+    protected boolean needUpdate(final FileConfig newcfg, final FileConfig oldcfg) {
+        return needUpdate(newcfg.getString(VERSION), oldcfg.getString(VERSION));
     }
 
     /**
