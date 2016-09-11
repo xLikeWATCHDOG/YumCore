@@ -300,8 +300,11 @@ public class FileConfig extends AbstractConfig {
      * @return 是否需要更新
      */
     public boolean needUpdate(final String newver, final String oldver) {
-        if (newver == null || oldver == null) {
+        if (newver == null) {
             return false;
+        }
+        if (oldver == null) {
+            return true;
         }
         final String[] va1 = newver.split("\\.");// 注意此处为正则匹配，不能用"."；
         final String[] va2 = oldver.split("\\.");
@@ -432,6 +435,7 @@ public class FileConfig extends AbstractConfig {
             Log.warning(String.format(CONFIG_BACKUP, filename, newCfgName));
         } catch (final IOException e) {
             Log.warning(String.format(CONFIG_BACKUP_ERROR, filename, e.getMessage()));
+            Log.debug(oldcfg.getConfigName(), e);
         }
     }
 
@@ -482,7 +486,7 @@ public class FileConfig extends AbstractConfig {
      * @return yyyy-MM-dd HH:mm:ss
      */
     protected String getStringDate(String format) {
-        format = format == null ? format : "yyyy-MM-dd HH:mm:ss";
+        format = format == null ? "yyyy-MM-dd HH:mm:ss" : format;
         final Date currentTime = new Date();
         return new SimpleDateFormat(format).format(currentTime);
     }
@@ -508,6 +512,7 @@ public class FileConfig extends AbstractConfig {
      */
     protected FileConfig init(final File file, final boolean check) {
         Validate.notNull(file, FILE_NOT_BE_NULL);
+        this.file = file;
         if (check) {
             check(file);
         }
