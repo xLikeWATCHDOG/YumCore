@@ -30,8 +30,12 @@ public abstract class ItemSerialize {
     }
 
     public static String $(final ItemStack item) {
-        return itemSerialize.parse(item);
+        final String result = itemSerialize.parse(item);
+        Log.debug(String.format("%s物品序列化结果: %s", itemSerialize.getName(), result));
+        return result;
     }
+
+    public abstract String getName();
 
     public abstract String parse(final ItemStack item);
 
@@ -44,13 +48,25 @@ public abstract class ItemSerialize {
         public Automatic() throws ClassNotFoundException, NoSuchMethodException, SecurityException {
             final Class<?> cis = getOBCClass("inventory.CraftItemStack");
             asNMSCopyMethod = cis.getMethod("asNMSCopy", ItemStack.class);
-            final Class<?> nmsItemStack = getNMSClass("ItemStack");
-            nmsNBTTagCompound = getNMSClass("NBTTagCompound");
-            nmsSaveNBTMethod = nmsItemStack.getMethod("save", nmsNBTTagCompound);
+            final Class<?> nmsItemStack = asNMSCopyMethod.getReturnType();
+            for (final Method method : nmsItemStack.getMethods()) {
+                final Class<?> rt = method.getReturnType();
+                if (method.getParameterTypes().length == 0 && rt.getSimpleName().equals("NBTTagCompound")) {
+                    nmsNBTTagCompound = rt;
+                }
+            }
+            for (final Method method : nmsItemStack.getMethods()) {
+                final Class<?>[] paras = method.getParameterTypes();
+                final Class<?> rt = method.getReturnType();
+                if (paras.length == 1 && paras[0].getSimpleName().equals("NBTTagCompound") && rt.getSimpleName().equals("NBTTagCompound")) {
+                    nmsSaveNBTMethod = method;
+                }
+            }
         }
 
-        public Class<?> getNMSClass(final String cname) throws ClassNotFoundException {
-            return Class.forName("net.minecraft.server." + ver + "." + cname);
+        @Override
+        public String getName() {
+            return "Automatic";
         }
 
         public Class<?> getOBCClass(final String cname) throws ClassNotFoundException {
@@ -69,6 +85,11 @@ public abstract class ItemSerialize {
     }
 
     static class Manual extends ItemSerialize {
+
+        @Override
+        public String getName() {
+            return "Manual";
+        }
 
         @Override
         public String parse(final ItemStack item) {
@@ -92,7 +113,7 @@ public abstract class ItemSerialize {
                 display.append("Lore:[");
                 int i = 0;
                 for (final String line : im.getLore()) {
-                    display.append(String.format("%s:%s,", i, new JsonBuilder(line).toString()));
+                    display.append(String.format("%s:\"%s\",", i, new JsonBuilder(line).toString()));
                     i++;
                 }
                 display.deleteCharAt(display.length() - 1);
@@ -131,7 +152,6 @@ public abstract class ItemSerialize {
             if (im.hasEnchants()) {
                 meta.append(String.format("ench:[%s],", getEnch(im.getEnchants().entrySet())));
             }
-            im.getItemFlags();
             if (im.hasDisplayName() || im.hasLore()) {
                 meta.append(String.format("display:%s,", getDisplay(im)));
             }

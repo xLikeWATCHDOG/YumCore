@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -46,11 +45,6 @@ public class Tellraw {
      */
     public static Tellraw create(final String text) {
         return new Tellraw(text);
-    }
-
-    public static void main(final String[] args) {
-        final ItemStack item = new ItemStack(Material.DIAMOND_SWORD);
-        System.out.println(Tellraw.create("命令").command("yum list").item(item).toJsonString());
     }
 
     /**
