@@ -144,8 +144,7 @@ public class C {
                     } while (time > 0);
 
                 }
-            }).start();
-            ;
+            }).start();;
         }
 
         /**
@@ -226,13 +225,17 @@ public class C {
                     }
                 }
                 // getOnlinePlayers end
+            } catch (NoSuchMethodException | SecurityException e) {
+                Log.warning(Player.class.getSimpleName() + "兼容性工具初始化失败 可能造成部分功能不可用!");
+            }
+            try {
                 // getOfflinePlayer start
                 try {
                     gameProfileClass = Class.forName("net.minecraft.util.com.mojang.authlib.GameProfile");
-                } catch (final ClassNotFoundException e) {
+                } catch (final Exception e) {
                     try {
                         gameProfileClass = Class.forName("com.mojang.authlib.GameProfile");
-                    } catch (final ClassNotFoundException e1) {
+                    } catch (final Exception e1) {
                     }
                 }
                 gameProfileConstructor = gameProfileClass.getDeclaredConstructor(new Class[] { UUID.class, String.class });
@@ -242,8 +245,7 @@ public class C {
                 craftOfflinePlayerConstructor = craftOfflinePlayer.getDeclaredConstructor(new Class[] { craftServer, gameProfileClass });
                 craftOfflinePlayerConstructor.setAccessible(true);
                 // getOfflinePlayer end
-            } catch (NoSuchMethodException | SecurityException | ClassNotFoundException e) {
-                Log.warning(Player.class.getSimpleName() + "兼容性工具初始化失败 可能造成部分功能不可用!");
+            } catch (final Exception e) {
             }
         }
 
@@ -338,11 +340,7 @@ public class C {
                     Object packet = null;
                     // Send if set
                     if ((fadeInTime != -1) && (fadeOutTime != -1) && (stayTime != -1)) {
-                        packet = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent, Integer.TYPE, Integer.TYPE, Integer.TYPE).newInstance(actions[2],
-                                null,
-                                fadeInTime * 20,
-                                stayTime * 20,
-                                fadeOutTime * 20);
+                        packet = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent, Integer.TYPE, Integer.TYPE, Integer.TYPE).newInstance(actions[2], null, fadeInTime * 20, stayTime * 20, fadeOutTime * 20);
                         sendPacket.invoke(connection, packet);
                     }
                     // Send title
