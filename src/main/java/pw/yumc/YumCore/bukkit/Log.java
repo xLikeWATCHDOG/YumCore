@@ -54,6 +54,18 @@ public class Log {
      *
      * @param msg
      *            消息
+     * @param object
+     *            参数
+     */
+    public static void d(final String msg, final Object... object) {
+        debug(String.format(msg, object));
+    }
+
+    /**
+     * 调试消息
+     *
+     * @param msg
+     *            消息
      */
     public static void debug(final String msg) {
         if (debug) {
@@ -84,6 +96,18 @@ public class Log {
     public static void debug(final String msg, final Throwable e) {
         if (debug) {
             logger.info("[DEBUG] " + msg);
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 调试消息
+     *
+     * @param e
+     *            异常
+     */
+    public static void debug(final Throwable e) {
+        if (debug) {
             e.printStackTrace();
         }
     }
