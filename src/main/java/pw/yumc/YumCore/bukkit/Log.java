@@ -62,7 +62,7 @@ public class Log {
     }
 
     /**
-     * 调试消息
+     * 格式化调试消息
      *
      * @param msg
      *            消息
@@ -249,6 +249,18 @@ public class Log {
         for (final String str : msg) {
             toSender(sender, str);
         }
+    }
+
+    /**
+     * 格式化警告消息
+     *
+     * @param string
+     *            消息
+     * @param objects
+     *            参数
+     */
+    public static void w(final String string, final Object... objects) {
+        logger.warning(String.format(string, objects));
     }
 
     /**
