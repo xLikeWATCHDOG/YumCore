@@ -16,6 +16,7 @@ import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
+import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import pw.yumc.YumCore.bukkit.Log;
@@ -45,6 +46,7 @@ public class FileConfig extends AbstractConfig {
     private static final String CONFIG_CREATE_ERROR = "配置: %s 创建失败...";
     private static final String CONFIG_FORMAT_ERROR = "配置: %s 格式错误...";
     private static final String CONFIG_BACKUP_ERROR = "配置: %s 备份失败 异常: %s !";
+    private static final String CONFIG_UPDATE_VALUE = "配置: 更新字段 %s 的值为 %s ...";
     private static final String CONFIG_BACKUP_AND_RESET = "配置: %s 格式错误 已备份为 %s 并恢复默认配置!";
     private static final String CONFIG_NOT_FOUND_IN_JAR = "配置: 从插件内部未找到预置的 %s 文件!";
     private static final String CONFIG_READ_COMMENT_ERROR = "配置: 读取文件注释信息失败!";
@@ -559,17 +561,20 @@ public class FileConfig extends AbstractConfig {
      * @param oldcfg
      *            旧配置文件
      * @return 是否需要升级
-     * @throws IOException
      */
     protected boolean needUpdate(final FileConfig newcfg, final FileConfig oldcfg) {
         return needUpdate(newcfg.getString(VERSION), oldcfg.getString(VERSION));
     }
 
     /**
-     * @param newCfg
-     * @param oldCfg
+     * 更新配置文件
      *
-     * @return
+     * @param newcfg
+     *            新配置文件
+     * @param oldcfg
+     *            旧配置文件
+     *
+     * @return 更新以后的配置文件
      */
     protected FileConfig updateConfig(final FileConfig newCfg, final FileConfig oldCfg) {
         return updateConfig(newCfg, oldCfg, false);
@@ -601,7 +606,11 @@ public class FileConfig extends AbstractConfig {
         }
         // 复制旧的数据
         for (final String string : oldConfigKeys) {
-            newCfg.set(string, oldCfg.get(string));
+            final Object var = oldCfg.get(string);
+            if (var != null && !(var instanceof MemorySection)) {
+                Log.debug(String.format(CONFIG_UPDATE_VALUE, string, var));
+                newCfg.set(string, var);
+            }
         }
         Log.info(String.format(CONFIG_UPDATED, filename, newver));
         return newCfg;
