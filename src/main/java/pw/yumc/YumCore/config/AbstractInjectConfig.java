@@ -1,10 +1,10 @@
 package pw.yumc.YumCore.config;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.logging.Level;
 
 import org.bukkit.configuration.ConfigurationSection;
 
@@ -16,12 +16,12 @@ import pw.yumc.YumCore.bukkit.Log;
  * @author 喵♂呜
  */
 public abstract class AbstractInjectConfig {
-    private static final String DATA_FORMAT_ERROR = "配置节点 {0} 数据类型不匹配 应该为: {1} 但实际为: {2}!";
-    private static final String INJECT_ERROR = "自动注入配置错误!";
+    private static final String INJECT_TYPE_ERROR = "配置节点 %s 数据类型不匹配 应该为: %s 但实际为: %s!";
+    private static final String INJECT_ERROR = "自动注入配置失败 可能造成插件运行错误 %s: %s!";
     private static final String DATE_PARSE_ERROR = "配置节点 {0} 日期解析失败 格式应该为: {1} 但输入值为: {2}!";
-    private static final String PATH_NOT_FOUND = "配置节点 %s 丢失!";
-    private static final String DATA_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    private static final SimpleDateFormat df = new SimpleDateFormat(DATA_FORMAT);
+    private static final String PATH_NOT_FOUND = "配置节点 %s 丢失 可能造成插件运行错误!";
+    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
     private ConfigurationSection config;
 
     /**
@@ -48,6 +48,90 @@ public abstract class AbstractInjectConfig {
     }
 
     /**
+     * 转换字段值类型
+     * 
+     * @param type
+     *            字段类型
+     * @param path
+     *            配置路径
+     * @param value
+     *            字段值
+     * @return 转换后的值
+     * @throws ParseException
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InstantiationException
+     * @throws InvocationTargetException
+     * @throws NoSuchMethodException
+     * @throws SecurityException
+     */
+    private Object convertType(final Class<?> type, final String path, final Object value) throws ParseException, IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException {
+        switch (type.getName()) {
+        case "java.util.Date":
+            return df.parse((String) value);
+        case "java.util.List":
+            return config.getList(path);
+        default:
+            return hanldeDefault(type, path, value);
+        }
+    }
+
+    /**
+     * 默认类型处理流程
+     *
+     * @param path
+     *            路径
+     * @param field
+     *            字段
+     * @param value
+     *            值
+     * @return 解析后的Value
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     * @throws InstantiationException
+     * @throws InvocationTargetException
+     * @throws NoSuchMethodException
+     * @throws SecurityException
+     */
+    private Object hanldeDefault(final Class<?> field, final String path, final Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException {
+        if (InjectConfigurationSection.class.isAssignableFrom(field)) {
+            if (config.isConfigurationSection(path)) {
+                return field.getConstructor(ConfigurationSection.class).newInstance(config.getConfigurationSection(path));
+            }
+            Log.w(INJECT_TYPE_ERROR, path, ConfigurationSection.class.getName(), value.getClass().getName());
+        }
+        return value;
+    }
+
+    /**
+     * 处理值
+     *
+     * @param path
+     *            路径
+     * @param field
+     *            字段
+     * @param value
+     *            值
+     */
+    private void hanldeValue(final String path, final Field field, Object value) {
+        try {
+            final Class<?> type = field.getType();
+            if (!type.equals(value.getClass())) {
+                value = convertType(type, path, value);
+            }
+            field.set(this, value);
+        } catch (final IllegalArgumentException ex) {
+            Log.w(INJECT_TYPE_ERROR, path, field.getType().getName(), value.getClass().getName());
+            Log.debug(ex);
+        } catch (final ParseException e) {
+            Log.w(DATE_PARSE_ERROR, path, DATE_FORMAT, value);
+        } catch (final InstantiationException | InvocationTargetException | NoSuchMethodException | SecurityException | IllegalAccessException ex) {
+            Log.w(INJECT_ERROR, ex.getClass().getName(), ex.getMessage());
+            Log.debug(ex);
+        }
+    }
+
+    /**
      * 通用解析流程
      *
      * @param path
@@ -61,36 +145,15 @@ public abstract class AbstractInjectConfig {
     protected void setField(final String path, final Field field) {
         Object value = config.get(path);
         final Default def = field.getAnnotation(Default.class);
+        if (value == null && def != null) {
+            value = def.value();
+        }
         if (value == null) {
-            if (def != null) {
-                value = def.value();
-            } else {
-                if (field.getAnnotation(Nullable.class) == null) {
-                    Log.warning(String.format(PATH_NOT_FOUND, path));
-                }
-                return;
+            if (field.getAnnotation(Nullable.class) == null) {
+                Log.w(PATH_NOT_FOUND, path);
             }
+            return;
         }
-        try {
-            final String typeName = field.getType().getName();
-            switch (typeName) {
-            case "java.util.Date":
-                try {
-                    value = df.parse((String) value);
-                } catch (final ParseException e) {
-                    final Object[] obj = new Object[] { path, DATA_FORMAT, value };
-                    Log.log(Level.INFO, DATE_PARSE_ERROR, obj);
-                }
-            case "java.util.List":
-                value = config.getList(path);
-            default:
-            }
-            field.set(this, value);
-        } catch (final IllegalArgumentException ex) {
-            final Object[] obj = new Object[] { path, field.getType().getName(), value.getClass().getName() };
-            Log.log(Level.INFO, DATA_FORMAT_ERROR, obj);
-        } catch (final IllegalAccessException ex) {
-            Log.log(Level.SEVERE, INJECT_ERROR, ex);
-        }
+        hanldeValue(path, field, value);
     }
 }
