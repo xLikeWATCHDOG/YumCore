@@ -148,6 +148,16 @@ public class CommandManager implements TabExecutor {
     }
 
     /**
+     * 设置帮助解析器
+     * 
+     * @param helpParse
+     *            帮助解析器
+     */
+    public void setHelpParse(final CommandHelpParse helpParse) {
+        help.setHelpParse(helpParse);
+    }
+
+    /**
      * 构建命令列表缓存
      */
     private void buildCmdNameCache() {

@@ -11,7 +11,6 @@ import java.util.Map;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.plugin.Plugin;
 
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.commands.annotation.Help;
@@ -24,26 +23,26 @@ import pw.yumc.YumCore.commands.annotation.Help;
  */
 public class CommandHelp {
     /**
-     * 插件实例
-     */
-    Plugin plugin = P.instance;
-    /**
      * 消息配置
      */
-    String prefix = String.format("§6[§b%s§6] ", P.instance.getName());
-    String commandNotFound = prefix + "§c当前插件未注册任何子命令!";
-    String pageNotFound = prefix + "§c不存在的帮助页面 §b请输入 /%s help §e1-%s";
-    String helpTitle = String.format("§6========= %s §6插件帮助列表=========", prefix);
-    String helpBody = "§6/%1$s §a%2$s §e%3$s §6- §b%4$s";
-    String helpFooter = "§6查看更多的帮助页面 §b请输入 /%s help §e1-%s";
+    private final static String prefix = String.format("§6[§b%s§6] ", P.instance.getName());
+    private final static String commandNotFound = prefix + "§c当前插件未注册任何子命令!";
+    private final static String pageNotFound = prefix + "§c不存在的帮助页面 §b请输入 /%s help §e1-%s";
+    private final static String helpTitle = String.format("§6========= %s §6插件帮助列表=========", prefix);
+    private final static String helpBody = "§6/%1$s §a%2$s §e%3$s §6- §b%4$s";
+    private final static String helpFooter = "§6查看更多的帮助页面 §b请输入 /%s help §e1-%s";
     /**
      * 默认命令
      */
-    CommandInfo defCmd;
+    private final CommandInfo defCmd;
     /**
      * 已排序的命令列表
      */
-    List<CommandInfo> cmdlist;
+    private final List<CommandInfo> cmdlist;
+    /**
+     * 命令解析
+     */
+    private CommandHelpParse helpParse;
     /**
      * 帮助页面数量
      */
@@ -95,7 +94,21 @@ public class CommandHelp {
         final String aliases = Arrays.toString(ci.getCommand().aliases());
         final String cmd = ci.getName() + (aliases.length() == 2 ? "" : "§7" + aliases);
         final Help help = ci.getHelp();
-        return String.format(helpBody, label, cmd, help.possibleArguments(), help.value());
+        return String.format(helpBody, label, cmd, help.possibleArguments(), formatHelp(help.value()));
+    }
+
+    /**
+     * 解析帮助
+     *
+     * @param value
+     *            参数
+     * @return 解析后的帮助
+     */
+    public String formatHelp(final String value) {
+        if (helpParse != null) {
+            return helpParse.parse(value);
+        }
+        return value;
     }
 
     /**
@@ -120,7 +133,7 @@ public class CommandHelp {
             final List<String> helpList = new LinkedList<>();
             if (page > this.HELPPAGECOUNT || page < 1) {
                 // 帮助页面不存在
-                helpList.add(String.format(commandNotFound, HELPPAGECOUNT));
+                helpList.add(String.format(pageNotFound, label, HELPPAGECOUNT));
             } else {
                 // 帮助标题
                 helpList.add(helpTitle);
@@ -141,6 +154,16 @@ public class CommandHelp {
             cacheHelp.put(helpkey, helpList.toArray(new String[0]));
         }
         sender.sendMessage(cacheHelp.get(helpkey));
+    }
+
+    /**
+     * 设置解析器
+     * 
+     * @param helpParse
+     *            帮助解析器
+     */
+    public void setHelpParse(final CommandHelpParse helpParse) {
+        this.helpParse = helpParse;
     }
 
     /**
