@@ -34,35 +34,35 @@ public class CommandManager implements TabExecutor {
     /**
      * 插件实例类
      */
-    JavaPlugin plugin = P.instance;
+    private final JavaPlugin plugin = P.instance;
     /**
      * 默认命令
      */
-    CommandInfo defCmd = null;
+    private CommandInfo defCmd = null;
     /**
      * 命令列表
      */
-    Set<CommandInfo> cmds = new HashSet<>();
+    private final Set<CommandInfo> cmds = new HashSet<>();
     /**
      * Tab列表
      */
-    Set<TabInfo> tabs = new HashSet<>();
+    private final Set<TabInfo> tabs = new HashSet<>();
     /**
      * 命令缓存列表
      */
-    Map<String, CommandInfo> cmdCache = new HashMap<>();
+    private final Map<String, CommandInfo> cmdCache = new HashMap<>();
     /**
      * 命令名称缓存
      */
-    List<String> cmdNameCache = new ArrayList<>();
+    private final List<String> cmdNameCache = new ArrayList<>();
     /**
      * 命令帮助
      */
-    CommandHelp help;
+    private CommandHelp help;
     /**
      * 插件命令
      */
-    PluginCommand cmd;
+    private final PluginCommand cmd;
 
     /**
      * 命令管理器
@@ -149,7 +149,7 @@ public class CommandManager implements TabExecutor {
 
     /**
      * 设置帮助解析器
-     * 
+     *
      * @param helpParse
      *            帮助解析器
      */

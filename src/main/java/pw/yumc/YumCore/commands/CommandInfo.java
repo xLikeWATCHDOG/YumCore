@@ -125,9 +125,8 @@ public class CommandInfo {
             } else {
                 runnable.run();
             }
-            return true;
         }
-        return false;
+        return true;
     }
 
     /**
