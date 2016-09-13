@@ -282,6 +282,52 @@ public class C {
 
     public static class Title {
         /**
+         * 发送Title公告
+         *
+         * @param title
+         *            标题
+         * @param subtitle
+         *            子标题
+         */
+        public static void broadcast(final String title, final String subtitle) {
+            for (final org.bukkit.entity.Player player : Player.getOnlinePlayers()) {
+                send(player, title, subtitle);
+            }
+        }
+
+        /**
+         * 发送Title公告
+         *
+         * @param title
+         *            标题
+         * @param subtitle
+         *            子标题
+         */
+        public static void broadcast(final String title, final String subtitle, final int fadeInTime, final int stayTime, final int fadeOutTime) {
+            for (final org.bukkit.entity.Player player : Player.getOnlinePlayers()) {
+                send(player, title, subtitle, fadeInTime, stayTime, fadeOutTime);
+            }
+        }
+
+        /**
+         * 发送Title公告
+         *
+         * @param world
+         *            世界
+         * @param title
+         *            标题
+         * @param subtitle
+         *            子标题
+         */
+        public static void broadcast(final World world, final String title, final String subtitle) {
+            for (final org.bukkit.entity.Player player : Player.getOnlinePlayers()) {
+                if (player.getWorld().getName().equalsIgnoreCase(world.getName())) {
+                    send(player, title, subtitle);
+                }
+            }
+        }
+
+        /**
          * 重置玩家的Title
          *
          * @param recoverPlayer
