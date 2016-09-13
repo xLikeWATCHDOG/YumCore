@@ -45,8 +45,28 @@ public class Log {
      */
     public static void console(final String... msg) {
         for (final String str : msg) {
-            console.sendMessage(prefix + str);
+            console(str);
         }
+    }
+
+    /**
+     * Sends console a message
+     *
+     * @param message
+     *            Message to be displayed
+     */
+    public static void console(final String msg) {
+        console.sendMessage(prefix + msg);
+    }
+
+    /**
+     * Sends console a message
+     *
+     * @param message
+     *            Message to be displayed
+     */
+    public static void console(final String msg, final Object... object) {
+        console.sendMessage(prefix + String.format(msg, object));
     }
 
     /**
