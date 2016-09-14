@@ -14,7 +14,7 @@ public class MessagePart {
     /**
      * 消息文本
      */
-    public String text = "";
+    public String text;
     /**
      * 点击操作
      */
@@ -59,18 +59,18 @@ public class MessagePart {
      */
     public void writeJson(final StringBuffer str) {
         str.append("{");
-        str.append(String.format(TEXT_FORMAT, text));
+        str.append(String.format(TEXT_FORMAT, new JsonBuilder(text)));
         if (clickActionName != null) {
             str.append(",");
-            str.append(String.format(CLICK_FORMAT, clickActionName, clickActionData));
+            str.append(String.format(CLICK_FORMAT, clickActionName, new JsonBuilder(clickActionData)));
         }
         if (hoverActionName != null) {
             str.append(",");
-            str.append(String.format(HOVER_FORMAT, hoverActionName, hoverActionData));
+            str.append(String.format(HOVER_FORMAT, hoverActionName, new JsonBuilder(hoverActionData)));
         }
         if (insertionData != null) {
             str.append(",");
-            str.append(String.format(INSERT_FORMAT, insertionData));
+            str.append(String.format(INSERT_FORMAT, new JsonBuilder(insertionData)));
         }
         str.append("}");
     }

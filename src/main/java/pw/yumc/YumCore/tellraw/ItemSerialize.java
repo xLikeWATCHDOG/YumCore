@@ -14,7 +14,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import pw.yumc.YumCore.bukkit.Log;
 
 /**
- *
+ * 物品序列化类
+ * 
  * @since 2016年9月9日 下午3:47:17
  * @author 喵♂呜
  */
@@ -31,7 +32,7 @@ public abstract class ItemSerialize {
 
     public static String $(final ItemStack item) {
         final String result = itemSerialize.parse(item);
-        Log.debug(String.format("%s物品序列化结果: %s", itemSerialize.getName(), result));
+        Log.d("%s物品序列化结果: %s", itemSerialize.getName(), result);
         return result;
     }
 
@@ -76,7 +77,7 @@ public abstract class ItemSerialize {
         @Override
         public String parse(final ItemStack item) {
             try {
-                return new JsonBuilder((nmsSaveNBTMethod.invoke(asNMSCopyMethod.invoke(null, item), nmsNBTTagCompound.newInstance()).toString())).toString();
+                return nmsSaveNBTMethod.invoke(asNMSCopyMethod.invoke(null, item), nmsNBTTagCompound.newInstance()).toString();
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | InstantiationException e) {
                 itemSerialize = new Manual();
                 return itemSerialize.parse(item);
@@ -168,7 +169,7 @@ public abstract class ItemSerialize {
          * @return 物品字符串
          */
         private String serialize(final ItemStack item) {
-            final JsonBuilder json = new JsonBuilder("{");
+            final StringBuffer json = new StringBuffer("{");
             json.append(String.format("id:\"%s\",Damage:\"%s\"", item.getTypeId(), item.getDurability()));
             if (item.getAmount() > 1) {
                 json.append(String.format(",Count:%s", item.getAmount()));

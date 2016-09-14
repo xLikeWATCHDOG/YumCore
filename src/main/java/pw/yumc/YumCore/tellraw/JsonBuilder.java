@@ -1,5 +1,11 @@
 package pw.yumc.YumCore.tellraw;
 
+/**
+ * Json构建
+ * 
+ * @since 2016年9月14日 上午11:55:36
+ * @author 喵♂呜
+ */
 public class JsonBuilder {
     public static final String[] REPLACEMENT_CHARS;
     static {
@@ -57,6 +63,10 @@ public class JsonBuilder {
 
     public void deleteLastChar() {
         json.deleteCharAt(json.length() - 1);
+    }
+
+    public boolean isEmpty() {
+        return json.length() == 0;
     }
 
     public int length() {

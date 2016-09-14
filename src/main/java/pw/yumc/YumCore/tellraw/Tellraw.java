@@ -10,6 +10,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.bukkit.compatible.C;
 
@@ -276,6 +277,7 @@ public class Tellraw {
             messagePart.writeJson(msg);
         }
         msg.append("]");
+        Log.debug(msg.toString());
         return msg.toString();
     }
 
