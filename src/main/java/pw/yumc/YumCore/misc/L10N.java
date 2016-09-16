@@ -35,7 +35,7 @@ public class L10N {
      *            物品实体
      * @return 物品名称
      */
-    public static final String getItemFullName(final ItemStack i) {
+    public static final String getFullName(final ItemStack i) {
         return getItemName(getItemType(i)) + (i.hasItemMeta() && i.getItemMeta().hasDisplayName() ? "§r(" + i.getItemMeta().getDisplayName() + "§r)" : "");
     }
 
@@ -47,6 +47,17 @@ public class L10N {
      * @return 物品名称
      */
     public static final String getItemName(final ItemStack i) {
+        return getItemName(getItemType(i));
+    }
+
+    /**
+     * 获取物品汉化名称(优先显示名称)
+     *
+     * @param i
+     *            物品实体
+     * @return 物品名称
+     */
+    public static final String getName(final ItemStack i) {
         return i.hasItemMeta() && i.getItemMeta().hasDisplayName() ? i.getItemMeta().getDisplayName() : getItemName(getItemType(i));
     }
 
