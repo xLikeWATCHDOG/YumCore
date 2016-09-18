@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +31,8 @@ public class StickyNotes {
         final Paste paste = new Paste();
         paste.addLine("异常提交测试!");
         paste.addThrowable(new Throwable());
-        System.out.println(p.post(StickyNotes.Expire.HalfHour, paste));;
+        System.out.println(p.post(StickyNotes.Expire.HalfHour, paste));
+        ;
     }
 
     /**
@@ -189,7 +191,7 @@ public class StickyNotes {
             if (file == null) {
                 throw new IllegalArgumentException("文件不得为Null!");
             }
-            addLines(Files.readAllLines(file.toPath()));
+            addLines(Files.readAllLines(file.toPath(), Charset.forName("UTF-8")));
         }
 
         public void addLine(final String str) {
