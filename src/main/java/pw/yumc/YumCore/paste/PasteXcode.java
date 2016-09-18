@@ -1,4 +1,4 @@
-package pw.yumc.YumCore.misc;
+package pw.yumc.YumCore.paste;
 
 import java.io.File;
 import java.io.IOException;

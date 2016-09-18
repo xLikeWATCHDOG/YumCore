@@ -1,4 +1,4 @@
-package pw.yumc.YumCore.misc;
+package pw.yumc.YumCore.paste;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -7,36 +7,87 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Pastebin {
-    private final String POST_URL = "http://pastebin.com/api/api_post.php";
-    private final String API_KEY;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
-    public Pastebin() {
-        this.API_KEY = "0e7d92011945cbcc1e884ab6e3e75e69";
-    }
-
-    public Pastebin(final String API_KEY) {
-        this.API_KEY = API_KEY;
-    }
+/**
+ * 数据提交
+ *
+ * @since 2016年9月18日 下午6:57:34
+ * @author 喵♂呜
+ */
+public class StickyNotes {
+    private final static String DOMAIN = "http://paste.yumc.pw";
+    private final String POST_URL = DOMAIN + "/api/json/create";
+    private final String VIEW_URL = DOMAIN + "/%s/%s";
 
     public static void main(final String[] args) {
-        final Pastebin p = new Pastebin();
+        final StickyNotes p = new StickyNotes();
         final Paste paste = new Paste();
         paste.addLine("异常提交测试!");
         paste.addThrowable(new Throwable());
-        System.out.println(p.post(paste));;
+        System.out.println(p.post(StickyNotes.Expire.HalfHour, paste));;
     }
 
-    public String post(final Pastebin.Paste content) {
-        return post("", Pastebin.Format.JAVA, Pastebin.Private.UNLISTED, content);
+    /**
+     * 上传数据
+     *
+     * @param expire
+     *            过期时间
+     * @param content
+     *            内容
+     * @return 地址
+     */
+    public String post(final StickyNotes.Expire expire, final StickyNotes.Paste content) {
+        return post("YumCore-" + System.currentTimeMillis(), StickyNotes.Format.JAVA, expire, content);
     }
 
-    public String post(final String name, final Pastebin.Format format, final Pastebin.Private level, final Pastebin.Paste content) {
+    /**
+     * 上传数据
+     *
+     * @param content
+     *            内容
+     * @return 地址
+     */
+    public String post(final StickyNotes.Paste content) {
+        return post("YumCore-" + System.currentTimeMillis(), StickyNotes.Format.JAVA, StickyNotes.Expire.Never, content);
+    }
+
+    /**
+     * 上传数据
+     *
+     * @param title
+     *            标题
+     * @param format
+     *            格式
+     * @param expire
+     *            过期时间
+     * @param content
+     *            内容
+     * @return 地址
+     */
+    public String post(final String title, final StickyNotes.Format format, final StickyNotes.Expire expire, final StickyNotes.Paste content) {
+        return post(title, format.toString(), expire.getExpire(), content.toString());
+    }
+
+    /**
+     * 上传数据
+     *
+     * @param title
+     *            标题
+     * @param format
+     *            格式
+     * @param expire
+     *            过期时间
+     * @param content
+     *            内容
+     * @return 地址
+     */
+    public String post(final String title, final String format, final int expire, final String content) {
         String result = "Failed to post!";
         try {
             final HttpURLConnection connection = (HttpURLConnection) new URL(POST_URL).openConnection();
@@ -47,20 +98,7 @@ public class Pastebin {
             connection.setInstanceFollowRedirects(false);
             connection.setDoOutput(true);
             final OutputStream outputStream = connection.getOutputStream();
-            final byte[] outByte = ("api_option=paste&api_dev_key="
-                    + URLEncoder.encode(this.API_KEY, "utf-8")
-                    + "&api_paste_code="
-                    + URLEncoder.encode(content.toString(), "utf-8")
-                    + "&api_paste_private="
-                    + URLEncoder.encode(level.getLevel(), "utf-8")
-                    + "&api_paste_name="
-                    + URLEncoder.encode(name, "utf-8")
-                    + "&api_paste_expire_date="
-                    + URLEncoder.encode("N", "utf-8")
-                    + "&api_paste_format="
-                    + URLEncoder.encode(format.toString(), "utf-8")
-                    + "&api_user_key="
-                    + URLEncoder.encode("", "utf-8")).getBytes();
+            final byte[] outByte = String.format("title=%s&language=%s&expire=%s&data=%s", title, format, expire, content).getBytes();
             outputStream.write(outByte);
             outputStream.flush();
             outputStream.close();
@@ -69,21 +107,57 @@ public class Pastebin {
             String temp;
             while ((temp = br.readLine()) != null) {
                 request.append(temp);
-                request.append("\r\n");
             }
             br.close();
             result = request.toString().trim();
-            if (!result.contains("http://")) {
-                result = "Failed to post! (returned result: " + result;
+            JSONObject object = (JSONObject) JSONValue.parse(result);
+            object = (JSONObject) object.get("result");
+            if (object.containsKey("error")) {
+                return object.get("error").toString();
             }
+            return String.format(VIEW_URL, object.get("id"), object.get("hash"));
         } catch (final Exception e) {
             e.printStackTrace();
         }
         return result;
     }
 
+    /**
+     * 过期时间
+     *
+     * @since 2016年9月18日 下午7:00:09
+     * @author 喵♂呜
+     */
+    public enum Expire {
+        HalfHour(1800),
+        Hour(21600),
+        Day(86400),
+        Week(604800),
+        Mouth(2592000),
+        Year(31536000),
+        Never(31536000);
+
+        int expire;
+
+        private Expire(final int expire) {
+            this.expire = expire;
+        }
+
+        public int getExpire() {
+            return expire;
+        }
+    }
+
+    /**
+     * 代码格式
+     *
+     * @since 2016年9月18日 下午7:00:15
+     * @author 喵♂呜
+     */
     public enum Format {
         JAVA("java"),
+        JAVASCRIPT("javascript"),
+        HTML("html"),
         YAML("yaml");
 
         String format;
@@ -98,6 +172,12 @@ public class Pastebin {
         }
     }
 
+    /**
+     * 数据组装
+     *
+     * @since 2016年9月18日 下午7:00:21
+     * @author 喵♂呜
+     */
     public static class Paste {
         private final static String errN = "异常名称: %s";
         private final static String errM = "异常说明: %s";
@@ -140,22 +220,6 @@ public class Pastebin {
                 text.append(str + '\n');
             }
             return text.toString();
-        }
-    }
-
-    public enum Private {
-        PUBLIC(0),
-        UNLISTED(1),
-        PRIVATE(2);
-
-        int level;
-
-        private Private(final int level) {
-            this.level = level;
-        }
-
-        public String getLevel() {
-            return String.valueOf(level);
         }
     }
 }
