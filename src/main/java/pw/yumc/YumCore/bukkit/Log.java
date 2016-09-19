@@ -55,18 +55,20 @@ public class Log {
      * @param message
      *            Message to be displayed
      */
-    public static void console(final String msg) {
-        console.sendMessage(prefix + msg);
+    public static void console(final String message) {
+        console.sendMessage(prefix + message);
     }
 
     /**
      * Sends console a message
      *
      * @param message
-     *            Message to be displayed
+     *            消息
+     * @param object
+     *            格式化参数
      */
-    public static void console(final String msg, final Object... object) {
-        console.sendMessage(prefix + String.format(msg, object));
+    public static void console(final String message, final Object... object) {
+        console.sendMessage(prefix + String.format(message, object));
     }
 
     /**
@@ -112,6 +114,8 @@ public class Log {
      *
      * @param msg
      *            消息
+     * @param e
+     *            异常
      */
     public static void debug(final String msg, final Throwable e) {
         if (debug) {

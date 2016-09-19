@@ -11,6 +11,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import pw.yumc.YumCore.bukkit.Log;
 
 /**
+ * 抽象注入配置
  *
  * @since 2016年7月5日 上午10:11:22
  * @author 喵♂呜
@@ -26,6 +27,9 @@ public abstract class AbstractInjectConfig {
 
     /**
      * 注入配置数据
+     *
+     * @param config
+     *            配置区
      */
     public void inject(final ConfigurationSection config) {
         if (config == null) {
@@ -49,7 +53,7 @@ public abstract class AbstractInjectConfig {
 
     /**
      * 转换字段值类型
-     * 
+     *
      * @param type
      *            字段类型
      * @param path
@@ -138,9 +142,6 @@ public abstract class AbstractInjectConfig {
      *            配置路径
      * @param field
      *            字段
-     * @return 是否解析成功
-     * @throws IllegalArgumentException
-     * @throws IllegalAccessException
      */
     protected void setField(final String path, final Field field) {
         Object value = config.get(path);

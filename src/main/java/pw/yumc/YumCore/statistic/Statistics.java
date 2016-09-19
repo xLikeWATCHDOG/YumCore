@@ -106,9 +106,6 @@ public class Statistics {
 
     /**
      * 插件使用数据统计
-     *
-     * @throws IOException
-     *             IO异常
      */
     public Statistics() {
         try {

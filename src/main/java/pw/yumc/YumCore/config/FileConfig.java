@@ -159,6 +159,8 @@ public class FileConfig extends AbstractConfig {
      *            路径
      * @param obj
      *            字符串
+     * @param allowrepeat
+     *            是否允许重复
      * @return {@link FileConfig}
      */
     public FileConfig addToStringList(final String path, final String obj, final boolean allowrepeat) {
@@ -214,7 +216,7 @@ public class FileConfig extends AbstractConfig {
     /**
      * 获得Location
      *
-     * @param key
+     * @param path
      *            键
      * @param def
      *            默认地点
@@ -297,8 +299,10 @@ public class FileConfig extends AbstractConfig {
     /**
      * 比较版本号
      *
-     * @param 新版本
-     * @param 旧版本
+     * @param newver
+     *            新版本
+     * @param oldver
+     *            旧版本
      * @return 是否需要更新
      */
     public boolean needUpdate(final String newver, final String oldver) {
@@ -428,6 +432,12 @@ public class FileConfig extends AbstractConfig {
         }
     }
 
+    /**
+     * 备份配置文件
+     *
+     * @param oldcfg
+     *            配置文件
+     */
     protected void backupConfig(final FileConfig oldcfg) {
         final String filename = oldcfg.getConfigName();
         try {
@@ -510,6 +520,8 @@ public class FileConfig extends AbstractConfig {
      *
      * @param file
      *            配置文件
+     * @param check
+     *            是否检查文件
      * @return FileConfig
      */
     protected FileConfig init(final File file, final boolean check) {
@@ -573,7 +585,6 @@ public class FileConfig extends AbstractConfig {
      *            新配置文件
      * @param oldcfg
      *            旧配置文件
-     *
      * @return 更新以后的配置文件
      */
     protected FileConfig updateConfig(final FileConfig newCfg, final FileConfig oldCfg) {

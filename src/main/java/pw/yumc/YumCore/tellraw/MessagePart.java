@@ -45,7 +45,7 @@ public class MessagePart {
     }
 
     /**
-     * 是否有文本
+     * @return 是否有文本
      */
     public boolean hasText() {
         return text != null && !text.isEmpty();

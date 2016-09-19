@@ -16,6 +16,9 @@ public abstract class InjectConfigurationSection extends AbstractInjectConfig {
 
     /**
      * 重载配置文件
+     *
+     * @param config
+     *            配置区
      */
     public void reload(final ConfigurationSection config) {
         inject(config);

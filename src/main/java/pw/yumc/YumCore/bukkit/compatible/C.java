@@ -302,6 +302,12 @@ public class C {
          *            标题
          * @param subtitle
          *            子标题
+         * @param fadeInTime
+         *            淡入时间
+         * @param stayTime
+         *            持续时间
+         * @param fadeOutTime
+         *            淡出时间
          */
         public static void broadcast(final String title, final String subtitle, final int fadeInTime, final int stayTime, final int fadeOutTime) {
             for (final org.bukkit.entity.Player player : Player.getOnlinePlayers()) {

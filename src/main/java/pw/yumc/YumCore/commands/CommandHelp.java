@@ -114,8 +114,14 @@ public class CommandHelp {
     /**
      * 发送帮助
      *
-     * @param ca
-     *            命令参数
+     * @param sender
+     *            命令发送者
+     * @param command
+     *            命令
+     * @param label
+     *            标签
+     * @param args
+     *            参数
      */
     public void send(final CommandSender sender, final Command command, final String label, final String[] args) {
         if (this.HELPPAGECOUNT == 0) {
@@ -158,7 +164,7 @@ public class CommandHelp {
 
     /**
      * 设置解析器
-     * 
+     *
      * @param helpParse
      *            帮助解析器
      */

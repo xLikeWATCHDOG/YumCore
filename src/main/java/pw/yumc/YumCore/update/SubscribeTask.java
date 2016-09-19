@@ -92,6 +92,9 @@ public class SubscribeTask implements Runnable {
 
     /**
      * 自动更新
+     *
+     * @param isMaven
+     *            是否为Maven
      */
     public SubscribeTask(final boolean isMaven) {
         this(false, isMaven);
@@ -99,6 +102,11 @@ public class SubscribeTask implements Runnable {
 
     /**
      * 自动更新
+     *
+     * @param isSecret
+     *            是否为私有
+     * @param isMaven
+     *            是否为Maven
      */
     public SubscribeTask(final boolean isSecret, final boolean isMaven) {
         this("master", isSecret, isMaven);
@@ -109,6 +117,10 @@ public class SubscribeTask implements Runnable {
      *
      * @param branch
      *            更新分支
+     * @param isSecret
+     *            是否为私有
+     * @param isMaven
+     *            是否为Maven
      */
     public SubscribeTask(final String branch, final boolean isSecret, final boolean isMaven) {
         this.branch = branch;
@@ -179,8 +191,10 @@ public class SubscribeTask implements Runnable {
     /**
      * 比较版本号
      *
-     * @param 新版本
-     * @param 旧版本
+     * @param v1
+     *            新版本
+     * @param v2
+     *            旧版本
      * @return 是否需要更新
      */
     public boolean needUpdate(final String v1, final String v2) {

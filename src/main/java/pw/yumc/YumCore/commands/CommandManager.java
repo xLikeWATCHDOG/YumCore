@@ -130,7 +130,7 @@ public class CommandManager implements TabExecutor {
     /**
      * 通过注解读取命令并注册
      *
-     * @param clazz
+     * @param clazzs
      *            子命令处理类
      */
     public void register(final CommandExecutor... clazzs) {

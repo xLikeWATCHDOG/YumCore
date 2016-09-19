@@ -227,8 +227,8 @@ public class Tellraw {
     /**
      * 悬浮消息
      *
-     * @param text
-     *            文本
+     * @param texts
+     *            文本列
      * @return {@link Tellraw}
      */
     public Tellraw tip(final List<String> texts) {
@@ -256,8 +256,8 @@ public class Tellraw {
     /**
      * 悬浮消息
      *
-     * @param text
-     *            文本
+     * @param texts
+     *            文本列
      * @return {@link Tellraw}
      */
     public Tellraw tip(final String... texts) {

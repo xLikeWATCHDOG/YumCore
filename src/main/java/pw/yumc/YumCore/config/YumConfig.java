@@ -15,8 +15,8 @@ public class YumConfig {
     /**
      * 获得本地配置文件
      *
-     * @param url
-     *            配置文件地址
+     * @param filename
+     *            本地文件名称
      * @return {@link FileConfig}
      */
     public static FileConfig getLocal(final String filename) {
@@ -31,13 +31,14 @@ public class YumConfig {
      *            配置文件地址
      * @return {@link FileConfig}
      */
-    public static FileConfig getRemote(final String filename) {
+    public static FileConfig getRemote(final String url) {
         FileConfig config = null;
         try {
-            config = new RemoteConfig(REMOTEFILECENTER + filename);
+            config = new RemoteConfig(REMOTEFILECENTER + url);
         } catch (final IOException e) {
+            Log.debug(e);
         }
-        Log.info(String.format(config == null ? createError : fromYumc, filename));
+        Log.info(String.format(config == null ? createError : fromYumc, url));
         return config;
     }
 }
