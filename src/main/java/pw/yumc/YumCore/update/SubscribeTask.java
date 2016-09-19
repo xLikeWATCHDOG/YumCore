@@ -26,7 +26,7 @@ public class SubscribeTask implements Runnable {
     /**
      * 插件实例
      */
-    public static JavaPlugin instance;
+    private static JavaPlugin instance;
 
     static {
         final Object pluginClassLoader = SubscribeTask.class.getClassLoader();
@@ -140,7 +140,7 @@ public class SubscribeTask implements Runnable {
      */
     public static String d(final String s) {
         final String key = "499521";
-        final StringBuffer str = new StringBuffer();
+        final StringBuilder str = new StringBuilder();
         int ch;
         for (int i = 0, j = 0; i < s.length(); i++, j++) {
             if (j > key.length() - 1) {

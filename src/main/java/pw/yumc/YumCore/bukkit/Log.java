@@ -16,9 +16,12 @@ import org.bukkit.command.CommandSender;
  */
 public class Log {
     private static boolean debug = new File(String.format("plugins%1$sYumCore%1$sdebug", File.separatorChar)).exists();
-    private static Logger logger = P.instance.getLogger();
-    private static String prefix = String.format("§6[§b%s§6]§r ", P.instance.getName());
-    private static CommandSender console = Bukkit.getConsoleSender();
+    private static final Logger logger = P.instance.getLogger();
+    private static final String prefix = String.format("§6[§b%s§6]§r ", P.instance.getName());
+    private static final CommandSender console = Bukkit.getConsoleSender();
+
+    private Log() {
+    }
 
     /**
      * Add a log Handler to receive logging messages.
