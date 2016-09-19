@@ -28,4 +28,22 @@ public class StrKit {
         }
         return ret;
     }
+
+    /**
+     * @param str
+     *            字串
+     * @return 是否为空字串
+     */
+    public static boolean isBlank(final String str) {
+        return str == null || str.isEmpty();
+    }
+
+    /**
+     * @param str
+     *            字串
+     * @return 是否不为空字串
+     */
+    public static boolean notBlank(final String str) {
+        return str != null && !str.isEmpty();
+    }
 }

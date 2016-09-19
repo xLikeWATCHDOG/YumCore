@@ -2,6 +2,7 @@ package pw.yumc.YumCore.paste;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,7 @@ public class PasteContent {
         if (file == null) {
             throw new IllegalArgumentException("文件不得为Null!");
         }
-        addLines(Files.readAllLines(file.toPath()));
+        addLines(Files.readAllLines(file.toPath(), Charset.forName("UTF-8")));
     }
 
     /**
@@ -56,7 +57,7 @@ public class PasteContent {
 
     /**
      * 添加异常
-     * 
+     *
      * @param e
      *            异常
      */
