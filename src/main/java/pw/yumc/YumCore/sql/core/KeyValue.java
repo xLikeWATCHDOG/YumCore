@@ -3,6 +3,7 @@ package pw.yumc.YumCore.sql.core;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 /**
@@ -13,7 +14,7 @@ import java.util.Map.Entry;
  */
 public class KeyValue {
 
-    private final HashMap<Object, Object> keyvalues = new HashMap<Object, Object>();
+    private final Map<Object, Object> keyvalues = new HashMap<>();
 
     /**
      * 数据库键值管理类
@@ -74,7 +75,7 @@ public class KeyValue {
      * @return 所有的值
      */
     public Object[] getValues() {
-        final List<Object> keys = new ArrayList<Object>();
+        final List<Object> keys = new ArrayList<>();
         for (final Entry<Object, Object> next : this.keyvalues.entrySet()) {
             keys.add(next.getValue());
         }

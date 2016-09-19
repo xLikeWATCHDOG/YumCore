@@ -2,11 +2,14 @@ package pw.yumc.YumCore.kit;
 
 /**
  * 字符串工具类
- * 
+ *
  * @author 喵♂呜
  * @since 2016年9月14日 上午1:02:23
  */
 public class StrKit {
+    private StrKit() {
+    }
+
     /**
      * 转移数组后获取字符串
      *

@@ -295,7 +295,7 @@ public class Statistics {
             final long startTime = System.nanoTime();
             final long timeSpent = (startTime - lastPoll) / 1000;
             if (history.size() > 10) {
-                history.remove();
+                history.removeFirst();
             }
             final double ttps = 2.0E7D / (timeSpent == 0 ? 1 : timeSpent);
             if (ttps <= 21.0D) {

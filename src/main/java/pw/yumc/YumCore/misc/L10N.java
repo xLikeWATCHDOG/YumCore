@@ -28,6 +28,9 @@ public class L10N {
         load();
     }
 
+    private L10N() {
+    }
+
     /**
      * 获取物品完整汉化名称(包括原版)
      *
