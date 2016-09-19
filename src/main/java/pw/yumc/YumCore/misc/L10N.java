@@ -117,8 +117,8 @@ public class L10N {
             @Override
             public void run() {
                 try {
-                    final Map<String, String> local = (Map<String, String>) YumConfig.getLocal(CONFIG_NAME).getContentMap();
-                    final Map<String, String> remote = (Map<String, String>) YumConfig.getRemote(CONFIG_NAME).getContentMap();
+                    final Map<String, String> local = YumConfig.getLocal(CONFIG_NAME).getContentMap();
+                    final Map<String, String> remote = YumConfig.getRemote(CONFIG_NAME).getContentMap();
                     if (local != null) {
                         Log.info("本地汉化文件词条数量: " + local.size());
                         content.putAll(local);

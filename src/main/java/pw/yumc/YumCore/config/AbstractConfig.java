@@ -54,7 +54,7 @@ public abstract class AbstractConfig extends YamlConfiguration {
     /**
      * 配置文件内容MAP
      */
-    protected Map<?, ?> contentsMap;
+    protected Map contentsMap;
 
     /**
      * 配置内容字符串
@@ -64,7 +64,7 @@ public abstract class AbstractConfig extends YamlConfiguration {
     /**
      * @return 获得配置内容
      */
-    public Map<?, ?> getContentMap() {
+    public Map getContentMap() {
         return contentsMap;
     }
 
@@ -95,7 +95,7 @@ public abstract class AbstractConfig extends YamlConfiguration {
     public void loadFromString(final String contents) throws InvalidConfigurationException {
         Validate.notNull(contents, CONTENT_NOT_BE_NULL);
         try {
-            contentsMap = (Map<?, ?>) yamlz.load(contents);
+            contentsMap = (Map) yamlz.load(contents);
         } catch (final YAMLException e) {
             throw new InvalidConfigurationException(e);
         } catch (final ClassCastException e) {

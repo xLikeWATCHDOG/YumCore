@@ -12,6 +12,9 @@ public class YumConfig {
     private static final String fromYumc = "配置 %s 来自 YUMC 数据中心...";
     private static final String createError = "从 YUMC 数据中心下载配置 %s 失败...";
 
+    private YumConfig() {
+    }
+
     /**
      * 获得本地配置文件
      *

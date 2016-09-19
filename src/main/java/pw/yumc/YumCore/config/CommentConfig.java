@@ -56,18 +56,16 @@ public class CommentConfig extends AbstractConfig {
                 }
             } else {
                 matcher = countSpacePattern.matcher(part);
-                if (matcher.find()) {
-                    if (!lastComments.isEmpty()) {
-                        for (final String comment : lastComments) {
-                            builder.append(matcher.group(1));
-                            builder.append(this.checkNull(matcher.group(2)));
-                            builder.append(commentPrefixSymbol);
-                            builder.append(comment);
-                            builder.append(commentSuffixSymbol);
-                            builder.append(newLine);
-                        }
-                        lastComments.clear();
+                if (matcher.find() && !lastComments.isEmpty()) {
+                    for (final String comment : lastComments) {
+                        builder.append(matcher.group(1));
+                        builder.append(this.checkNull(matcher.group(2)));
+                        builder.append(commentPrefixSymbol);
+                        builder.append(comment);
+                        builder.append(commentSuffixSymbol);
+                        builder.append(newLine);
                     }
+                    lastComments.clear();
                 }
                 builder.append(part);
                 builder.append(newLine);
@@ -91,10 +89,8 @@ public class CommentConfig extends AbstractConfig {
         final String[] parts = contents.split(newLine);
         for (String part : parts) {
             final Matcher matcher = toPattern.matcher(part);
-            if (matcher.find()) {
-                if (matcher.groupCount() == 5) {
-                    part = this.checkNull(matcher.group(1)) + matcher.group(4);
-                }
+            if (matcher.find() && matcher.groupCount() == 5) {
+                part = this.checkNull(matcher.group(1)) + matcher.group(4);
             }
             savcontent.append(part.replaceAll("．", ".").replaceAll("＇", "'").replaceAll("：", ":"));
             savcontent.append(newLine);

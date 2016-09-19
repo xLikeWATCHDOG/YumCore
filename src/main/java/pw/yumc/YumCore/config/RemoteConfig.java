@@ -52,7 +52,8 @@ public class RemoteConfig extends FileConfig {
         String result = def;
         try {
             result = getConfig(url).getString(tag);
-        } catch (final Exception e) {
+        } catch (final NullPointerException e) {
+            // Ignore
         }
         return result;
     }

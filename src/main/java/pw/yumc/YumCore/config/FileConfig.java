@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -185,7 +186,7 @@ public class FileConfig extends AbstractConfig {
     public List<String> getColorList(final List<String> cfgmsg) {
         final List<String> message = new ArrayList<>();
         if (cfgmsg == null) {
-            return null;
+            return Collections.emptyList();
         }
         for (final String msg : cfgmsg) {
             message.add(ChatColor.translateAlternateColorCodes('&', msg));
@@ -265,7 +266,7 @@ public class FileConfig extends AbstractConfig {
     public List<String> getMessageList(final String path) {
         final List<String> cfgmsg = this.getStringList(path);
         if (cfgmsg == null) {
-            return null;
+            return Collections.emptyList();
         }
         for (int i = 0; i < cfgmsg.size(); i++) {
             cfgmsg.set(i, ChatColor.translateAlternateColorCodes(ALT_COLOR_CHAR, cfgmsg.get(i)));
@@ -498,7 +499,9 @@ public class FileConfig extends AbstractConfig {
      * @return yyyy-MM-dd HH:mm:ss
      */
     protected String getStringDate(String format) {
-        format = format == null ? "yyyy-MM-dd HH:mm:ss" : format;
+        if (format == null) {
+            format = "yyyy-MM-dd HH:mm:ss";
+        }
         final Date currentTime = new Date();
         return new SimpleDateFormat(format).format(currentTime);
     }
