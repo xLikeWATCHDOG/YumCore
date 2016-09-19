@@ -5,7 +5,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class PasteXcode {
-    private final String POST_URL = "http://paste.xcode.ro/";
+    private final static String POST_URL = "http://paste.xcode.ro/";
 
     public static void main(final String[] args) {
         final PasteXcode p = new PasteXcode();

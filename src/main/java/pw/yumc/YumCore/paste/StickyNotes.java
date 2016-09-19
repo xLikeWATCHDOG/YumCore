@@ -17,15 +17,15 @@ import org.json.simple.JSONValue;
  */
 public class StickyNotes {
     private final static String DOMAIN = "http://paste.yumc.pw";
-    private final String POST_URL = DOMAIN + "/api/json/create";
-    private final String VIEW_URL = DOMAIN + "/%s/%s";
+    private final static String POST_URL = DOMAIN + "/api/json/create";
+    private final static String VIEW_URL = DOMAIN + "/%s/%s";
 
     public static void main(final String[] args) {
         final StickyNotes p = new StickyNotes();
         final PasteContent paste = new PasteContent();
         paste.addLine("异常提交测试!");
         paste.addThrowable(new Throwable());
-        System.out.println(p.post(StickyNotes.Expire.HalfHour, paste));;
+        System.out.println(p.post(StickyNotes.Expire.HalfHour, paste));
     }
 
     /**
@@ -98,7 +98,7 @@ public class StickyNotes {
             outputStream.flush();
             outputStream.close();
             final BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            final StringBuffer request = new StringBuffer();
+            final StringBuilder request = new StringBuilder();
             String temp;
             while ((temp = br.readLine()) != null) {
                 request.append(temp);

@@ -8,7 +8,7 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 public class Pastebin {
-    private final String POST_URL = "http://pastebin.com/api/api_post.php";
+    private final static String POST_URL = "http://pastebin.com/api/api_post.php";
     private final String API_KEY;
 
     public Pastebin() {
