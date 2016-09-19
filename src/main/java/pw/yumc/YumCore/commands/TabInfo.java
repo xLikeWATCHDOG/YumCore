@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender;
 
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.commands.annotation.Tab;
+import pw.yumc.YumCore.commands.exception.CommandException;
 
 /**
  * Tab补全
@@ -72,7 +73,7 @@ public class TabInfo {
         try {
             return (List<String>) method.invoke(origin, cmdArgs);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            throw new RuntimeException("调用Tab自动补全发生错误 请反馈给开发者 " + Arrays.toString(P.instance.getDescription().getAuthors().toArray()) + " !", e);
+            throw new CommandException("调用Tab自动补全发生错误 请反馈给开发者 " + Arrays.toString(P.instance.getDescription().getAuthors().toArray()) + " !", e);
         }
     }
 

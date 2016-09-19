@@ -234,7 +234,7 @@ public class CommandInfo {
     }
 
     private String eS(final List<Executor> executors) {
-        final StringBuffer str = new StringBuffer();
+        final StringBuilder str = new StringBuilder();
         for (final Executor executor : executors) {
             str.append(executor.getName());
             str.append(", ");

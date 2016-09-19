@@ -29,12 +29,12 @@ import pw.yumc.YumCore.bukkit.compatible.C;
  * @author 喵♂呜
  */
 public class CommandManager implements TabExecutor {
-    private final String argumentTypeError = "注解命令方法 %s 位于 %s 的参数错误 应只有 CommandArgument 参数!";
-    private final String returnTypeError = "注解命令补全 %s 位于 %s 的返回值错误 应实现 List 接口!";
+    private final static String argumentTypeError = "注解命令方法 %s 位于 %s 的参数错误 应只有 CommandArgument 参数!";
+    private final static String returnTypeError = "注解命令补全 %s 位于 %s 的返回值错误 应实现 List 接口!";
     /**
      * 插件实例类
      */
-    private final JavaPlugin plugin = P.instance;
+    private final static JavaPlugin plugin = P.instance;
     /**
      * 默认命令
      */
@@ -207,7 +207,7 @@ public class CommandManager implements TabExecutor {
     private List<String> getPlayerTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
         final String lastWord = args[args.length - 1];
         final Player senderPlayer = sender instanceof Player ? (Player) sender : null;
-        final ArrayList<String> matchedPlayers = new ArrayList<>();
+        final List<String> matchedPlayers = new ArrayList<>();
         for (final Player player : C.Player.getOnlinePlayers()) {
             final String name = player.getName();
             if ((senderPlayer == null || senderPlayer.canSee(player)) && StringUtil.startsWithIgnoreCase(name, lastWord)) {

@@ -16,4 +16,8 @@ public class CommandException extends RuntimeException {
         super(string);
     }
 
+    public CommandException(final String string, final Exception e) {
+        super(string, e);
+    }
+
 }

@@ -32,6 +32,10 @@ public class CommandHelp {
     private final static String helpBody = "§6/%1$s §a%2$s §e%3$s §6- §b%4$s";
     private final static String helpFooter = "§6查看更多的帮助页面 §b请输入 /%s help §e1-%s";
     /**
+     * 帮助页面每页行数
+     */
+    private final static int LINES_PER_PAGE = 7;
+    /**
      * 默认命令
      */
     private final CommandInfo defCmd;
@@ -47,10 +51,6 @@ public class CommandHelp {
      * 帮助页面数量
      */
     private final int HELPPAGECOUNT;
-    /**
-     * 帮助页面每页行数
-     */
-    private final int LINES_PER_PAGE = 7;
     /**
      * 帮助列表缓存
      */
@@ -133,6 +133,7 @@ public class CommandHelp {
             page = Integer.parseInt(args[1]);
             page = page == 0 ? 1 : page;
         } catch (final Exception e) {
+            // Ignore
         }
         final String helpkey = label + page;
         if (!cacheHelp.containsKey(helpkey)) {
