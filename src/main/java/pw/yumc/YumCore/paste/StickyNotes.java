@@ -1,16 +1,10 @@
 package pw.yumc.YumCore.paste;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -28,11 +22,21 @@ public class StickyNotes {
 
     public static void main(final String[] args) {
         final StickyNotes p = new StickyNotes();
-        final Paste paste = new Paste();
+        final PasteContent paste = new PasteContent();
         paste.addLine("异常提交测试!");
         paste.addThrowable(new Throwable());
-        System.out.println(p.post(StickyNotes.Expire.HalfHour, paste));
-        ;
+        System.out.println(p.post(StickyNotes.Expire.HalfHour, paste));;
+    }
+
+    /**
+     * 上传数据
+     *
+     * @param content
+     *            内容
+     * @return 地址
+     */
+    public String post(final PasteContent content) {
+        return post("YumCore-" + System.currentTimeMillis(), PasteFormat.JAVA, StickyNotes.Expire.Never, content);
     }
 
     /**
@@ -44,19 +48,8 @@ public class StickyNotes {
      *            内容
      * @return 地址
      */
-    public String post(final StickyNotes.Expire expire, final StickyNotes.Paste content) {
-        return post("YumCore-" + System.currentTimeMillis(), StickyNotes.Format.JAVA, expire, content);
-    }
-
-    /**
-     * 上传数据
-     *
-     * @param content
-     *            内容
-     * @return 地址
-     */
-    public String post(final StickyNotes.Paste content) {
-        return post("YumCore-" + System.currentTimeMillis(), StickyNotes.Format.JAVA, StickyNotes.Expire.Never, content);
+    public String post(final StickyNotes.Expire expire, final PasteContent content) {
+        return post("YumCore-" + System.currentTimeMillis(), PasteFormat.JAVA, expire, content);
     }
 
     /**
@@ -72,7 +65,7 @@ public class StickyNotes {
      *            内容
      * @return 地址
      */
-    public String post(final String title, final StickyNotes.Format format, final StickyNotes.Expire expire, final StickyNotes.Paste content) {
+    public String post(final String title, final PasteFormat format, final StickyNotes.Expire expire, final PasteContent content) {
         return post(title, format.toString(), expire.getExpire(), content.toString());
     }
 
@@ -147,81 +140,6 @@ public class StickyNotes {
 
         public int getExpire() {
             return expire;
-        }
-    }
-
-    /**
-     * 代码格式
-     *
-     * @since 2016年9月18日 下午7:00:15
-     * @author 喵♂呜
-     */
-    public enum Format {
-        JAVA("java"),
-        JAVASCRIPT("javascript"),
-        HTML("html"),
-        YAML("yaml");
-
-        String format;
-
-        private Format(final String format) {
-            this.format = format;
-        }
-
-        @Override
-        public String toString() {
-            return format;
-        }
-    }
-
-    /**
-     * 数据组装
-     *
-     * @since 2016年9月18日 下午7:00:21
-     * @author 喵♂呜
-     */
-    public static class Paste {
-        private final static String errN = "异常名称: %s";
-        private final static String errM = "异常说明: %s";
-        private final static String errInfo = "简易错误信息如下:";
-        private final static String errStackTrace = "    位于 %s.%s(%s:%s)";
-        private final List<String> TEXT = new ArrayList<>();
-
-        public void addFile(final File file) throws IOException {
-            if (file == null) {
-                throw new IllegalArgumentException("文件不得为Null!");
-            }
-            addLines(Files.readAllLines(file.toPath(), Charset.forName("UTF-8")));
-        }
-
-        public void addLine(final String str) {
-            this.TEXT.add(str);
-        }
-
-        public void addLines(final List<String> str) {
-            this.TEXT.addAll(str);
-        }
-
-        public void addThrowable(final Throwable e) {
-            Throwable temp = e;
-            while (temp.getCause() != null) {
-                temp = temp.getCause();
-            }
-            TEXT.add(String.format(errN, e.getClass().getName()));
-            TEXT.add(String.format(errM, e.getMessage()));
-            TEXT.add(errInfo);
-            for (final StackTraceElement ste : e.getStackTrace()) {
-                TEXT.add(String.format(errStackTrace, ste.getClassName(), ste.getMethodName(), ste.getFileName(), ste.getLineNumber() < 0 ? "未知" : ste.getLineNumber()));
-            }
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder text = new StringBuilder();
-            for (final String str : TEXT) {
-                text.append(str + '\n');
-            }
-            return text.toString();
         }
     }
 }

@@ -1,8 +1,5 @@
 package pw.yumc.YumCore.config;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -37,22 +34,6 @@ public class CommentConfig extends AbstractConfig {
             array[i] = string.substring(beginIndex, endIndex);
         }
         return array;
-    }
-
-    @Override
-    public void load(final Reader reader) throws IOException, InvalidConfigurationException {
-        final BufferedReader input = reader instanceof BufferedReader ? (BufferedReader) reader : new BufferedReader(reader);
-        final StringBuilder builder = new StringBuilder();
-        try {
-            String line;
-            while ((line = input.readLine()) != null) {
-                builder.append(line);
-                builder.append(newLine);
-            }
-        } finally {
-            input.close();
-        }
-        loadFromString(builder.toString());
     }
 
     @Override
