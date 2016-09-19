@@ -15,7 +15,7 @@ import pw.yumc.YumCore.bukkit.Log;
 
 /**
  * 物品序列化类
- * 
+ *
  * @since 2016年9月9日 下午3:47:17
  * @author 喵♂呜
  */
@@ -52,14 +52,14 @@ public abstract class ItemSerialize {
             final Class<?> nmsItemStack = asNMSCopyMethod.getReturnType();
             for (final Method method : nmsItemStack.getMethods()) {
                 final Class<?> rt = method.getReturnType();
-                if (method.getParameterTypes().length == 0 && rt.getSimpleName().equals("NBTTagCompound")) {
+                if (method.getParameterTypes().length == 0 && "NBTTagCompound".equals(rt.getSimpleName())) {
                     nmsNBTTagCompound = rt;
                 }
             }
             for (final Method method : nmsItemStack.getMethods()) {
                 final Class<?>[] paras = method.getParameterTypes();
                 final Class<?> rt = method.getReturnType();
-                if (paras.length == 1 && paras[0].getSimpleName().equals("NBTTagCompound") && rt.getSimpleName().equals("NBTTagCompound")) {
+                if (paras.length == 1 && "NBTTagCompound".equals(paras[0].getSimpleName()) && "NBTTagCompound".equals(rt.getSimpleName())) {
                     nmsSaveNBTMethod = method;
                 }
             }
@@ -70,7 +70,7 @@ public abstract class ItemSerialize {
             return "Automatic";
         }
 
-        public Class<?> getOBCClass(final String cname) throws ClassNotFoundException {
+        public Class getOBCClass(final String cname) throws ClassNotFoundException {
             return Class.forName("org.bukkit.craftbukkit." + ver + "." + cname);
         }
 
@@ -105,7 +105,7 @@ public abstract class ItemSerialize {
          * @return 获取显示序列化
          */
         private String getDisplay(final ItemMeta im) {
-            final StringBuffer display = new StringBuffer();
+            final StringBuilder display = new StringBuilder();
             display.append("{");
             if (im.hasDisplayName()) {
                 display.append(String.format("Name:\"%s\",", im.getDisplayName()));
@@ -133,7 +133,7 @@ public abstract class ItemSerialize {
          * @return 获得附魔序列化
          */
         private String getEnch(final Set<Entry<Enchantment, Integer>> set) {
-            final StringBuffer enchs = new StringBuffer();
+            final StringBuilder enchs = new StringBuilder();
             for (final Map.Entry<Enchantment, Integer> ench : set) {
                 enchs.append(String.format("{id:%s,lvl:%s},", ench.getKey().getId(), ench.getValue()));
             }
@@ -149,7 +149,7 @@ public abstract class ItemSerialize {
          * @return 获得属性序列化
          */
         private String getTag(final ItemMeta im) {
-            final StringBuffer meta = new StringBuffer("{");
+            final StringBuilder meta = new StringBuilder("{");
             if (im.hasEnchants()) {
                 meta.append(String.format("ench:[%s],", getEnch(im.getEnchants().entrySet())));
             }
@@ -169,7 +169,7 @@ public abstract class ItemSerialize {
          * @return 物品字符串
          */
         private String serialize(final ItemStack item) {
-            final StringBuffer json = new StringBuffer("{");
+            final StringBuilder json = new StringBuilder("{");
             json.append(String.format("id:\"%s\",Damage:\"%s\"", item.getTypeId(), item.getDurability()));
             if (item.getAmount() > 1) {
                 json.append(String.format(",Count:%s", item.getAmount()));

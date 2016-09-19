@@ -2,7 +2,7 @@ package pw.yumc.YumCore.tellraw;
 
 /**
  * Json构建
- * 
+ *
  * @since 2016年9月14日 上午11:55:36
  * @author 喵♂呜
  */
@@ -21,10 +21,10 @@ public class JsonBuilder {
         REPLACEMENT_CHARS['\r'] = "\\r";
         REPLACEMENT_CHARS['\f'] = "\\f";
     }
-    StringBuffer json;
+    StringBuilder json;
 
     public JsonBuilder() {
-        json = new StringBuffer();
+        json = new StringBuilder();
     }
 
     public JsonBuilder(final String string) {

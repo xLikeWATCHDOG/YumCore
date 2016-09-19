@@ -57,7 +57,7 @@ public class MessagePart {
      * @param str
      *            流对象
      */
-    public void writeJson(final StringBuffer str) {
+    public void writeJson(final StringBuilder str) {
         str.append("{");
         str.append(String.format(TEXT_FORMAT, new JsonBuilder(text)));
         if (clickActionName != null) {

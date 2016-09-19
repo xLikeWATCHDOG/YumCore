@@ -232,10 +232,10 @@ public class Tellraw {
      * @return {@link Tellraw}
      */
     public Tellraw tip(final List<String> texts) {
-        if (texts.size() == 0) {
+        if (texts.isEmpty()) {
             return this;
         }
-        final StringBuffer text = new StringBuffer();
+        final StringBuilder text = new StringBuilder();
         for (final String t : texts) {
             text.append(t).append("\n");
         }
@@ -270,7 +270,7 @@ public class Tellraw {
      * @return Json串
      */
     public String toJsonString() {
-        final StringBuffer msg = new StringBuffer();
+        final StringBuilder msg = new StringBuilder();
         msg.append("[\"\"");
         for (final MessagePart messagePart : messageParts) {
             msg.append(",");
