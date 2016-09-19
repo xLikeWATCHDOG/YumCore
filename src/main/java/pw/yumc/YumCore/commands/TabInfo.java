@@ -44,6 +44,9 @@ public class TabInfo {
 
     @Override
     public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
         if (obj instanceof TabInfo) {
             return method.equals(((TabInfo) obj).getMethod());
         }
@@ -75,5 +78,10 @@ public class TabInfo {
 
     public Method getMethod() {
         return method;
+    }
+
+    @Override
+    public int hashCode() {
+        return method.hashCode() + origin.hashCode();
     }
 }

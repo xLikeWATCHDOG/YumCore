@@ -92,6 +92,9 @@ public class CommandInfo {
 
     @Override
     public boolean equals(final Object obj) {
+        if (this == obj) {
+            return true;
+        }
         if (obj instanceof CommandInfo) {
             return name.equalsIgnoreCase(((CommandInfo) obj).getName());
         }
@@ -155,6 +158,11 @@ public class CommandInfo {
      */
     public int getSort() {
         return sort;
+    }
+
+    @Override
+    public int hashCode() {
+        return name.toLowerCase().hashCode() + method.hashCode() + origin.hashCode();
     }
 
     /**
