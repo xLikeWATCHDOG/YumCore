@@ -52,9 +52,9 @@ public class C {
             getHandle = typeCraftPlayer.getMethod("getHandle");
             playerConnection = typeNMSPlayer.getField("playerConnection");
             sendPacket = typePlayerConnection.getMethod("sendPacket", Class.forName(a("Packet")));
-        } catch (final Throwable e) {
+        } catch (final Exception e) {
             Log.warning(C.class.getSimpleName() + " 兼容性工具初始化失败 可能造成部分功能不可用!");
-            e.printStackTrace();
+            Log.debug(e);
         }
     }
 
@@ -225,7 +225,7 @@ public class C {
                     }
                 }
                 // getOnlinePlayers end
-            } catch (NoSuchMethodException | SecurityException e) {
+            } catch (final Exception e) {
                 Log.warning(Player.class.getSimpleName() + "兼容性工具初始化失败 可能造成部分功能不可用!");
             }
             try {
@@ -246,6 +246,7 @@ public class C {
                 craftOfflinePlayerConstructor.setAccessible(true);
                 // getOfflinePlayer end
             } catch (final Exception e) {
+                Log.debug(e);
             }
         }
 
@@ -261,7 +262,7 @@ public class C {
                 final Object gameProfile = gameProfileConstructor.newInstance(new Object[] { UUID.nameUUIDFromBytes(("OfflinePlayer:" + playerName).getBytes(Charsets.UTF_8)), playerName });
                 final Object offlinePlayer = craftOfflinePlayerConstructor.newInstance(new Object[] { Bukkit.getServer(), gameProfile });
                 return (OfflinePlayer) offlinePlayer;
-            } catch (final Throwable e) {
+            } catch (final Exception e) {
                 return Bukkit.getOfflinePlayer(playerName);
             }
         }
@@ -274,7 +275,7 @@ public class C {
         public static Collection<? extends org.bukkit.entity.Player> getOnlinePlayers() {
             try {
                 return Arrays.asList((org.bukkit.entity.Player[]) getOnlinePlayers.invoke(null));
-            } catch (final Throwable e) {
+            } catch (final Exception e) {
                 return Bukkit.getOnlinePlayers();
             }
         }
@@ -399,13 +400,13 @@ public class C {
                     Object serialized = nmsChatSerializer.getMethod("a", String.class).invoke(null, "{\"text\":\"" + ChatColor.translateAlternateColorCodes('&', title) + "\"}");
                     packet = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent).newInstance(actions[0], serialized);
                     sendPacket.invoke(connection, packet);
-                    if (subtitle != "") {
+                    if (!"".equals(subtitle)) {
                         // Send subtitle if present
                         serialized = nmsChatSerializer.getMethod("a", String.class).invoke(null, "{\"text\":\"" + ChatColor.translateAlternateColorCodes('&', subtitle) + "\"}");
                         packet = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent).newInstance(actions[1], serialized);
                         sendPacket.invoke(connection, packet);
                     }
-                } catch (final Throwable e) {
+                } catch (final Exception e) {
                     e.printStackTrace();
                 }
             }

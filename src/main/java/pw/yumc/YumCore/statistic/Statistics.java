@@ -130,40 +130,37 @@ public class Statistics {
      * @param param
      *            请求参数
      * @return 所代表远程资源的响应结果
+     * @throws IOException
      */
-    public static String postData(final String url, final String param) {
+    public static String postData(final String url, final String param) throws IOException {
         PrintWriter out = null;
         String result = "";
-        try {
-            final URL realUrl = new URL(url);
-            // 打开和URL之间的连接
-            final URLConnection conn = realUrl.openConnection();
-            // 设置通用的请求属性
-            conn.setRequestProperty("Accept", "*/*");
-            conn.setRequestProperty("Connection", "Keep-Alive");
-            conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36");
-            // 设置超时时间 10秒
-            conn.setReadTimeout(10000);
-            // 发送POST请求必须设置如下两行
-            conn.setDoOutput(true);
-            conn.setDoInput(true);
-            // 获取URLConnection对象对应的输出流
-            out = new PrintWriter(conn.getOutputStream());
-            // 发送请求参数
-            out.write(param);
-            // flush输出流的缓冲
-            out.flush();
-            String response = "";
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), UTF_8));
-            while ((response = reader.readLine()) != null) {
-                result += response;
-            }
-            reader.close();
-        } catch (final Exception e) {
-        } finally {
-            if (out != null) {
-                out.close();
-            }
+        final URL realUrl = new URL(url);
+        // 打开和URL之间的连接
+        final URLConnection conn = realUrl.openConnection();
+        // 设置通用的请求属性
+        conn.setRequestProperty("Accept", "*/*");
+        conn.setRequestProperty("Connection", "Keep-Alive");
+        conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36");
+        // 设置超时时间 10秒
+        conn.setReadTimeout(10000);
+        // 发送POST请求必须设置如下两行
+        conn.setDoOutput(true);
+        conn.setDoInput(true);
+        // 获取URLConnection对象对应的输出流
+        out = new PrintWriter(conn.getOutputStream());
+        // 发送请求参数
+        out.write(param);
+        // flush输出流的缓冲
+        out.flush();
+        String response = "";
+        final BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), UTF_8));
+        while ((response = reader.readLine()) != null) {
+            result += response;
+        }
+        reader.close();
+        if (out != null) {
+            out.close();
         }
         return result;
     }
