@@ -6,7 +6,6 @@ import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
-import java.util.logging.Level;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -58,6 +57,9 @@ public class C {
         }
     }
 
+    private C() {
+    }
+
     public static String a(final String str) {
         return "net.minecraft.server." + version + "." + str;
     }
@@ -76,6 +78,9 @@ public class C {
     }
 
     public static class ActionBar {
+        private ActionBar() {
+        }
+
         /**
          * 公告发送ActionBar
          *
@@ -108,6 +113,7 @@ public class C {
                         try {
                             Thread.sleep(1000);
                         } catch (final InterruptedException e) {
+                            // Ignore
                         }
                         time--;
                     } while (time > 0);
@@ -139,12 +145,13 @@ public class C {
                         try {
                             Thread.sleep(1000);
                         } catch (final InterruptedException e) {
+                            // Ignore
                         }
                         time--;
                     } while (time > 0);
 
                 }
-            }).start();;
+            }).start();
         }
 
         /**
@@ -168,7 +175,7 @@ public class C {
                 final Object connection = playerConnection.get(player);
                 sendPacket.invoke(connection, packet);
             } catch (final Exception ex) {
-                Log.log(Level.SEVERE, "ActionBar发包错误 %s " + version, ex);
+                Log.debug("ActionBar发包错误 " + version, ex);
             }
         }
 
@@ -192,6 +199,7 @@ public class C {
                         try {
                             Thread.sleep(1000);
                         } catch (final InterruptedException e) {
+                            // Ignore
                         }
                         time--;
                     } while (time > 0);
@@ -210,9 +218,7 @@ public class C {
         private static Class<?> gameProfileClass;
         private static Constructor<?> gameProfileConstructor;
         private static Constructor<?> craftOfflinePlayerConstructor;
-
         private static Method getOnlinePlayers;
-
         static {
             try {
                 // getOnlinePlayers start
@@ -250,6 +256,9 @@ public class C {
             }
         }
 
+        private Player() {
+        }
+
         /**
          * 获取离线玩家(跳过网络获取)
          *
@@ -282,6 +291,9 @@ public class C {
     }
 
     public static class Title {
+        private Title() {
+        }
+
         /**
          * 发送Title公告
          *
@@ -407,7 +419,7 @@ public class C {
                         sendPacket.invoke(connection, packet);
                     }
                 } catch (final Exception e) {
-                    e.printStackTrace();
+                    Log.debug(e);
                 }
             }
         }
