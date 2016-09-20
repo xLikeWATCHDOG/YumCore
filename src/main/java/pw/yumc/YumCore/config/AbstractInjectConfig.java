@@ -5,7 +5,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 
 import pw.yumc.YumCore.bukkit.Log;
@@ -20,7 +22,7 @@ public abstract class AbstractInjectConfig {
     private static final String INJECT_TYPE_ERROR = "配置节点 %s 数据类型不匹配 应该为: %s 但实际为: %s!";
     private static final String INJECT_ERROR = "自动注入配置失败 可能造成插件运行错误 %s: %s!";
     private static final String DATE_PARSE_ERROR = "配置节点 {0} 日期解析失败 格式应该为: {1} 但输入值为: {2}!";
-    private static final String PATH_NOT_FOUND = "配置节点 %s 丢失 可能造成插件运行错误!";
+    private static final String PATH_NOT_FOUND = "配置节点 %s 丢失 已设置为默认空值!";
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static final SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
     private ConfigurationSection config;
@@ -48,6 +50,21 @@ public abstract class AbstractInjectConfig {
             }
             field.setAccessible(true);
             setField(path, field);
+        }
+    }
+
+    /**
+     * 添加默认值
+     *
+     * @param field
+     *            字段
+     * @param value
+     *            值
+     */
+    private void applyDefault(final Field field, Object value) {
+        switch (field.getType().getName()) {
+        case "java.util.List":
+            value = Collections.emptyList();
         }
     }
 
@@ -123,6 +140,9 @@ public abstract class AbstractInjectConfig {
             if (!type.equals(value.getClass())) {
                 value = convertType(type, path, value);
             }
+            if (type.equals(String.class)) {
+                value = ChatColor.translateAlternateColorCodes('&', (String) value);
+            }
             field.set(this, value);
         } catch (final IllegalArgumentException ex) {
             Log.w(INJECT_TYPE_ERROR, path, field.getType().getName(), value.getClass().getName());
@@ -152,6 +172,7 @@ public abstract class AbstractInjectConfig {
         if (value == null) {
             if (field.getAnnotation(Nullable.class) == null) {
                 Log.w(PATH_NOT_FOUND, path);
+                applyDefault(field, value);
             }
             return;
         }
