@@ -5,7 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
@@ -47,7 +48,7 @@ public abstract class AbstractInjectConfig {
      */
     public void inject(final ConfigurationSection config, final boolean save) {
         if (config == null) {
-            Log.warning("尝试注入 ConfigurationSection 为 Null 的数据!");
+            Log.w("尝试%s ConfigurationSection 为 Null 的数据!", save ? "保存" : "读取");
             return;
         }
         this.config = config;
@@ -75,8 +76,9 @@ public abstract class AbstractInjectConfig {
      * @param config
      *            配置文件区
      */
-    public void save(final ConfigurationSection config) {
+    public ConfigurationSection save(final ConfigurationSection config) {
         inject(config, true);
+        return config;
     }
 
     /**
@@ -86,12 +88,17 @@ public abstract class AbstractInjectConfig {
      *            字段
      * @param value
      *            值
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
      */
-    private void applyDefault(final Field field, Object value) {
+    private void applyDefault(final Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
         switch (field.getType().getName()) {
         case "java.util.List":
-            value = Collections.emptyList();
+            value = new ArrayList<>();
+        case "java.util.Map":
+            value = new HashMap<>();
         }
+        field.set(this, value);
     }
 
     /**
@@ -118,6 +125,8 @@ public abstract class AbstractInjectConfig {
             return df.parse((String) value);
         case "java.util.List":
             return config.getList(path);
+        case "java.util.Map":
+            return config.getConfigurationSection(path).getValues(false);
         default:
             return hanldeDefault(type, path, value);
         }
@@ -159,26 +168,24 @@ public abstract class AbstractInjectConfig {
      *            字段
      * @param value
      *            值
+     * @throws ParseException
+     * @throws SecurityException
+     * @throws NoSuchMethodException
+     * @throws InvocationTargetException
+     * @throws InstantiationException
+     * @throws IllegalArgumentException
+     * @throws IllegalAccessException
      */
-    private void hanldeValue(final String path, final Field field, Object value) {
-        try {
-            final Class<?> type = field.getType();
-            if (!type.equals(value.getClass())) {
-                value = convertType(type, path, value);
-            }
-            if (type.equals(String.class)) {
-                value = ChatColor.translateAlternateColorCodes('&', (String) value);
-            }
-            field.set(this, value);
-        } catch (final IllegalArgumentException ex) {
-            Log.w(INJECT_TYPE_ERROR, path, field.getType().getName(), value.getClass().getName());
-            Log.debug(ex);
-        } catch (final ParseException e) {
-            Log.w(DATE_PARSE_ERROR, path, DATE_FORMAT, value);
-        } catch (final InstantiationException | InvocationTargetException | NoSuchMethodException | SecurityException | IllegalAccessException ex) {
-            Log.w(INJECT_ERROR, ex.getClass().getName(), ex.getMessage());
-            Log.debug(ex);
+    private void hanldeValue(final String path, final Field field, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException, ParseException {
+        final Class<?> type = field.getType();
+        if (!type.equals(value.getClass())) {
+            value = convertType(type, path, value);
         }
+        if (type.equals(String.class)) {
+            value = ChatColor.translateAlternateColorCodes('&', (String) value);
+        }
+        field.set(this, value);
+
     }
 
     /**
@@ -208,17 +215,27 @@ public abstract class AbstractInjectConfig {
      */
     protected void setField(final String path, final Field field) {
         Object value = config.get(path);
-        final Default def = field.getAnnotation(Default.class);
-        if (value == null && def != null) {
-            value = def.value();
-        }
-        if (value == null) {
-            if (field.getAnnotation(Nullable.class) == null) {
-                Log.w(PATH_NOT_FOUND, path);
-                applyDefault(field, value);
+        try {
+            final Default def = field.getAnnotation(Default.class);
+            if (value == null && def != null) {
+                value = def.value();
             }
-            return;
+            if (value == null) {
+                if (field.getAnnotation(Nullable.class) == null) {
+                    Log.w(PATH_NOT_FOUND, path);
+                    applyDefault(field, value);
+                }
+                return;
+            }
+            hanldeValue(path, field, value);
+        } catch (final IllegalArgumentException ex) {
+            Log.w(INJECT_TYPE_ERROR, path, field.getType().getName(), value.getClass().getName());
+            Log.debug(ex);
+        } catch (final ParseException e) {
+            Log.w(DATE_PARSE_ERROR, path, DATE_FORMAT, value);
+        } catch (final InstantiationException | InvocationTargetException | NoSuchMethodException | SecurityException | IllegalAccessException ex) {
+            Log.w(INJECT_ERROR, ex.getClass().getName(), ex.getMessage());
+            Log.debug(ex);
         }
-        hanldeValue(path, field, value);
     }
 }
