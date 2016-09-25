@@ -50,4 +50,11 @@ public class CommandArgument {
         return sender;
     }
 
+    /**
+     * @return 命令发送者(自动转换)
+     */
+    @SuppressWarnings("unchecked")
+    public <CS> CS getSenderEx() {
+        return (CS) sender;
+    }
 }
