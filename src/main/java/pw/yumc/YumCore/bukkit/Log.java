@@ -271,6 +271,20 @@ public class Log {
      *            命令发送者
      * @param msg
      *            消息
+     * @param objs
+     *            参数
+     */
+    public static void toSender(final CommandSender sender, final String msg, final Object... objs) {
+        sender.sendMessage(prefix + String.format(msg, objs));
+    }
+
+    /**
+     * Sends this sender a message
+     *
+     * @param sender
+     *            命令发送者
+     * @param msg
+     *            消息
      */
     public static void toSender(final CommandSender sender, final String[] msg) {
         for (final String str : msg) {
