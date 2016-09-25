@@ -34,6 +34,18 @@ public abstract class AbstractInjectConfig {
      *            配置区
      */
     public void inject(final ConfigurationSection config) {
+        inject(config, false);
+    }
+
+    /**
+     * 注入配置数据
+     *
+     * @param config
+     *            配置区
+     * @param save
+     *            是否为保存
+     */
+    public void inject(final ConfigurationSection config, final boolean save) {
         if (config == null) {
             Log.warning("尝试注入 ConfigurationSection 为 Null 的数据!");
             return;
@@ -49,8 +61,22 @@ public abstract class AbstractInjectConfig {
                 path = node.value();
             }
             field.setAccessible(true);
-            setField(path, field);
+            if (save) {
+                setConfig(path, field);
+            } else {
+                setField(path, field);
+            }
         }
+    }
+
+    /**
+     * 自动化保存
+     *
+     * @param config
+     *            配置文件区
+     */
+    public void save(final ConfigurationSection config) {
+        inject(config, true);
     }
 
     /**
@@ -156,7 +182,24 @@ public abstract class AbstractInjectConfig {
     }
 
     /**
-     * 通用解析流程
+     * 通用保存流程
+     *
+     * @param path
+     *            配置路径
+     * @param field
+     *            字段
+     */
+    protected void setConfig(final String path, final Field field) {
+        try {
+            config.set(path, field.get(this));
+        } catch (IllegalArgumentException | IllegalAccessException e) {
+            Log.w(INJECT_ERROR, e.getClass().getName(), e.getMessage());
+            Log.debug(e);
+        }
+    }
+
+    /**
+     * 通用读取流程
      *
      * @param path
      *            配置路径

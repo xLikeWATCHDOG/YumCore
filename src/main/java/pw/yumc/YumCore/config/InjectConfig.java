@@ -44,4 +44,12 @@ public abstract class InjectConfig extends AbstractInjectConfig {
         config.reload();
         inject(config);
     }
+
+    /**
+     * 自动化保存
+     */
+    public void save() {
+        save(config);
+        config.save();
+    }
 }
