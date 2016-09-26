@@ -192,7 +192,7 @@ public class CommandInfo {
      */
     private boolean check(final CommandArgument cmdArgs) {
         final CommandSender sender = cmdArgs.getSender();
-        return checkArgs(sender, cmdArgs) && checkSender(sender) && checkPerm(sender);
+        return checkSender(sender) && checkArgs(sender, cmdArgs) && checkPerm(sender);
     }
 
     private boolean checkArgs(final CommandSender sender, final CommandArgument cmdArgs) {
