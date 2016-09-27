@@ -46,18 +46,6 @@ public class Log {
      * @param message
      *            Message to be displayed
      */
-    public static void console(final String... msg) {
-        for (final String str : msg) {
-            console(str);
-        }
-    }
-
-    /**
-     * Sends console a message
-     *
-     * @param message
-     *            Message to be displayed
-     */
     public static void console(final String message) {
         console.sendMessage(prefix + message);
     }
@@ -72,6 +60,18 @@ public class Log {
      */
     public static void console(final String message, final Object... object) {
         console.sendMessage(prefix + String.format(message, object));
+    }
+
+    /**
+     * Sends console a message
+     *
+     * @param message
+     *            Message to be displayed
+     */
+    public static void console(final String[] msg) {
+        for (final String str : msg) {
+            console(str);
+        }
     }
 
     /**
