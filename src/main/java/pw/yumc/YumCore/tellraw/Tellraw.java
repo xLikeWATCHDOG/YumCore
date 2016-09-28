@@ -49,6 +49,19 @@ public class Tellraw {
     }
 
     /**
+     * 创建Tellraw
+     *
+     * @param text
+     *            文本
+     * @param objects
+     *            参数
+     * @return {@link Tellraw}
+     */
+    public static Tellraw create(final String text, final Object... objects) {
+        return new Tellraw(String.format(text, objects));
+    }
+
+    /**
      * 发送Tellraw公告
      */
     public void broadcast() {
@@ -222,6 +235,19 @@ public class Tellraw {
      */
     public Tellraw then(final String name, final ItemStack item) {
         return then(name).item(ItemSerialize.$(item));
+    }
+
+    /**
+     * 结束上一串消息 开始下一串数据
+     *
+     * @param text
+     *            新的文本
+     * @param objects
+     *            参数
+     * @return {@link Tellraw}
+     */
+    public Tellraw then(final String text, final Object... objects) {
+        return then(new MessagePart(String.format(text, objects)));
     }
 
     /**
