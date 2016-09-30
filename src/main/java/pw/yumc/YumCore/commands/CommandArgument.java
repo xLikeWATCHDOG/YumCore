@@ -2,6 +2,7 @@ package pw.yumc.YumCore.commands;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 /**
  * 子命令参数类
@@ -41,6 +42,13 @@ public class CommandArgument {
      */
     public Command getCommand() {
         return command;
+    }
+
+    /**
+     * @return 命令发送者(转换为Player)
+     */
+    public Player getPlayer() {
+        return (Player) sender;
     }
 
     /**
