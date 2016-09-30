@@ -5,8 +5,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
@@ -23,7 +21,7 @@ public abstract class AbstractInjectConfig {
     private static final String INJECT_TYPE_ERROR = "配置节点 %s 数据类型不匹配 应该为: %s 但实际为: %s!";
     private static final String INJECT_ERROR = "自动注入配置失败 可能造成插件运行错误 %s: %s!";
     private static final String DATE_PARSE_ERROR = "配置节点 {0} 日期解析失败 格式应该为: {1} 但输入值为: {2}!";
-    private static final String PATH_NOT_FOUND = "配置节点 %s 丢失 已设置为默认空值!";
+    private static final String PATH_NOT_FOUND = "配置节点 %s 丢失 将使用默认值!";
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static final SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
     private ConfigurationSection config;
@@ -79,26 +77,6 @@ public abstract class AbstractInjectConfig {
     public ConfigurationSection save(final ConfigurationSection config) {
         inject(config, true);
         return config;
-    }
-
-    /**
-     * 添加默认值
-     *
-     * @param field
-     *            字段
-     * @param value
-     *            值
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     */
-    private void applyDefault(final Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
-        switch (field.getType().getName()) {
-        case "java.util.List":
-            value = new ArrayList<>();
-        case "java.util.Map":
-            value = new HashMap<>();
-        }
-        field.set(this, value);
     }
 
     /**
@@ -223,7 +201,6 @@ public abstract class AbstractInjectConfig {
             if (value == null) {
                 if (field.getAnnotation(Nullable.class) == null) {
                     Log.w(PATH_NOT_FOUND, path);
-                    applyDefault(field, value);
                 }
                 return;
             }
