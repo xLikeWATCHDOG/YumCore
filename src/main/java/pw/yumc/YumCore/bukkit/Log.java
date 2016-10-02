@@ -6,6 +6,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
 /**
@@ -245,7 +246,7 @@ public class Log {
      *            插件前缀
      */
     public static void setPrefix(final String prefix) {
-        Log.prefix = prefix;
+        Log.prefix = ChatColor.translateAlternateColorCodes('&', prefix);
     }
 
     /**
