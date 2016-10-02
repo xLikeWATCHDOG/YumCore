@@ -20,8 +20,7 @@ public class VaultEconomy extends VaultBase {
 
     static {
         final RegisteredServiceProvider<Economy> rsp = Bukkit.getServer().getServicesManager().getRegistration(Economy.class);
-        economy = rsp.getProvider();
-        if (economy == null) {
+        if (rsp == null || (economy = rsp.getProvider()) == null) {
             PKit.disable("已加载 Vault 但是未找到经济相关插件 停止加载...");
         } else {
             Log.info("发现 Vault 使用经济管理系统 " + economy.getName());

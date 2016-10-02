@@ -19,8 +19,7 @@ public class VaultChat extends VaultBase {
 
     static {
         final RegisteredServiceProvider<Chat> rsp = Bukkit.getServer().getServicesManager().getRegistration(Chat.class);
-        chat = rsp.getProvider();
-        if (chat == null) {
+        if (rsp == null || (chat = rsp.getProvider()) == null) {
             PKit.disable("已加载 Vault 但是未找到聊天相关插件 停止加载...");
         } else {
             Log.info("发现 Vault 使用聊天管理系统 " + chat.getName());
