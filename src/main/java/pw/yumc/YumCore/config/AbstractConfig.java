@@ -16,8 +16,6 @@ import java.util.Map;
 import org.apache.commons.lang.Validate;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.configuration.file.YamlConstructor;
-import org.bukkit.configuration.file.YamlRepresenter;
 import org.bukkit.plugin.Plugin;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
@@ -28,6 +26,8 @@ import com.google.common.io.Files;
 
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
+import pw.yumc.YumCore.config.yaml.BukkitConstructor;
+import pw.yumc.YumCore.config.yaml.BukkitRepresenter;
 
 /**
  * 抽象配置文件
@@ -48,8 +48,8 @@ public abstract class AbstractConfig extends YamlConfiguration {
     protected static Plugin plugin = P.instance;
 
     protected final DumperOptions yamlOptions = new DumperOptions();
-    protected final Representer yamlRepresenter = new YamlRepresenter();
-    protected final Yaml yamlz = new Yaml(new YamlConstructor(), yamlRepresenter, yamlOptions);
+    protected final Representer yamlRepresenter = new BukkitRepresenter();
+    protected final Yaml yamlz = new Yaml(new BukkitConstructor(), yamlRepresenter, yamlOptions);
 
     /**
      * 配置文件内容MAP
