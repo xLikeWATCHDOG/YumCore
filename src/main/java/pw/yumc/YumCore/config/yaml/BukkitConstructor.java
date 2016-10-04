@@ -46,7 +46,7 @@ public class BukkitConstructor extends YamlConstructor {
                 final String key = raw.get(ConfigurationSerialization.SERIALIZED_TYPE_KEY).toString();
                 if (constructor.containsKey(key)) {
                     try {
-                        return constructor.get(key).invoke(null, raw);
+                        return constructor.get(key).invoke(null, typed);
                     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
                         throw new YAMLException("Could not deserialize object", ex);
                     }
