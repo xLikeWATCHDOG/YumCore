@@ -5,6 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
@@ -80,6 +82,26 @@ public abstract class AbstractInjectConfig {
     }
 
     /**
+     * 添加默认值
+     *
+     * @param field
+     *            字段
+     * @param value
+     *            值
+     * @throws IllegalAccessException
+     * @throws IllegalArgumentException
+     */
+    private void applyDefault(final Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
+        switch (field.getType().getName()) {
+        case "java.util.List":
+            value = new ArrayList<>();
+        case "java.util.Map":
+            value = new HashMap<>();
+        }
+        field.set(this, value);
+    }
+
+    /**
      * 转换字段值类型
      *
      * @param type
@@ -104,7 +126,7 @@ public abstract class AbstractInjectConfig {
         case "java.util.List":
             return config.getList(path);
         case "java.util.Map":
-            return config.getConfigurationSection(path).getValues(false);
+            return config.getConfigurationSection(path).getValues(true);
         default:
             return hanldeDefault(type, path, value);
         }
@@ -155,6 +177,7 @@ public abstract class AbstractInjectConfig {
      * @throws IllegalAccessException
      */
     private void hanldeValue(final String path, final Field field, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException, ParseException {
+        final Object origin = field.get(this);
         final Class<?> type = field.getType();
         if (!type.equals(value.getClass())) {
             value = convertType(type, path, value);
@@ -163,7 +186,7 @@ public abstract class AbstractInjectConfig {
             value = ChatColor.translateAlternateColorCodes('&', (String) value);
         }
         field.set(this, value);
-
+        Log.d("设置字段 %s 由 %s 为 %s ", field.getName(), origin, value);
     }
 
     /**
@@ -201,6 +224,7 @@ public abstract class AbstractInjectConfig {
             if (value == null) {
                 if (field.getAnnotation(Nullable.class) == null) {
                     Log.w(PATH_NOT_FOUND, path);
+                    applyDefault(field, value);
                 }
                 return;
             }
