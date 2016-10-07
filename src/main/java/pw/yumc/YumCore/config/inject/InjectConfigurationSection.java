@@ -1,4 +1,4 @@
-package pw.yumc.YumCore.config;
+package pw.yumc.YumCore.config.inject;
 
 import org.bukkit.configuration.ConfigurationSection;
 

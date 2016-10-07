@@ -1,6 +1,8 @@
-package pw.yumc.YumCore.config;
+package pw.yumc.YumCore.config.inject;
 
 import java.io.File;
+
+import pw.yumc.YumCore.config.FileConfig;
 
 /**
  * 配置自动载入类

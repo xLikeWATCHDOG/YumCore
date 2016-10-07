@@ -43,8 +43,9 @@ public class CommandInfo {
     private final Cmd command;
     private final Help help;
     private final int sort;
+    private final CommandParse parse;
 
-    public CommandInfo(final Method method, final Object origin, final Cmd command, final Help help, final boolean async, final int sort) {
+    public CommandInfo(final Method method, final Object origin, final Cmd command, final Help help, final boolean async, final int sort, final CommandParse parse) {
         this.method = method;
         this.origin = origin;
         this.name = "".equals(command.value()) ? method.getName().toLowerCase() : command.value();
@@ -55,6 +56,7 @@ public class CommandInfo {
         this.help = help;
         this.async = async;
         this.sort = sort;
+        this.parse = parse;
     }
 
     private CommandInfo() {
@@ -68,6 +70,7 @@ public class CommandInfo {
         this.help = null;
         this.async = false;
         this.sort = 0;
+        this.parse = null;
     }
 
     /**
@@ -85,7 +88,8 @@ public class CommandInfo {
             final Help help = method.getAnnotation(Help.class);
             final Async async = method.getAnnotation(Async.class);
             final Sort sort = method.getAnnotation(Sort.class);
-            return new CommandInfo(method, origin, command, help != null ? help : Help.DEFAULT, async != null, sort != null ? sort.value() : 50);
+            final CommandParse cp = CommandParse.get(method);
+            return new CommandInfo(method, origin, command, help != null ? help : Help.DEFAULT, async != null, sort != null ? sort.value() : 50, cp);
         }
         return null;
     }
@@ -117,7 +121,7 @@ public class CommandInfo {
                 @Override
                 public void run() {
                     try {
-                        method.invoke(origin, cmdArgs);
+                        method.invoke(origin, cmdArgs.getSender(), parse.parse(cmdArgs));
                     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                         throw new CommandException(e);
                     }

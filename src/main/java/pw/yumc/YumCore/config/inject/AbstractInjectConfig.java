@@ -1,4 +1,4 @@
-package pw.yumc.YumCore.config;
+package pw.yumc.YumCore.config.inject;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -12,6 +12,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 
 import pw.yumc.YumCore.bukkit.Log;
+import pw.yumc.YumCore.config.ConfigNode;
+import pw.yumc.YumCore.config.Default;
+import pw.yumc.YumCore.config.Nullable;
 
 /**
  * 抽象注入配置
@@ -177,7 +180,6 @@ public abstract class AbstractInjectConfig {
      * @throws IllegalAccessException
      */
     private void hanldeValue(final String path, final Field field, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException, ParseException {
-        final Object origin = field.get(this);
         final Class<?> type = field.getType();
         if (!type.equals(value.getClass())) {
             value = convertType(type, path, value);
@@ -186,7 +188,7 @@ public abstract class AbstractInjectConfig {
             value = ChatColor.translateAlternateColorCodes('&', (String) value);
         }
         field.set(this, value);
-        Log.d("设置字段 %s 由 %s 为 %s ", field.getName(), origin, value);
+        Log.d("设置字段 %s 为 %s ", field.getName(), value);
     }
 
     /**

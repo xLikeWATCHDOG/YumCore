@@ -1,5 +1,8 @@
 package pw.yumc.YumCore.commands;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -10,11 +13,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.StringUtil;
 
@@ -29,8 +36,33 @@ import pw.yumc.YumCore.bukkit.compatible.C;
  * @author 喵♂呜
  */
 public class CommandManager implements TabExecutor {
-    private final static String argumentTypeError = "注解命令方法 %s 位于 %s 的参数错误 应只有 CommandArgument 参数!";
+    private final static String argumentTypeError = "注解命令方法 %s 位于 %s 的参数错误 第一个参数应实现 CommandSender 接口!";
     private final static String returnTypeError = "注解命令补全 %s 位于 %s 的返回值错误 应实现 List 接口!";
+    private static Constructor<PluginCommand> PluginCommandConstructor;
+    private static Map<String, Command> knownCommands;
+    private static Map<String, Plugin> lookupNames;
+    static {
+        try {
+            final PluginManager pluginManager = Bukkit.getPluginManager();
+
+            final Field lookupNamesField = pluginManager.getClass().getDeclaredField("lookupNames");
+            lookupNamesField.setAccessible(true);
+            lookupNames = (Map<String, Plugin>) lookupNamesField.get(pluginManager);
+
+            final Field commandMapField = pluginManager.getClass().getDeclaredField("commandMap");
+            commandMapField.setAccessible(true);
+            final SimpleCommandMap commandMap = (SimpleCommandMap) commandMapField.get(pluginManager);
+
+            final Field knownCommandsField = commandMap.getClass().getDeclaredField("knownCommands");
+            knownCommandsField.setAccessible(true);
+            knownCommands = (Map<String, Command>) knownCommandsField.get(commandMap);
+
+            PluginCommandConstructor = PluginCommand.class.getConstructor(String.class, Plugin.class);
+        } catch (NoSuchMethodException | SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
+            Log.d("初始化命令管理器失败!");
+            Log.debug(e);
+        }
+    }
     /**
      * 插件实例类
      */
@@ -62,7 +94,7 @@ public class CommandManager implements TabExecutor {
     /**
      * 插件命令
      */
-    private final PluginCommand cmd;
+    private PluginCommand cmd;
 
     /**
      * 命令管理器
@@ -73,7 +105,14 @@ public class CommandManager implements TabExecutor {
     public CommandManager(final String name) {
         cmd = plugin.getCommand(name);
         if (cmd == null) {
-            throw new IllegalStateException("未找到命令 必须在plugin.yml先注册 " + name + " 命令!");
+            try {
+                knownCommands.put(name, PluginCommandConstructor.newInstance(name, plugin));
+                lookupNames.put(name, plugin);
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            }
+            if ((cmd = plugin.getCommand(name)) == null) {
+                throw new IllegalStateException("未找到命令 必须在plugin.yml先注册 " + name + " 命令!");
+            }
         }
         cmd.setExecutor(this);
         cmd.setTabCompleter(this);
@@ -106,9 +145,8 @@ public class CommandManager implements TabExecutor {
             help.send(sender, command, label, args);
             return true;
         }
-        final CommandArgument cmdArgs = new CommandArgument(sender, command, label, moveStrings(args, 1));
         final CommandInfo ci = checkCache(subcmd);
-        return ci.execute(cmdArgs);
+        return ci.execute(new CommandArgument(sender, command, label, moveStrings(args, 1)));
     }
 
     @Override
@@ -245,7 +283,7 @@ public class CommandManager implements TabExecutor {
         final CommandInfo ci = CommandInfo.parse(method, clazz);
         if (ci != null) {
             final Class<?>[] params = method.getParameterTypes();
-            if (params.length == 1 && params[0].equals(CommandArgument.class)) {
+            if (params.length > 0 && params[0].equals(CommandArgument.class)) {
                 if (method.getReturnType() == boolean.class) {
                     defCmd = ci;
                     return true;

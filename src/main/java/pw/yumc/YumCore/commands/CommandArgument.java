@@ -15,12 +15,14 @@ public class CommandArgument {
     private final Command command;
     private final String alias;
     private final String[] args;
+    private final CommandParse parses;
 
     public CommandArgument(final CommandSender sender, final Command command, final String alias, final String[] args) {
         this.sender = sender;
         this.command = command;
         this.alias = alias;
         this.args = args;
+        parses = null;
     }
 
     /**
