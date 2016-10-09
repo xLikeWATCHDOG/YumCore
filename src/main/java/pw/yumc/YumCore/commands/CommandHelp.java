@@ -14,6 +14,8 @@ import org.bukkit.command.CommandSender;
 
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.commands.annotation.Help;
+import pw.yumc.YumCore.commands.info.CommandInfo;
+import pw.yumc.YumCore.commands.interfaces.CommandHelpParse;
 
 /**
  * 命令帮助生成类

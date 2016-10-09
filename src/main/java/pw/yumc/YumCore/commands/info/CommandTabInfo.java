@@ -1,4 +1,4 @@
-package pw.yumc.YumCore.commands;
+package pw.yumc.YumCore.commands.info;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -8,6 +8,7 @@ import java.util.List;
 import org.bukkit.command.CommandSender;
 
 import pw.yumc.YumCore.bukkit.P;
+import pw.yumc.YumCore.commands.CommandArgument;
 import pw.yumc.YumCore.commands.annotation.Tab;
 import pw.yumc.YumCore.commands.exception.CommandException;
 
@@ -17,11 +18,11 @@ import pw.yumc.YumCore.commands.exception.CommandException;
  * @since 2016年7月23日 上午9:56:42
  * @author 喵♂呜
  */
-public class TabInfo {
+public class CommandTabInfo {
     private final Object origin;
     private final Method method;
 
-    public TabInfo(final Method method, final Object origin) {
+    public CommandTabInfo(final Method method, final Object origin) {
         this.method = method;
         this.origin = origin;
     }
@@ -33,12 +34,12 @@ public class TabInfo {
      *            方法
      * @param origin
      *            对象
-     * @return {@link TabInfo}
+     * @return {@link CommandTabInfo}
      */
-    public static TabInfo parse(final Method method, final Object origin) {
+    public static CommandTabInfo parse(final Method method, final Object origin) {
         final Tab tab = method.getAnnotation(Tab.class);
         if (tab != null) {
-            return new TabInfo(method, origin);
+            return new CommandTabInfo(method, origin);
         }
         return null;
     }
@@ -48,8 +49,8 @@ public class TabInfo {
         if (this == obj) {
             return true;
         }
-        if (obj instanceof TabInfo) {
-            return method.equals(((TabInfo) obj).getMethod());
+        if (obj instanceof CommandTabInfo) {
+            return method.equals(((CommandTabInfo) obj).getMethod());
         }
         return super.equals(obj);
     }

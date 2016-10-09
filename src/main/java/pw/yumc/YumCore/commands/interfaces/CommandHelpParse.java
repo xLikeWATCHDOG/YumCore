@@ -1,4 +1,4 @@
-package pw.yumc.YumCore.commands;
+package pw.yumc.YumCore.commands.interfaces;
 
 /**
  * 命令解析接口

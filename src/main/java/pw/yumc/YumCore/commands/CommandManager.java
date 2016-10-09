@@ -28,6 +28,10 @@ import org.bukkit.util.StringUtil;
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.bukkit.compatible.C;
+import pw.yumc.YumCore.commands.info.CommandInfo;
+import pw.yumc.YumCore.commands.info.CommandTabInfo;
+import pw.yumc.YumCore.commands.interfaces.CommandExecutor;
+import pw.yumc.YumCore.commands.interfaces.CommandHelpParse;
 
 /**
  * 命令管理类
@@ -57,7 +61,7 @@ public class CommandManager implements TabExecutor {
             knownCommandsField.setAccessible(true);
             knownCommands = (Map<String, Command>) knownCommandsField.get(commandMap);
 
-            PluginCommandConstructor = PluginCommand.class.getConstructor(String.class, Plugin.class);
+            PluginCommandConstructor = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
         } catch (NoSuchMethodException | SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
             Log.d("初始化命令管理器失败!");
             Log.debug(e);
@@ -78,7 +82,7 @@ public class CommandManager implements TabExecutor {
     /**
      * Tab列表
      */
-    private final Set<TabInfo> tabs = new HashSet<>();
+    private final Set<CommandTabInfo> tabs = new HashSet<>();
     /**
      * 命令缓存列表
      */
@@ -156,7 +160,7 @@ public class CommandManager implements TabExecutor {
         if (args.length == 1) {
             StringUtil.copyPartialMatches(args[0], cmdNameCache, completions);
         } else if (args.length >= 2) {
-            for (final TabInfo tab : tabs) {
+            for (final CommandTabInfo tab : tabs) {
                 StringUtil.copyPartialMatches(token, tab.execute(sender, command, token, args), completions);
             }
             StringUtil.copyPartialMatches(token, getPlayerTabComplete(sender, command, alias, args), completions);
@@ -283,13 +287,14 @@ public class CommandManager implements TabExecutor {
         final CommandInfo ci = CommandInfo.parse(method, clazz);
         if (ci != null) {
             final Class<?>[] params = method.getParameterTypes();
-            if (params.length > 0 && params[0].equals(CommandArgument.class)) {
+            Log.d("命令 %s 参数类型: %s", ci.getName(), Arrays.toString(params));
+            if (params.length > 0 && params[0].isAssignableFrom(CommandSender.class)) {
                 if (method.getReturnType() == boolean.class) {
                     defCmd = ci;
-                    return true;
+                } else {
+                    cmds.add(ci);
+                    cmdCache.put(ci.getName(), ci);
                 }
-                cmds.add(ci);
-                cmdCache.put(ci.getName(), ci);
                 return true;
             }
             Log.warning(String.format(argumentTypeError, method.getName(), clazz.getClass().getName()));
@@ -307,7 +312,7 @@ public class CommandManager implements TabExecutor {
      * @return 是否成功
      */
     private boolean registerTab(final Method method, final CommandExecutor clazz) {
-        final TabInfo ti = TabInfo.parse(method, clazz);
+        final CommandTabInfo ti = CommandTabInfo.parse(method, clazz);
         if (ti != null) {
             if (method.getReturnType().equals(List.class)) {
                 tabs.add(ti);

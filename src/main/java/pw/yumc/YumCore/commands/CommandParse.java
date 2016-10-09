@@ -2,11 +2,13 @@ package pw.yumc.YumCore.commands;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import pw.yumc.YumCore.commands.exception.CommandException;
@@ -19,7 +21,7 @@ import pw.yumc.YumCore.commands.exception.CommandParseException;
  * @since 2016年10月5日 下午4:02:04
  */
 public class CommandParse {
-    private static Map<Class, Parse> allparses;
+    private static Map<Class, Parse> allparses = new HashMap<>();
     static {
         new IntegerParse();
         new LongParse();
@@ -33,6 +35,9 @@ public class CommandParse {
     public CommandParse(final Class[] classes, final Annotation[][] annons) {
         for (final Class classe : classes) {
             final Class clazz = classe;
+            if (clazz.isAssignableFrom(CommandSender.class)) {
+                continue;
+            }
             if (!allparses.containsKey(clazz)) {
                 throw new CommandParseException(String.format("无法解析的参数类型 %s !", clazz.getName()));
             }

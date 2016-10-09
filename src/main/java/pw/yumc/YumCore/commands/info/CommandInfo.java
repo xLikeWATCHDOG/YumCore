@@ -1,4 +1,4 @@
-package pw.yumc.YumCore.commands;
+package pw.yumc.YumCore.commands.info;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -11,6 +11,8 @@ import org.bukkit.entity.Player;
 
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
+import pw.yumc.YumCore.commands.CommandArgument;
+import pw.yumc.YumCore.commands.CommandParse;
 import pw.yumc.YumCore.commands.annotation.Async;
 import pw.yumc.YumCore.commands.annotation.Cmd;
 import pw.yumc.YumCore.commands.annotation.Cmd.Executor;
@@ -121,7 +123,7 @@ public class CommandInfo {
                 @Override
                 public void run() {
                     try {
-                        method.invoke(origin, cmdArgs.getSender(), parse.parse(cmdArgs));
+                        method.invoke(origin, parse.parse(cmdArgs));
                     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                         throw new CommandException(e);
                     }
