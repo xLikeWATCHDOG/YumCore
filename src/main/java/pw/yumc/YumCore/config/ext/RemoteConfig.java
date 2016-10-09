@@ -1,10 +1,11 @@
-package pw.yumc.YumCore.config;
+package pw.yumc.YumCore.config.ext;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 
 import pw.yumc.YumCore.bukkit.Log;
+import pw.yumc.YumCore.config.FileConfig;
 
 /**
  * 远程配置文件类

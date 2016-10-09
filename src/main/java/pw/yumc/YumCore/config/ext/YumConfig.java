@@ -1,9 +1,10 @@
-package pw.yumc.YumCore.config;
+package pw.yumc.YumCore.config.ext;
 
 import java.io.File;
 import java.io.IOException;
 
 import pw.yumc.YumCore.bukkit.Log;
+import pw.yumc.YumCore.config.FileConfig;
 
 public class YumConfig {
     protected static final String REMOTEFILECENTER = "http://data.yumc.pw/config/";

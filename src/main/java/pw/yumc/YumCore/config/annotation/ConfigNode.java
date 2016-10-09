@@ -1,4 +1,4 @@
-package pw.yumc.YumCore.config;
+package pw.yumc.YumCore.config.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

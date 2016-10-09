@@ -1,8 +1,10 @@
-package pw.yumc.YumCore.config;
+package pw.yumc.YumCore.config.ext;
 
 import java.io.File;
 
 import org.bukkit.entity.Player;
+
+import pw.yumc.YumCore.config.FileConfig;
 
 /**
  * 玩家配置管理类

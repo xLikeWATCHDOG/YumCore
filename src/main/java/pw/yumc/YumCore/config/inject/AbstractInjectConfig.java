@@ -12,9 +12,9 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 
 import pw.yumc.YumCore.bukkit.Log;
-import pw.yumc.YumCore.config.ConfigNode;
-import pw.yumc.YumCore.config.Default;
-import pw.yumc.YumCore.config.Nullable;
+import pw.yumc.YumCore.config.annotation.ConfigNode;
+import pw.yumc.YumCore.config.annotation.Default;
+import pw.yumc.YumCore.config.annotation.Nullable;
 
 /**
  * 抽象注入配置

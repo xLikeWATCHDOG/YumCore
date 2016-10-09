@@ -9,7 +9,7 @@ import org.bukkit.material.SpawnEgg;
 
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.config.FileConfig;
-import pw.yumc.YumCore.config.YumConfig;
+import pw.yumc.YumCore.config.ext.YumConfig;
 
 /**
  * 本地化工具类
