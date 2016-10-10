@@ -149,8 +149,8 @@ public class CommandHelp {
                 if (page == 1 && defCmd != null) {
                     helpList.add(formatCommand(defCmd, label));
                 }
-                final int start = this.LINES_PER_PAGE * (page - 1);
-                final int end = start + this.LINES_PER_PAGE;
+                final int start = LINES_PER_PAGE * (page - 1);
+                final int end = start + LINES_PER_PAGE;
                 for (int i = start; i < end; i++) {
                     if (this.cmdlist.size() > i) {
                         // 帮助列表

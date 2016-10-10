@@ -7,7 +7,6 @@ import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
@@ -28,8 +27,6 @@ import pw.yumc.YumCore.commands.exception.CommandException;
  */
 public class CommandInfo {
     public static final CommandInfo Unknow = new CommandInfo();
-    private static final String onlyPlayer = "§c控制台无法使用此命令(§4请在游戏内执行§c)!";
-    private static final String onlyConsole = "§c玩家无法使用此命令(§4请使用控制台执行§c)!";
     private static final String onlyExecutor = "§c当前命令仅允许 §b%s §c执行!";
     private static final String losePerm = "§c你需要有 %s 的权限才能执行此命令!";
     private static final String cmdErr = "§6错误原因: §4命令参数不正确!";
@@ -224,17 +221,6 @@ public class CommandInfo {
         if (!executors.contains(Executor.ALL) && !executors.contains(Executor.valueOf(sender))) {
             Log.toSender(sender, String.format(onlyExecutor, executorStr));
             return false;
-        }
-        if (sender instanceof Player) {
-            if (command.onlyConsole()) {
-                Log.toSender(sender, onlyConsole);
-                return false;
-            }
-        } else {
-            if (command.onlyPlayer()) {
-                Log.toSender(sender, onlyPlayer);
-                return false;
-            }
         }
         return true;
     }

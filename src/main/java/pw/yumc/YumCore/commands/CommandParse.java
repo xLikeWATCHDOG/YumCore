@@ -1,10 +1,6 @@
 package pw.yumc.YumCore.commands;
 
 import java.lang.annotation.Annotation;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -15,6 +11,9 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import pw.yumc.YumCore.commands.annotation.Default;
+import pw.yumc.YumCore.commands.annotation.KeyValue;
+import pw.yumc.YumCore.commands.annotation.Limit;
 import pw.yumc.YumCore.commands.exception.CommandException;
 import pw.yumc.YumCore.commands.exception.CommandParseException;
 
@@ -47,18 +46,7 @@ public class CommandParse {
                 throw new CommandParseException(String.format("无法解析的参数类型 %s !", clazz.getName()));
             }
             final Parse parse = allparses.get(clazz).clone();
-            for (final Annotation annotation : annotations) {
-                if (annotation.annotationType() == Default.class) {
-                    parse.setAttr("default", ((Default) annotation).value());
-                } else if (annotation.annotationType() == Limit.class) {
-                    parse.setAttr("min", ((Limit) annotation).min());
-                    parse.setAttr("max", ((Limit) annotation).max());
-                } else if (annotation.annotationType() == KeyValue.class) {
-                    final KeyValue kv = (KeyValue) annotation;
-                    parse.setAttr(kv.key(), kv.value());
-                }
-            }
-            this.parse.add(parse);
+            this.parse.add(parse.parseAnnotation(annotations));
         }
     }
 
@@ -105,18 +93,6 @@ public class CommandParse {
         }
     }
 
-    /**
-     * 默认参数
-     *
-     * @since 2016年7月23日 上午9:00:27
-     * @author 喵♂呜
-     */
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface Default {
-        String value();
-    }
-
     public static class IntegerParse extends Parse<Integer> {
         public IntegerParse() {
             allparses.put(Integer.class, this);
@@ -135,46 +111,6 @@ public class CommandParse {
                 throw new CommandParseException("必须为数字!");
             }
         }
-    }
-
-    /**
-     * 自定义参数
-     *
-     * @since 2016年7月23日 上午9:00:27
-     * @author 喵♂呜
-     */
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface KeyValue {
-        /**
-         * @return 键
-         */
-        String key();
-
-        /**
-         * @return 值
-         */
-        String value() default "";
-    }
-
-    /**
-     * 参数限制
-     *
-     * @since 2016年7月23日 上午9:00:27
-     * @author 喵♂呜
-     */
-    @Target(ElementType.METHOD)
-    @Retention(RetentionPolicy.RUNTIME)
-    public @interface Limit {
-        /**
-         * @return 最大长度(最大值)
-         */
-        int max() default 255;
-
-        /**
-         * @return 最小长度(或最小值)
-         */
-        int min();
     }
 
     public static class LongParse extends Parse<Long> {
@@ -223,6 +159,21 @@ public class CommandParse {
         }
 
         public abstract RT parse(String arg) throws CommandParseException;
+
+        public Parse<RT> parseAnnotation(final Annotation[] annotations) {
+            for (final Annotation annotation : annotations) {
+                if (annotation.annotationType() == Default.class) {
+                    setAttr("default", ((Default) annotation).value());
+                } else if (annotation.annotationType() == Limit.class) {
+                    setAttr("min", ((Limit) annotation).min());
+                    setAttr("max", ((Limit) annotation).max());
+                } else if (annotation.annotationType() == KeyValue.class) {
+                    final KeyValue kv = (KeyValue) annotation;
+                    setAttr(kv.key(), kv.value());
+                }
+            }
+            return this;
+        }
 
         public void setAttr(final String name, final Object value) {
             attrs.put(name, value);

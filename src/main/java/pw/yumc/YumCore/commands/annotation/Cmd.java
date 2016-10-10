@@ -21,8 +21,7 @@ import org.bukkit.entity.minecart.CommandMinecart;
  * aliases           命令别名
  * minimumArguments  最小参数     默认0
  * permission        权限
- * onlyPlayer        只允许玩家   false
- * onlyConsole       只允许控制台 false
+ * executor          执行者       所有
  * </pre>
  *
  * @since 2016年7月23日 上午8:59:05
@@ -47,20 +46,6 @@ public @interface Cmd {
     int minimumArguments() default 0;
 
     /**
-     * @deprecated 详见 {@link Executor}
-     * @return 只允许控制台执行
-     */
-    @Deprecated
-    boolean onlyConsole() default false;
-
-    /**
-     * @deprecated 详见 {@link Executor}
-     * @return 只允许玩家执行
-     */
-    @Deprecated
-    boolean onlyPlayer() default false;
-
-    /**
      * @return 当前命令权限
      */
     String permission() default "";
@@ -80,66 +65,37 @@ public @interface Cmd {
         /**
          * 玩家
          */
-        PLAYER {
-            @Override
-            public String getName() {
-                return "玩家";
-            }
-        },
+        PLAYER("玩家"),
         /**
          * 控制台
          */
-        CONSOLE {
-            @Override
-            public String getName() {
-                return "控制台";
-            }
-        },
+        CONSOLE("控制台"),
         /**
          * 命令方块
          */
-        BLOCK {
-            @Override
-            public String getName() {
-                return "命令方块";
-            }
-        },
+        BLOCK("命令方块"),
         /**
          * 命令矿车
          */
-        COMMANDMINECART {
-            @Override
-            public String getName() {
-                return "命令矿车";
-            }
-        },
+        COMMANDMINECART("命令矿车"),
         /**
          * 远程控制台
          */
-        REMOTECONSOLE {
-            @Override
-            public String getName() {
-                return "远程控制台";
-            }
-        },
+        REMOTECONSOLE("远程控制台"),
         /**
          * 所有
          */
-        ALL {
-            @Override
-            public String getName() {
-                return "所有执行者";
-            }
-        },
+        ALL("所有执行者"),
         /**
          * 未知
          */
-        UNKNOW {
-            @Override
-            public String getName() {
-                return "未知";
-            }
-        };
+        UNKNOW("未知");
+        private String name;
+
+        private Executor(final String name) {
+            this.name = name;
+        }
+
         /**
          * 解析Executor
          *
@@ -166,6 +122,8 @@ public @interface Cmd {
         /**
          * @return 执行者名称
          */
-        public abstract String getName();
+        public String getName() {
+            return name;
+        }
     }
 }
