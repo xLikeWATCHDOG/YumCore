@@ -35,15 +35,15 @@ public class CommandParse {
         new PlayerParse();
         new StringParse();
     }
-    private final List<Parse> parse = new LinkedList<>();
+    private List<Parse> parse = new LinkedList<>();
 
-    private final boolean isMain;
+    private boolean isMain;
 
-    public CommandParse(final Class[] classes, final Annotation[][] annons, final boolean isMain) {
+    public CommandParse(Class[] classes, Annotation[][] annons, boolean isMain) {
         this.isMain = isMain;
         for (int i = 0; i < classes.length; i++) {
-            final Class clazz = classes[i];
-            final Annotation[] annotations = annons[i];
+            Class clazz = classes[i];
+            Annotation[] annotations = annons[i];
             if (clazz.isAssignableFrom(CommandSender.class)) {
                 continue;
             }
@@ -58,24 +58,24 @@ public class CommandParse {
         }
     }
 
-    public static CommandParse get(final Method method) {
+    public static CommandParse get(Method method) {
         return new CommandParse(method.getParameterTypes(), method.getParameterAnnotations(), method.getReturnType().equals(boolean.class));
     }
 
-    public static void registerParse(final Class clazz, final Parse parse) {
+    public static void registerParse(Class clazz, Parse parse) {
         allparses.put(clazz, parse);
     }
 
-    public Object[] parse(final CommandArgument cmdArgs) {
-        final String args[] = cmdArgs.getArgs();
-        final List<Object> pobjs = new LinkedList<>();
+    public Object[] parse(CommandArgument cmdArgs) {
+        String args[] = cmdArgs.getArgs();
+        List<Object> pobjs = new LinkedList<>();
         pobjs.add(cmdArgs.getSender());
         for (int i = 0; i < parse.size(); i++) {
             try {
-                final Parse p = parse.get(i);
-                final String param = i < args.length ? args[i] : p.def;
-                pobjs.add(param == null ? param : p.parse(param));
-            } catch (final Exception e) {
+                Parse p = parse.get(i);
+                String param = i < args.length ? args[i] : p.def;
+                pobjs.add(param == null ? param : p.parse(cmdArgs.getSender(), param));
+            } catch (Exception e) {
                 Log.debug(e);
                 throw new CommandParseException(String.format("第 %s 个参数 ", isMain ? 1 : 2 + i) + e.getMessage());
             }
@@ -90,10 +90,10 @@ public class CommandParse {
         }
 
         @Override
-        public Boolean parse(final String arg) {
+        public Boolean parse(CommandSender sender, String arg) {
             try {
                 return Boolean.parseBoolean(arg);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw new CommandParseException("必须为True或者False!", e);
             }
         }
@@ -103,16 +103,16 @@ public class CommandParse {
         Class<Enum> etype;
         Enum[] elist;
 
-        public EnumParse(final Class<Enum> etype) {
+        public EnumParse(Class<Enum> etype) {
             this.etype = etype;
             this.elist = etype.getEnumConstants();
         }
 
         @Override
-        public Enum parse(final String arg) {
+        public Enum parse(CommandSender sender, String arg) {
             try {
                 return Enum.valueOf(etype, arg);
-            } catch (final IllegalArgumentException ex) {
+            } catch (IllegalArgumentException ex) {
                 throw new CommandParseException(String.format("不是 %s 有效值为 %s", etype.getSimpleName(), Arrays.toString(elist)));
             }
         }
@@ -125,14 +125,14 @@ public class CommandParse {
         }
 
         @Override
-        public Integer parse(final String arg) {
+        public Integer parse(CommandSender sender, String arg) {
             try {
-                final int result = Integer.parseInt(arg);
+                int result = Integer.parseInt(arg);
                 if (min > result || result > max) {
                     throwRange();
                 }
                 return result;
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw new CommandParseException("必须为数字!", e);
             }
         }
@@ -145,14 +145,14 @@ public class CommandParse {
         }
 
         @Override
-        public Long parse(final String arg) {
+        public Long parse(CommandSender sender, String arg) {
             try {
-                final long result = Long.parseLong(arg);
+                long result = Long.parseLong(arg);
                 if (min > result || result > max) {
                     throwRange();
                 }
                 return result;
-            } catch (final NumberFormatException e) {
+            } catch (NumberFormatException e) {
                 throw new CommandParseException("必须为数字!", e);
             }
         }
@@ -164,10 +164,10 @@ public class CommandParse {
         }
 
         @Override
-        public Material parse(final String arg) {
+        public Material parse(CommandSender sender, String arg) {
             try {
                 return Material.valueOf(arg);
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 throw new CommandParseException("玩家 " + arg + "不存在或不在线!");
             }
         }
@@ -183,7 +183,7 @@ public class CommandParse {
         public Parse<RT> clone() {
             try {
                 return (Parse<RT>) super.clone();
-            } catch (final CloneNotSupportedException e) {
+            } catch (CloneNotSupportedException e) {
                 return null;
             }
         }
@@ -192,17 +192,17 @@ public class CommandParse {
             return def;
         }
 
-        public abstract RT parse(String arg) throws CommandParseException;
+        public abstract RT parse(CommandSender sender, String arg) throws CommandParseException;
 
-        public Parse<RT> parseAnnotation(final Annotation[] annotations) {
-            for (final Annotation annotation : annotations) {
+        public Parse<RT> parseAnnotation(Annotation[] annotations) {
+            for (Annotation annotation : annotations) {
                 if (annotation.annotationType() == Default.class) {
                     def = ((Default) annotation).value();
                 } else if (annotation.annotationType() == Limit.class) {
                     min = ((Limit) annotation).min();
                     max = ((Limit) annotation).max();
                 } else if (annotation.annotationType() == KeyValue.class) {
-                    final KeyValue kv = (KeyValue) annotation;
+                    KeyValue kv = (KeyValue) annotation;
                     attrs.put(kv.key(), kv.value());
                 }
             }
@@ -213,7 +213,7 @@ public class CommandParse {
             throwRange(null);
         }
 
-        public void throwRange(final String str) {
+        public void throwRange(String str) {
             throw new CommandException(String.format(str == null ? "必须在 %s 到 %s 之间!" : str, min, max));
         }
     }
@@ -224,8 +224,8 @@ public class CommandParse {
         }
 
         @Override
-        public Player parse(final String arg) {
-            final Player p = Bukkit.getPlayerExact(arg);
+        public Player parse(CommandSender sender, String arg) {
+            Player p = Bukkit.getPlayerExact(arg);
             if (attrs.containsKey("check") && p == null) {
                 throw new CommandParseException("玩家 " + arg + "不存在或不在线!");
             }
@@ -244,7 +244,7 @@ public class CommandParse {
         }
 
         @Override
-        public String parse(final String arg) {
+        public String parse(CommandSender sender, String arg) {
             if (min > arg.length() || arg.length() > max) {
                 throwRange("长度必须在 %s 和 %s 之间!");
             }
