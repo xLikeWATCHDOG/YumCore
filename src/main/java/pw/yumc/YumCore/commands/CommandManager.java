@@ -141,16 +141,13 @@ public class CommandManager implements TabExecutor {
             if (defCmd != null) {
                 return defCmd.execute(new CommandArgument(sender, command, label, args));
             }
-            help.send(sender, command, label, args);
-            return true;
+            return help.send(sender, command, label, args);
         }
         final String subcmd = args[0].toLowerCase();
         if (subcmd.equalsIgnoreCase("help")) {
-            help.send(sender, command, label, args);
-            return true;
+            return help.send(sender, command, label, args);
         }
-        final CommandInfo ci = checkCache(subcmd);
-        return ci.execute(new CommandArgument(sender, command, label, moveStrings(args, 1)));
+        return getByCache(subcmd).execute(new CommandArgument(sender, command, label, moveStrings(args, 1)));
     }
 
     @Override
@@ -218,7 +215,7 @@ public class CommandManager implements TabExecutor {
      *            子命令
      * @return 命令信息
      */
-    private CommandInfo checkCache(final String subcmd) {
+    private CommandInfo getByCache(final String subcmd) {
         if (!cmdCache.containsKey(subcmd)) {
             for (final CommandInfo cmdinfo : cmds) {
                 if (cmdinfo.isValid(subcmd)) {

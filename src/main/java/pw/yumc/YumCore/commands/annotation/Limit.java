@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * @since 2016年7月23日 上午9:00:27
  * @author 喵♂呜
  */
-@Target(ElementType.METHOD)
+@Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Limit {
     /**

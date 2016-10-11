@@ -2,15 +2,18 @@ package pw.yumc.YumCore.commands;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.commands.annotation.Default;
 import pw.yumc.YumCore.commands.annotation.KeyValue;
 import pw.yumc.YumCore.commands.annotation.Limit;
@@ -32,26 +35,31 @@ public class CommandParse {
         new PlayerParse();
         new StringParse();
     }
-    public List<Parse> parse = new LinkedList<>();
-    public List<Object> parsed = new LinkedList<>();
+    private final List<Parse> parse = new LinkedList<>();
 
-    public CommandParse(final Class[] classes, final Annotation[][] annons) {
+    private final boolean isMain;
+
+    public CommandParse(final Class[] classes, final Annotation[][] annons, final boolean isMain) {
+        this.isMain = isMain;
         for (int i = 0; i < classes.length; i++) {
             final Class clazz = classes[i];
             final Annotation[] annotations = annons[i];
             if (clazz.isAssignableFrom(CommandSender.class)) {
                 continue;
             }
-            if (!allparses.containsKey(clazz)) {
-                throw new CommandParseException(String.format("无法解析的参数类型 %s !", clazz.getName()));
+            Parse parse = allparses.get(clazz);
+            if (parse == null) {
+                if (!clazz.isEnum()) {
+                    throw new CommandParseException(String.format("存在无法解析的参数类型 %s", clazz.getName()));
+                }
+                parse = new EnumParse(clazz);
             }
-            final Parse parse = allparses.get(clazz).clone();
-            this.parse.add(parse.parseAnnotation(annotations));
+            this.parse.add(parse.clone().parseAnnotation(annotations));
         }
     }
 
     public static CommandParse get(final Method method) {
-        return new CommandParse(method.getParameterTypes(), method.getParameterAnnotations());
+        return new CommandParse(method.getParameterTypes(), method.getParameterAnnotations(), method.getReturnType().equals(boolean.class));
     }
 
     public static void registerParse(final Class clazz, final Parse parse) {
@@ -60,18 +68,16 @@ public class CommandParse {
 
     public Object[] parse(final CommandArgument cmdArgs) {
         final String args[] = cmdArgs.getArgs();
-        if (args.length == 0) {
-            return null;
-        }
         final List<Object> pobjs = new LinkedList<>();
         pobjs.add(cmdArgs.getSender());
-        for (int i = 0; i < args.length; i++) {
+        for (int i = 0; i < parse.size(); i++) {
             try {
-                if (i < parse.size()) {
-                    pobjs.add(parse.get(i).parse(args[i]));
-                }
+                final Parse p = parse.get(i);
+                final String param = i < args.length ? args[i] : p.def;
+                pobjs.add(param == null ? param : p.parse(param));
             } catch (final Exception e) {
-                throw new CommandException(String.format("第 %s 个参数 ", i + 1) + e.getMessage());
+                Log.debug(e);
+                throw new CommandParseException(String.format("第 %s 个参数 ", isMain ? 1 : 2 + i) + e.getMessage());
             }
         }
         return pobjs.toArray();
@@ -88,7 +94,26 @@ public class CommandParse {
             try {
                 return Boolean.parseBoolean(arg);
             } catch (final Exception e) {
-                throw new CommandParseException("必须为True或者False!");
+                throw new CommandParseException("必须为True或者False!", e);
+            }
+        }
+    }
+
+    public static class EnumParse extends Parse<Enum> {
+        Class<Enum> etype;
+        Enum[] elist;
+
+        public EnumParse(final Class<Enum> etype) {
+            this.etype = etype;
+            this.elist = etype.getEnumConstants();
+        }
+
+        @Override
+        public Enum parse(final String arg) {
+            try {
+                return Enum.valueOf(etype, arg);
+            } catch (final IllegalArgumentException ex) {
+                throw new CommandParseException(String.format("不是 %s 有效值为 %s", etype.getSimpleName(), Arrays.toString(elist)));
             }
         }
     }
@@ -107,8 +132,8 @@ public class CommandParse {
                     throwRange();
                 }
                 return result;
-            } catch (final Exception e) {
-                throw new CommandParseException("必须为数字!");
+            } catch (final NumberFormatException e) {
+                throw new CommandParseException("必须为数字!", e);
             }
         }
     }
@@ -127,17 +152,32 @@ public class CommandParse {
                     throwRange();
                 }
                 return result;
+            } catch (final NumberFormatException e) {
+                throw new CommandParseException("必须为数字!", e);
+            }
+        }
+    }
+
+    public static class MaterialParse extends Parse<Material> {
+        public MaterialParse() {
+            allparses.put(String.class, this);
+        }
+
+        @Override
+        public Material parse(final String arg) {
+            try {
+                return Material.valueOf(arg);
             } catch (final Exception e) {
-                throw new CommandParseException("必须为数字!");
+                throw new CommandParseException("玩家 " + arg + "不存在或不在线!");
             }
         }
     }
 
     public static abstract class Parse<RT> implements Cloneable {
-        protected Object def;
-        protected Map<String, Object> attrs = new HashMap<>();
-        protected int min;
-        protected int max;
+        protected String def;
+        protected Map<String, String> attrs = new HashMap<>();
+        protected int min = 0;
+        protected int max = Integer.MAX_VALUE;
 
         @Override
         public Parse<RT> clone() {
@@ -148,14 +188,8 @@ public class CommandParse {
             }
         }
 
-        public Object getDefault() {
+        public String getDefault() {
             return def;
-        }
-
-        public void load() {
-            def = attrs.get("default");
-            min = (int) attrs.get("min");
-            max = (int) attrs.get("max");
         }
 
         public abstract RT parse(String arg) throws CommandParseException;
@@ -163,20 +197,16 @@ public class CommandParse {
         public Parse<RT> parseAnnotation(final Annotation[] annotations) {
             for (final Annotation annotation : annotations) {
                 if (annotation.annotationType() == Default.class) {
-                    setAttr("default", ((Default) annotation).value());
+                    def = ((Default) annotation).value();
                 } else if (annotation.annotationType() == Limit.class) {
-                    setAttr("min", ((Limit) annotation).min());
-                    setAttr("max", ((Limit) annotation).max());
+                    min = ((Limit) annotation).min();
+                    max = ((Limit) annotation).max();
                 } else if (annotation.annotationType() == KeyValue.class) {
                     final KeyValue kv = (KeyValue) annotation;
-                    setAttr(kv.key(), kv.value());
+                    attrs.put(kv.key(), kv.value());
                 }
             }
             return this;
-        }
-
-        public void setAttr(final String name, final Object value) {
-            attrs.put(name, value);
         }
 
         public void throwRange() {
@@ -184,7 +214,7 @@ public class CommandParse {
         }
 
         public void throwRange(final String str) {
-            throw new CommandException(String.format(str == null ? "必须在 %s 到 %s之间!" : str, min, max));
+            throw new CommandException(String.format(str == null ? "必须在 %s 到 %s 之间!" : str, min, max));
         }
     }
 
@@ -204,8 +234,13 @@ public class CommandParse {
     }
 
     public static class StringParse extends Parse<String> {
+        List<String> options;
+
         public StringParse() {
             allparses.put(String.class, this);
+            if (attrs.containsKey("option")) {
+
+            }
         }
 
         @Override

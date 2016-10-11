@@ -125,10 +125,10 @@ public class CommandHelp {
      * @param args
      *            参数
      */
-    public void send(final CommandSender sender, final Command command, final String label, final String[] args) {
+    public boolean send(final CommandSender sender, final Command command, final String label, final String[] args) {
         if (this.HELPPAGECOUNT == 0) {
             sender.sendMessage(commandNotFound);
-            return;
+            return true;
         }
         int page = 1;
         try {
@@ -163,6 +163,7 @@ public class CommandHelp {
             cacheHelp.put(helpkey, helpList.toArray(new String[0]));
         }
         sender.sendMessage(cacheHelp.get(helpkey));
+        return true;
     }
 
     /**

@@ -17,7 +17,9 @@ import pw.yumc.YumCore.commands.annotation.Cmd;
 import pw.yumc.YumCore.commands.annotation.Cmd.Executor;
 import pw.yumc.YumCore.commands.annotation.Help;
 import pw.yumc.YumCore.commands.annotation.Sort;
+import pw.yumc.YumCore.commands.exception.CommandArgumentException;
 import pw.yumc.YumCore.commands.exception.CommandException;
+import pw.yumc.YumCore.commands.exception.CommandParseException;
 
 /**
  * 命令信息存储类
@@ -29,6 +31,7 @@ public class CommandInfo {
     public static final CommandInfo Unknow = new CommandInfo();
     private static final String onlyExecutor = "§c当前命令仅允许 §b%s §c执行!";
     private static final String losePerm = "§c你需要有 %s 的权限才能执行此命令!";
+    private static final String argErr = "§c参数错误: §4%s";
     private static final String cmdErr = "§6错误原因: §4命令参数不正确!";
     private static final String cmdUse = "§6使用方法: §e/%s %s %s";
     private static final String cmdDes = "§6命令描述: §3%s";
@@ -121,6 +124,8 @@ public class CommandInfo {
                 public void run() {
                     try {
                         method.invoke(origin, parse.parse(cmdArgs));
+                    } catch (final CommandParseException | CommandArgumentException e) {
+                        Log.toSender(cmdArgs.getSender(), argErr, e.getMessage());
                     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                         throw new CommandException(e);
                     }
