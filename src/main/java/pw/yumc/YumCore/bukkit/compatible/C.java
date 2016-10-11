@@ -39,19 +39,19 @@ public class C {
     static {
         try {
             version = getNMSVersion();
-            final boolean newversion = Integer.parseInt(version.split("_")[1]) > 7;
+            boolean newversion = Integer.parseInt(version.split("_")[1]) > 7;
             nmsChatSerializer = Class.forName(a(newversion ? "IChatBaseComponent$ChatSerializer" : "ChatSerializer"));
             nmsIChatBaseComponent = Class.forName(a("IChatBaseComponent"));
             packetType = Class.forName(a("PacketPlayOutChat"));
             packetActions = Class.forName(a(newversion ? "PacketPlayOutTitle$EnumTitleAction" : "EnumTitleAction"));
             packetTitle = Class.forName(a("PacketPlayOutTitle"));
-            final Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
-            final Class<?> typeNMSPlayer = Class.forName(a("EntityPlayer"));
-            final Class<?> typePlayerConnection = Class.forName(a("PlayerConnection"));
+            Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
+            Class<?> typeNMSPlayer = Class.forName(a("EntityPlayer"));
+            Class<?> typePlayerConnection = Class.forName(a("PlayerConnection"));
             getHandle = typeCraftPlayer.getMethod("getHandle");
             playerConnection = typeNMSPlayer.getField("playerConnection");
             sendPacket = typePlayerConnection.getMethod("sendPacket", Class.forName(a("Packet")));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             Log.warning(C.class.getSimpleName() + " 兼容性工具初始化失败 可能造成部分功能不可用!");
             Log.debug(e);
         }
@@ -60,11 +60,11 @@ public class C {
     private C() {
     }
 
-    public static String a(final String str) {
+    public static String a(String str) {
         return "net.minecraft.server." + version + "." + str;
     }
 
-    public static String b(final String str) {
+    public static String b(String str) {
         return "org.bukkit.craftbukkit." + version + "." + str;
     }
 
@@ -87,8 +87,8 @@ public class C {
          * @param message
          *            需要发送的消息
          */
-        public static void broadcast(final String message) {
-            for (final org.bukkit.entity.Player player : C.Player.getOnlinePlayers()) {
+        public static void broadcast(String message) {
+            for (org.bukkit.entity.Player player : C.Player.getOnlinePlayers()) {
                 send(player, message);
             }
         }
@@ -107,12 +107,12 @@ public class C {
                 public void run() {
                     int time = times;
                     do {
-                        for (final org.bukkit.entity.Player player : C.Player.getOnlinePlayers()) {
+                        for (org.bukkit.entity.Player player : C.Player.getOnlinePlayers()) {
                             send(player, message);
                         }
                         try {
                             Thread.sleep(1000);
-                        } catch (final InterruptedException e) {
+                        } catch (InterruptedException e) {
                             // Ignore
                         }
                         time--;
@@ -137,14 +137,14 @@ public class C {
                 public void run() {
                     int time = times;
                     do {
-                        for (final org.bukkit.entity.Player player : C.Player.getOnlinePlayers()) {
+                        for (org.bukkit.entity.Player player : C.Player.getOnlinePlayers()) {
                             if (player.getWorld().getName().equalsIgnoreCase(world.getName())) {
                                 send(player, message);
                             }
                         }
                         try {
                             Thread.sleep(1000);
-                        } catch (final InterruptedException e) {
+                        } catch (InterruptedException e) {
                             // Ignore
                         }
                         time--;
@@ -162,19 +162,19 @@ public class C {
          * @param msg
          *            ActionBar信息
          */
-        public static void send(final org.bukkit.entity.Player receivingPacket, final String msg) {
+        public static void send(org.bukkit.entity.Player receivingPacket, String msg) {
             Object packet = null;
             try {
-                final Object serialized = nmsChatSerializer.getMethod("a", String.class).invoke(null, "{\"text\":\"" + ChatColor.translateAlternateColorCodes('&', JSONObject.escape(msg)) + "\"}");
+                Object serialized = nmsChatSerializer.getMethod("a", String.class).invoke(null, "{\"text\":\"" + ChatColor.translateAlternateColorCodes('&', JSONObject.escape(msg)) + "\"}");
                 if (!version.contains("1_7")) {
                     packet = packetType.getConstructor(nmsIChatBaseComponent, byte.class).newInstance(serialized, (byte) 2);
                 } else {
                     packet = packetType.getConstructor(nmsIChatBaseComponent, int.class).newInstance(serialized, 2);
                 }
-                final Object player = getHandle.invoke(receivingPacket);
-                final Object connection = playerConnection.get(player);
+                Object player = getHandle.invoke(receivingPacket);
+                Object connection = playerConnection.get(player);
                 sendPacket.invoke(connection, packet);
-            } catch (final Exception ex) {
+            } catch (Exception ex) {
                 Log.debug("ActionBar发包错误 " + version, ex);
             }
         }
@@ -198,7 +198,7 @@ public class C {
                         send(receivingPacket, msg);
                         try {
                             Thread.sleep(1000);
-                        } catch (final InterruptedException e) {
+                        } catch (InterruptedException e) {
                             // Ignore
                         }
                         time--;
@@ -224,34 +224,34 @@ public class C {
                 // getOnlinePlayers start
                 getOnlinePlayers = Bukkit.class.getDeclaredMethod("getOnlinePlayers");
                 if (getOnlinePlayers.getReturnType() != org.bukkit.entity.Player[].class) {
-                    for (final Method method : Bukkit.class.getDeclaredMethods()) {
+                    for (Method method : Bukkit.class.getDeclaredMethods()) {
                         if (method.getReturnType() == org.bukkit.entity.Player[].class && method.getName().endsWith("getOnlinePlayers")) {
                             getOnlinePlayers = method;
                         }
                     }
                 }
                 // getOnlinePlayers end
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 Log.warning(Player.class.getSimpleName() + "兼容性工具初始化失败 可能造成部分功能不可用!");
             }
             try {
                 // getOfflinePlayer start
                 try {
                     gameProfileClass = Class.forName("net.minecraft.util.com.mojang.authlib.GameProfile");
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     try {
                         gameProfileClass = Class.forName("com.mojang.authlib.GameProfile");
-                    } catch (final Exception e1) {
+                    } catch (Exception e1) {
                     }
                 }
                 gameProfileConstructor = gameProfileClass.getDeclaredConstructor(new Class[] { UUID.class, String.class });
                 gameProfileConstructor.setAccessible(true);
-                final Class<? extends Server> craftServer = Bukkit.getServer().getClass();
-                final Class<?> craftOfflinePlayer = Class.forName(craftServer.getName().replace("CraftServer", "CraftOfflinePlayer"));
+                Class<? extends Server> craftServer = Bukkit.getServer().getClass();
+                Class<?> craftOfflinePlayer = Class.forName(craftServer.getName().replace("CraftServer", "CraftOfflinePlayer"));
                 craftOfflinePlayerConstructor = craftOfflinePlayer.getDeclaredConstructor(new Class[] { craftServer, gameProfileClass });
                 craftOfflinePlayerConstructor.setAccessible(true);
                 // getOfflinePlayer end
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 Log.debug(e);
             }
         }
@@ -266,12 +266,12 @@ public class C {
          *            玩家名称
          * @return {@link OfflinePlayer}
          */
-        public static OfflinePlayer getOfflinePlayer(final String playerName) {
+        public static OfflinePlayer getOfflinePlayer(String playerName) {
             try {
-                final Object gameProfile = gameProfileConstructor.newInstance(new Object[] { UUID.nameUUIDFromBytes(("OfflinePlayer:" + playerName).getBytes(Charsets.UTF_8)), playerName });
-                final Object offlinePlayer = craftOfflinePlayerConstructor.newInstance(new Object[] { Bukkit.getServer(), gameProfile });
+                Object gameProfile = gameProfileConstructor.newInstance(new Object[] { UUID.nameUUIDFromBytes(("OfflinePlayer:" + playerName).getBytes(Charsets.UTF_8)), playerName });
+                Object offlinePlayer = craftOfflinePlayerConstructor.newInstance(new Object[] { Bukkit.getServer(), gameProfile });
                 return (OfflinePlayer) offlinePlayer;
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 return Bukkit.getOfflinePlayer(playerName);
             }
         }
@@ -284,7 +284,7 @@ public class C {
         public static Collection<? extends org.bukkit.entity.Player> getOnlinePlayers() {
             try {
                 return Arrays.asList((org.bukkit.entity.Player[]) getOnlinePlayers.invoke(null));
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 return Bukkit.getOnlinePlayers();
             }
         }
@@ -302,8 +302,8 @@ public class C {
          * @param subtitle
          *            子标题
          */
-        public static void broadcast(final String title, final String subtitle) {
-            for (final org.bukkit.entity.Player player : Player.getOnlinePlayers()) {
+        public static void broadcast(String title, String subtitle) {
+            for (org.bukkit.entity.Player player : Player.getOnlinePlayers()) {
                 send(player, title, subtitle);
             }
         }
@@ -322,8 +322,8 @@ public class C {
          * @param fadeOutTime
          *            淡出时间
          */
-        public static void broadcast(final String title, final String subtitle, final int fadeInTime, final int stayTime, final int fadeOutTime) {
-            for (final org.bukkit.entity.Player player : Player.getOnlinePlayers()) {
+        public static void broadcast(String title, String subtitle, int fadeInTime, int stayTime, int fadeOutTime) {
+            for (org.bukkit.entity.Player player : Player.getOnlinePlayers()) {
                 send(player, title, subtitle, fadeInTime, stayTime, fadeOutTime);
             }
         }
@@ -338,8 +338,8 @@ public class C {
          * @param subtitle
          *            子标题
          */
-        public static void broadcast(final World world, final String title, final String subtitle) {
-            for (final org.bukkit.entity.Player player : Player.getOnlinePlayers()) {
+        public static void broadcast(World world, String title, String subtitle) {
+            for (org.bukkit.entity.Player player : Player.getOnlinePlayers()) {
                 if (player.getWorld().getName().equalsIgnoreCase(world.getName())) {
                     send(player, title, subtitle);
                 }
@@ -354,12 +354,12 @@ public class C {
          * @throws Exception
          *             异常
          */
-        public static void reset(final org.bukkit.entity.Player recoverPlayer) throws Exception {
+        public static void reset(org.bukkit.entity.Player recoverPlayer) throws Exception {
             // Send timings first
-            final Object player = getHandle.invoke(recoverPlayer);
-            final Object connection = playerConnection.get(player);
-            final Object[] actions = packetActions.getEnumConstants();
-            final Object packet = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent).newInstance(actions[4], null);
+            Object player = getHandle.invoke(recoverPlayer);
+            Object connection = playerConnection.get(player);
+            Object[] actions = packetActions.getEnumConstants();
+            Object packet = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent).newInstance(actions[4], null);
             sendPacket.invoke(connection, packet);
         }
 
@@ -373,7 +373,7 @@ public class C {
          * @param subtitle
          *            子标题
          */
-        public static void send(final org.bukkit.entity.Player receivingPacket, final String title, final String subtitle) {
+        public static void send(org.bukkit.entity.Player receivingPacket, String title, String subtitle) {
             send(receivingPacket, title, subtitle, 1, 2, 1);
         }
 
@@ -393,19 +393,23 @@ public class C {
          * @param fadeOutTime
          *            淡出时间
          */
-        public static void send(final org.bukkit.entity.Player receivingPacket, final String title, final String subtitle, final int fadeInTime, final int stayTime, final int fadeOutTime) {
+        public static void send(org.bukkit.entity.Player receivingPacket, String title, String subtitle, int fadeInTime, int stayTime, int fadeOutTime) {
             if (packetTitle != null) {
                 try {
                     // First reset previous settings
                     reset(receivingPacket);
                     // Send timings first
-                    final Object player = getHandle.invoke(receivingPacket);
-                    final Object connection = playerConnection.get(player);
-                    final Object[] actions = packetActions.getEnumConstants();
+                    Object player = getHandle.invoke(receivingPacket);
+                    Object connection = playerConnection.get(player);
+                    Object[] actions = packetActions.getEnumConstants();
                     Object packet = null;
                     // Send if set
                     if ((fadeInTime != -1) && (fadeOutTime != -1) && (stayTime != -1)) {
-                        packet = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent, Integer.TYPE, Integer.TYPE, Integer.TYPE).newInstance(actions[2], null, fadeInTime * 20, stayTime * 20, fadeOutTime * 20);
+                        packet = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent, Integer.TYPE, Integer.TYPE, Integer.TYPE).newInstance(actions[2],
+                                null,
+                                fadeInTime * 20,
+                                stayTime * 20,
+                                fadeOutTime * 20);
                         sendPacket.invoke(connection, packet);
                     }
                     // Send title
@@ -418,7 +422,7 @@ public class C {
                         packet = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent).newInstance(actions[1], serialized);
                         sendPacket.invoke(connection, packet);
                     }
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     Log.debug(e);
                 }
             }

@@ -8,15 +8,15 @@ package pw.yumc.YumCore.commands.exception;
  */
 public class CommandException extends RuntimeException {
 
-    public CommandException(final Exception e) {
+    public CommandException(Exception e) {
         super(e);
     }
 
-    public CommandException(final String string) {
+    public CommandException(String string) {
         super(string);
     }
 
-    public CommandException(final String string, final Exception e) {
+    public CommandException(String string, Exception e) {
         super(string, e);
     }
 

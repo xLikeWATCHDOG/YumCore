@@ -16,13 +16,13 @@ import org.json.simple.JSONValue;
  * @author 喵♂呜
  */
 public class StickyNotes {
-    private final static String DOMAIN = "http://paste.yumc.pw";
-    private final static String POST_URL = DOMAIN + "/api/json/create";
-    private final static String VIEW_URL = DOMAIN + "/%s/%s";
+    private static String DOMAIN = "http://paste.yumc.pw";
+    private static String POST_URL = DOMAIN + "/api/json/create";
+    private static String VIEW_URL = DOMAIN + "/%s/%s";
 
-    public static void main(final String[] args) {
-        final StickyNotes p = new StickyNotes();
-        final PasteContent paste = new PasteContent();
+    public static void main(String[] args) {
+        StickyNotes p = new StickyNotes();
+        PasteContent paste = new PasteContent();
         paste.addLine("异常提交测试!");
         paste.addThrowable(new Throwable());
         System.out.println(p.post(StickyNotes.Expire.HalfHour, paste));
@@ -35,7 +35,7 @@ public class StickyNotes {
      *            内容
      * @return 地址
      */
-    public String post(final PasteContent content) {
+    public String post(PasteContent content) {
         return post("YumCore-" + System.currentTimeMillis(), PasteFormat.JAVA, StickyNotes.Expire.Never, content);
     }
 
@@ -48,7 +48,7 @@ public class StickyNotes {
      *            内容
      * @return 地址
      */
-    public String post(final StickyNotes.Expire expire, final PasteContent content) {
+    public String post(StickyNotes.Expire expire, PasteContent content) {
         return post("YumCore-" + System.currentTimeMillis(), PasteFormat.JAVA, expire, content);
     }
 
@@ -65,7 +65,7 @@ public class StickyNotes {
      *            内容
      * @return 地址
      */
-    public String post(final String title, final PasteFormat format, final StickyNotes.Expire expire, final PasteContent content) {
+    public String post(String title, PasteFormat format, StickyNotes.Expire expire, PasteContent content) {
         return post(title, format.toString(), expire.getExpire(), content.toString());
     }
 
@@ -82,23 +82,23 @@ public class StickyNotes {
      *            内容
      * @return 地址
      */
-    public String post(final String title, final String format, final int expire, final String content) {
+    public String post(String title, String format, int expire, String content) {
         String result = "Failed to post!";
         try {
-            final HttpURLConnection connection = (HttpURLConnection) new URL(POST_URL).openConnection();
+            HttpURLConnection connection = (HttpURLConnection) new URL(POST_URL).openConnection();
             connection.setConnectTimeout(20000);
             connection.setReadTimeout(20000);
             connection.setRequestMethod("POST");
             connection.addRequestProperty("Content-type", "application/x-www-form-urlencoded");
             connection.setInstanceFollowRedirects(false);
             connection.setDoOutput(true);
-            final OutputStream outputStream = connection.getOutputStream();
-            final byte[] outByte = String.format("title=%s&language=%s&expire=%s&data=%s", title, format, expire, content).getBytes();
+            OutputStream outputStream = connection.getOutputStream();
+            byte[] outByte = String.format("title=%s&language=%s&expire=%s&data=%s", title, format, expire, content).getBytes();
             outputStream.write(outByte);
             outputStream.flush();
             outputStream.close();
-            final BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            final StringBuilder request = new StringBuilder();
+            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            StringBuilder request = new StringBuilder();
             String temp;
             while ((temp = br.readLine()) != null) {
                 request.append(temp);
@@ -111,7 +111,7 @@ public class StickyNotes {
                 return object.get("error").toString();
             }
             return String.format(VIEW_URL, object.get("id"), object.get("hash"));
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return result;
@@ -134,7 +134,7 @@ public class StickyNotes {
 
         int expire;
 
-        private Expire(final int expire) {
+        private Expire(int expire) {
             this.expire = expire;
         }
 

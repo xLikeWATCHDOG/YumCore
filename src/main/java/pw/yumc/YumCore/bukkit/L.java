@@ -37,8 +37,8 @@ public class L {
      *             if the world don't exists
      * @see ConfigurationSerializable
      */
-    public static Location deserialize(final Map<String, Object> args) {
-        final World world = Bukkit.getWorld((String) args.get("world"));
+    public static Location deserialize(Map<String, Object> args) {
+        World world = Bukkit.getWorld((String) args.get("world"));
         if (world == null) {
             throw new IllegalArgumentException("unknown world");
         }
@@ -54,8 +54,8 @@ public class L {
      *            地点
      * @return Map
      */
-    public static Map<String, Object> serialize(final Location loc) {
-        final Map<String, Object> data = new LinkedHashMap<>();
+    public static Map<String, Object> serialize(Location loc) {
+        Map<String, Object> data = new LinkedHashMap<>();
         data.put(ConfigurationSerialization.SERIALIZED_TYPE_KEY, Location.class.getName());
         data.put("world", loc.getWorld().getName());
         data.put("x", loc.getX());

@@ -14,7 +14,7 @@ import java.util.Map.Entry;
  */
 public class KeyValue {
 
-    private final Map<Object, Object> keyvalues = new HashMap<>();
+    private Map<Object, Object> keyvalues = new HashMap<>();
 
     /**
      * 数据库键值管理类
@@ -30,7 +30,7 @@ public class KeyValue {
      * @param value
      *            值
      */
-    public KeyValue(final String key, final Object value) {
+    public KeyValue(String key, Object value) {
         add(key, value);
     }
 
@@ -43,7 +43,7 @@ public class KeyValue {
      *            值
      * @return {@link KeyValue}
      */
-    public KeyValue add(final String key, final Object value) {
+    public KeyValue add(String key, Object value) {
         this.keyvalues.put(key, value);
         return this;
     }
@@ -64,8 +64,8 @@ public class KeyValue {
      *            查询的键
      * @return 值
      */
-    public String getString(final String key) {
-        final Object obj = this.keyvalues.get(key);
+    public String getString(String key) {
+        Object obj = this.keyvalues.get(key);
         return obj == null ? "" : obj.toString();
     }
 
@@ -75,8 +75,8 @@ public class KeyValue {
      * @return 所有的值
      */
     public Object[] getValues() {
-        final List<Object> keys = new ArrayList<>();
-        for (final Entry<Object, Object> next : this.keyvalues.entrySet()) {
+        List<Object> keys = new ArrayList<>();
+        for (Entry<Object, Object> next : this.keyvalues.entrySet()) {
             keys.add(next.getValue());
         }
         return keys.toArray(new Object[0]);
@@ -97,8 +97,8 @@ public class KeyValue {
      * @return 数据表创建SQL语句
      */
     public String toCreateString() {
-        final StringBuilder sb = new StringBuilder();
-        for (final Entry<Object, Object> next : this.keyvalues.entrySet()) {
+        StringBuilder sb = new StringBuilder();
+        for (Entry<Object, Object> next : this.keyvalues.entrySet()) {
             sb.append("`");
             sb.append(next.getKey());
             sb.append("` ");
@@ -116,7 +116,7 @@ public class KeyValue {
     public String toInsertString() {
         String ks = "";
         String vs = "";
-        for (final Entry<Object, Object> next : this.keyvalues.entrySet()) {
+        for (Entry<Object, Object> next : this.keyvalues.entrySet()) {
             ks += "`" + next.getKey() + "`, ";
             vs += "'" + next.getValue() + "', ";
         }
@@ -127,8 +127,8 @@ public class KeyValue {
      * @return 转换为键列
      */
     public String toKeys() {
-        final StringBuilder sb = new StringBuilder();
-        for (final Object next : this.keyvalues.keySet()) {
+        StringBuilder sb = new StringBuilder();
+        for (Object next : this.keyvalues.keySet()) {
             sb.append("`");
             sb.append(next);
             sb.append("`, ");
@@ -147,8 +147,8 @@ public class KeyValue {
      * @return 更新SQL语句
      */
     public String toUpdateString() {
-        final StringBuilder sb = new StringBuilder();
-        for (final Entry<Object, Object> next : this.keyvalues.entrySet()) {
+        StringBuilder sb = new StringBuilder();
+        for (Entry<Object, Object> next : this.keyvalues.entrySet()) {
             sb.append("`");
             sb.append(next.getKey());
             sb.append("`='");
@@ -164,8 +164,8 @@ public class KeyValue {
      * @return 查询SQL语句
      */
     public String toWhereString() {
-        final StringBuilder sb = new StringBuilder();
-        for (final Entry<Object, Object> next : this.keyvalues.entrySet()) {
+        StringBuilder sb = new StringBuilder();
+        for (Entry<Object, Object> next : this.keyvalues.entrySet()) {
             sb.append("`");
             sb.append(next.getKey());
             sb.append("`='");

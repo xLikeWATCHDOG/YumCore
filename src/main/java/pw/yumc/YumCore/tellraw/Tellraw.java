@@ -24,7 +24,7 @@ public class Tellraw {
     static boolean isPaper = Bukkit.getVersion().contains("Paper");
     List<MessagePart> messageParts = new ArrayList<>();
 
-    public Tellraw(final String text) {
+    public Tellraw(String text) {
         messageParts.add(new MessagePart(text));
     }
 
@@ -44,7 +44,7 @@ public class Tellraw {
      *            文本
      * @return {@link Tellraw}
      */
-    public static Tellraw create(final String text) {
+    public static Tellraw create(String text) {
         return new Tellraw(text);
     }
 
@@ -57,7 +57,7 @@ public class Tellraw {
      *            参数
      * @return {@link Tellraw}
      */
-    public static Tellraw create(final String text, final Object... objects) {
+    public static Tellraw create(String text, Object... objects) {
         return new Tellraw(String.format(text, objects));
     }
 
@@ -65,7 +65,7 @@ public class Tellraw {
      * 发送Tellraw公告
      */
     public void broadcast() {
-        for (final Player player : C.Player.getOnlinePlayers()) {
+        for (Player player : C.Player.getOnlinePlayers()) {
             send(player);
         }
     }
@@ -79,7 +79,7 @@ public class Tellraw {
      *            提示
      * @return {@link Tellraw}
      */
-    public Tellraw cmd_tip(final String command, final String... tip) {
+    public Tellraw cmd_tip(String command, String... tip) {
         return command(command).tip(tip);
     }
 
@@ -90,7 +90,7 @@ public class Tellraw {
      *            命令
      * @return {@link Tellraw}
      */
-    public Tellraw command(final String command) {
+    public Tellraw command(String command) {
         return onClick("run_command", command);
     }
 
@@ -101,11 +101,11 @@ public class Tellraw {
      *            文件路径
      * @return {@link Tellraw}
      */
-    public Tellraw file(final String path) {
+    public Tellraw file(String path) {
         return onClick("open_file", path);
     }
 
-    public Tellraw insertion(final String data) {
+    public Tellraw insertion(String data) {
         latest().insertionData = data;
         return this;
     }
@@ -117,7 +117,7 @@ public class Tellraw {
      *            {@link ItemStack}
      * @return {@link Tellraw}
      */
-    public Tellraw item(final ItemStack item) {
+    public Tellraw item(ItemStack item) {
         return item(ItemSerialize.$(item));
     }
 
@@ -128,7 +128,7 @@ public class Tellraw {
      *            物品Json串
      * @return {@link Tellraw}
      */
-    public Tellraw item(final String json) {
+    public Tellraw item(String json) {
         return onHover("show_item", json);
     }
 
@@ -139,7 +139,7 @@ public class Tellraw {
      *            地址
      * @return {@link Tellraw}
      */
-    public Tellraw link(final String url) {
+    public Tellraw link(String url) {
         return onClick("open_url", url);
     }
 
@@ -150,7 +150,7 @@ public class Tellraw {
      *            网址
      * @return {@link Tellraw}
      */
-    public Tellraw openurl(final String url) {
+    public Tellraw openurl(String url) {
         return onClick("open_url", url);
     }
 
@@ -186,7 +186,7 @@ public class Tellraw {
      *            提示
      * @return {@link Tellraw}
      */
-    public Tellraw sug_tip(final String command, final String... tip) {
+    public Tellraw sug_tip(String command, String... tip) {
         return suggest(command).tip(tip);
     }
 
@@ -197,7 +197,7 @@ public class Tellraw {
      *            命令
      * @return {@link Tellraw}
      */
-    public Tellraw suggest(final String command) {
+    public Tellraw suggest(String command) {
         return onClick("suggest_command", command);
     }
 
@@ -208,7 +208,7 @@ public class Tellraw {
      *            文本
      * @return {@link Tellraw}
      */
-    public Tellraw text(final String text) {
+    public Tellraw text(String text) {
         latest().text = text;
         return this;
     }
@@ -220,7 +220,7 @@ public class Tellraw {
      *            新的文本
      * @return {@link Tellraw}
      */
-    public Tellraw then(final String text) {
+    public Tellraw then(String text) {
         return then(new MessagePart(text));
     }
 
@@ -233,7 +233,7 @@ public class Tellraw {
      *            {@link ItemStack}
      * @return {@link Tellraw}
      */
-    public Tellraw then(final String name, final ItemStack item) {
+    public Tellraw then(String name, ItemStack item) {
         return then(name).item(ItemSerialize.$(item));
     }
 
@@ -246,7 +246,7 @@ public class Tellraw {
      *            参数
      * @return {@link Tellraw}
      */
-    public Tellraw then(final String text, final Object... objects) {
+    public Tellraw then(String text, Object... objects) {
         return then(new MessagePart(String.format(text, objects)));
     }
 
@@ -257,12 +257,12 @@ public class Tellraw {
      *            文本列
      * @return {@link Tellraw}
      */
-    public Tellraw tip(final List<String> texts) {
+    public Tellraw tip(List<String> texts) {
         if (texts.isEmpty()) {
             return this;
         }
-        final StringBuilder text = new StringBuilder();
-        for (final String t : texts) {
+        StringBuilder text = new StringBuilder();
+        for (String t : texts) {
             text.append(t).append("\n");
         }
         return tip(text.toString().substring(0, text.length() - 1));
@@ -275,7 +275,7 @@ public class Tellraw {
      *            文本
      * @return {@link Tellraw}
      */
-    public Tellraw tip(final String text) {
+    public Tellraw tip(String text) {
         return onHover("show_text", text);
     }
 
@@ -286,7 +286,7 @@ public class Tellraw {
      *            文本列
      * @return {@link Tellraw}
      */
-    public Tellraw tip(final String... texts) {
+    public Tellraw tip(String... texts) {
         return tip(Arrays.asList(texts));
     }
 
@@ -296,9 +296,9 @@ public class Tellraw {
      * @return Json串
      */
     public String toJsonString() {
-        final StringBuilder msg = new StringBuilder();
+        StringBuilder msg = new StringBuilder();
         msg.append("[\"\"");
-        for (final MessagePart messagePart : messageParts) {
+        for (MessagePart messagePart : messageParts) {
             msg.append(",");
             messagePart.writeJson(msg);
         }
@@ -326,8 +326,8 @@ public class Tellraw {
      * @return 发送给老版本客户端以及控制台。
      */
     public String toOldMessageFormat() {
-        final StringBuilder result = new StringBuilder();
-        for (final MessagePart part : messageParts) {
+        StringBuilder result = new StringBuilder();
+        for (MessagePart part : messageParts) {
             result.append(part.text);
         }
         return result.toString();
@@ -351,8 +351,8 @@ public class Tellraw {
      *            点击操作
      * @return {@link Tellraw}
      */
-    private Tellraw onClick(final String name, final String data) {
-        final MessagePart latest = latest();
+    private Tellraw onClick(String name, String data) {
+        MessagePart latest = latest();
         latest.clickActionName = name;
         latest.clickActionData = data;
         return this;
@@ -367,8 +367,8 @@ public class Tellraw {
      *            显示内容
      * @return {@link Tellraw}
      */
-    private Tellraw onHover(final String name, final String data) {
-        final MessagePart latest = latest();
+    private Tellraw onHover(String name, String data) {
+        MessagePart latest = latest();
         latest.hoverActionName = name;
         latest.hoverActionData = data;
         return this;
@@ -381,8 +381,8 @@ public class Tellraw {
      *            下一段内容
      * @return {@link Tellraw}
      */
-    private Tellraw then(final MessagePart part) {
-        final MessagePart last = latest();
+    private Tellraw then(MessagePart part) {
+        MessagePart last = latest();
         if (!last.hasText()) {
             last.text = part.text;
         } else {

@@ -8,41 +8,42 @@ import java.net.URL;
 import java.net.URLEncoder;
 
 public class Pastebin {
-    private final static String POST_URL = "http://pastebin.com/api/api_post.php";
-    private final String API_KEY;
+    private static String POST_URL = "http://pastebin.com/api/api_post.php";
+    private String API_KEY;
 
     public Pastebin() {
         this.API_KEY = "0e7d92011945cbcc1e884ab6e3e75e69";
     }
 
-    public Pastebin(final String API_KEY) {
+    public Pastebin(String API_KEY) {
         this.API_KEY = API_KEY;
     }
 
-    public static void main(final String[] args) {
-        final Pastebin p = new Pastebin();
-        final PasteContent paste = new PasteContent();
+    public static void main(String[] args) {
+        Pastebin p = new Pastebin();
+        PasteContent paste = new PasteContent();
         paste.addLine("异常提交测试!");
         paste.addThrowable(new Throwable());
-        System.out.println(p.post(paste));;
+        System.out.println(p.post(paste));
+        ;
     }
 
-    public String post(final PasteContent content) {
+    public String post(PasteContent content) {
         return post("", PasteFormat.JAVA, Pastebin.Private.UNLISTED, content);
     }
 
-    public String post(final String name, final PasteFormat format, final Pastebin.Private level, final PasteContent content) {
+    public String post(String name, PasteFormat format, Pastebin.Private level, PasteContent content) {
         String result = "Failed to post!";
         try {
-            final HttpURLConnection connection = (HttpURLConnection) new URL(POST_URL).openConnection();
+            HttpURLConnection connection = (HttpURLConnection) new URL(POST_URL).openConnection();
             connection.setConnectTimeout(20000);
             connection.setReadTimeout(20000);
             connection.setRequestMethod("POST");
             connection.addRequestProperty("Content-type", "application/x-www-form-urlencoded");
             connection.setInstanceFollowRedirects(false);
             connection.setDoOutput(true);
-            final OutputStream outputStream = connection.getOutputStream();
-            final byte[] outByte = ("api_option=paste&api_dev_key="
+            OutputStream outputStream = connection.getOutputStream();
+            byte[] outByte = ("api_option=paste&api_dev_key="
                     + URLEncoder.encode(this.API_KEY, "utf-8")
                     + "&api_paste_code="
                     + URLEncoder.encode(content.toString(), "utf-8")
@@ -59,8 +60,8 @@ public class Pastebin {
             outputStream.write(outByte);
             outputStream.flush();
             outputStream.close();
-            final BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            final StringBuffer request = new StringBuffer();
+            BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+            StringBuffer request = new StringBuffer();
             String temp;
             while ((temp = br.readLine()) != null) {
                 request.append(temp);
@@ -71,7 +72,7 @@ public class Pastebin {
             if (!result.contains("http://")) {
                 result = "Failed to post! (returned result: " + result;
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return result;
@@ -84,7 +85,7 @@ public class Pastebin {
 
         int level;
 
-        private Private(final int level) {
+        private Private(int level) {
             this.level = level;
         }
 

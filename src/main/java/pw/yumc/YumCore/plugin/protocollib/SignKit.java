@@ -38,7 +38,7 @@ public class SignKit extends ProtocolLibBase {
     static {
         try {
             GameMode.SPECTATOR.name();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             newVer = false;
         }
     }
@@ -52,9 +52,9 @@ public class SignKit extends ProtocolLibBase {
      *            木牌内容
      * @throws InvocationTargetException
      */
-    public static void open(final Player player, final String[] lines) throws InvocationTargetException {
-        final Location loc = player.getLocation();
-        final int x = loc.getBlockX(), y = 0, z = loc.getBlockZ();
+    public static void open(Player player, String[] lines) throws InvocationTargetException {
+        Location loc = player.getLocation();
+        int x = loc.getBlockX(), y = 0, z = loc.getBlockZ();
         if (newVer) {
             // Set
             PacketContainer packet = manager.createPacket(Server.BLOCK_CHANGE);
@@ -66,7 +66,8 @@ public class SignKit extends ProtocolLibBase {
             packet = manager.createPacket(Server.UPDATE_SIGN);
             packet.getBlockPositionModifier().write(0, new BlockPosition(x, y, z));
             packet.getChatComponentArrays().write(0,
-                    new WrappedChatComponent[] { WrappedChatComponent.fromText(lines[0]), WrappedChatComponent.fromText(lines[1]), WrappedChatComponent.fromText(lines[2]), WrappedChatComponent.fromText(lines[3]) });
+                    new WrappedChatComponent[] { WrappedChatComponent.fromText(lines[0]), WrappedChatComponent.fromText(lines[1]), WrappedChatComponent.fromText(lines[2]),
+                                                 WrappedChatComponent.fromText(lines[3]) });
 
             manager.sendServerPacket(player, packet);
 
@@ -108,12 +109,12 @@ public class SignKit extends ProtocolLibBase {
      * @author 喵♂呜
      */
     public static class SignUpdateEvent extends Event implements Cancellable {
-        private static final HandlerList handlers = new HandlerList();
-        private final Player player;
-        private final String[] lines;
+        private static HandlerList handlers = new HandlerList();
+        private Player player;
+        private String[] lines;
         private boolean cancel = false;
 
-        public SignUpdateEvent(final Player player, final String[] lines) {
+        public SignUpdateEvent(Player player, String[] lines) {
             this.player = player;
             this.lines = lines;
         }
@@ -157,7 +158,7 @@ public class SignKit extends ProtocolLibBase {
          * @see org.bukkit.event.Cancellable#setCancelled(boolean)
          */
         @Override
-        public void setCancelled(final boolean cancel) {
+        public void setCancelled(boolean cancel) {
             this.cancel = cancel;
         }
 
@@ -176,25 +177,25 @@ public class SignKit extends ProtocolLibBase {
         }
 
         @Override
-        public void onPacketReceiving(final PacketEvent event) {
-            final Player player = event.getPlayer();
-            final PacketContainer packet = event.getPacket();
-            final List<String> lines = new ArrayList<>();
+        public void onPacketReceiving(PacketEvent event) {
+            Player player = event.getPlayer();
+            PacketContainer packet = event.getPacket();
+            List<String> lines = new ArrayList<>();
             if (newVer) {
-                final WrappedChatComponent[] input1_8 = packet.getChatComponentArrays().read(0);
-                for (final WrappedChatComponent wrappedChatComponent : input1_8) {
+                WrappedChatComponent[] input1_8 = packet.getChatComponentArrays().read(0);
+                for (WrappedChatComponent wrappedChatComponent : input1_8) {
                     lines.add(subString(wrappedChatComponent.getJson()));
                 }
             } else {
-                final String[] input = packet.getStringArrays().getValues().get(0);
+                String[] input = packet.getStringArrays().getValues().get(0);
                 lines.addAll(Arrays.asList(input));
             }
-            final SignUpdateEvent sue = new SignUpdateEvent(player, lines.toArray(new String[0]));
+            SignUpdateEvent sue = new SignUpdateEvent(player, lines.toArray(new String[0]));
             Bukkit.getPluginManager().callEvent(sue);
             event.setCancelled(sue.isCancelled());
         }
 
-        private String subString(final String string) {
+        private String subString(String string) {
             return string.substring(1, string.length() - 1);
         }
     }

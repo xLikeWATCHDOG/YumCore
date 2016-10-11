@@ -19,10 +19,10 @@ import pw.yumc.YumCore.commands.exception.CommandException;
  * @author 喵♂呜
  */
 public class CommandTabInfo {
-    private final Object origin;
-    private final Method method;
+    private Object origin;
+    private Method method;
 
-    public CommandTabInfo(final Method method, final Object origin) {
+    public CommandTabInfo(Method method, Object origin) {
         this.method = method;
         this.origin = origin;
     }
@@ -36,8 +36,8 @@ public class CommandTabInfo {
      *            对象
      * @return {@link CommandTabInfo}
      */
-    public static CommandTabInfo parse(final Method method, final Object origin) {
-        final Tab tab = method.getAnnotation(Tab.class);
+    public static CommandTabInfo parse(Method method, Object origin) {
+        Tab tab = method.getAnnotation(Tab.class);
         if (tab != null) {
             return new CommandTabInfo(method, origin);
         }
@@ -45,7 +45,7 @@ public class CommandTabInfo {
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -69,8 +69,8 @@ public class CommandTabInfo {
      * @return Tab补全信息
      */
     @SuppressWarnings("unchecked")
-    public List<String> execute(final CommandSender sender, final org.bukkit.command.Command command, final String label, final String[] args) {
-        final CommandArgument cmdArgs = new CommandArgument(sender, command, label, args);
+    public List<String> execute(CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {
+        CommandArgument cmdArgs = new CommandArgument(sender, command, label, args);
         try {
             return (List<String>) method.invoke(origin, cmdArgs);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {

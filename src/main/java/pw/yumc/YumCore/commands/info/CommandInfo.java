@@ -28,26 +28,26 @@ import pw.yumc.YumCore.commands.exception.CommandParseException;
  * @author 喵♂呜
  */
 public class CommandInfo {
-    public static final CommandInfo Unknow = new CommandInfo();
-    private static final String onlyExecutor = "§c当前命令仅允许 §b%s §c执行!";
-    private static final String losePerm = "§c你需要有 %s 的权限才能执行此命令!";
-    private static final String argErr = "§c参数错误: §4%s";
-    private static final String cmdErr = "§6错误原因: §4命令参数不正确!";
-    private static final String cmdUse = "§6使用方法: §e/%s %s %s";
-    private static final String cmdDes = "§6命令描述: §3%s";
-    private final Object origin;
-    private final Method method;
-    private final String name;
-    private final List<String> aliases;
-    private final List<Executor> executors;
-    private final String executorStr;
-    private final boolean async;
-    private final Cmd command;
-    private final Help help;
-    private final int sort;
-    private final CommandParse parse;
+    public static CommandInfo Unknow = new CommandInfo();
+    private static String onlyExecutor = "§c当前命令仅允许 §b%s §c执行!";
+    private static String losePerm = "§c你需要有 %s 的权限才能执行此命令!";
+    private static String argErr = "§c参数错误: §4%s";
+    private static String cmdErr = "§6错误原因: §4命令参数不正确!";
+    private static String cmdUse = "§6使用方法: §e/%s %s %s";
+    private static String cmdDes = "§6命令描述: §3%s";
+    private Object origin;
+    private Method method;
+    private String name;
+    private List<String> aliases;
+    private List<Executor> executors;
+    private String executorStr;
+    private boolean async;
+    private Cmd command;
+    private Help help;
+    private int sort;
+    private CommandParse parse;
 
-    public CommandInfo(final Method method, final Object origin, final Cmd command, final Help help, final boolean async, final int sort, final CommandParse parse) {
+    public CommandInfo(Method method, Object origin, Cmd command, Help help, boolean async, int sort, CommandParse parse) {
         this.method = method;
         this.origin = origin;
         this.name = "".equals(command.value()) ? method.getName().toLowerCase() : command.value();
@@ -84,20 +84,20 @@ public class CommandInfo {
      *            源对象
      * @return {@link CommandInfo}
      */
-    public static CommandInfo parse(final Method method, final Object origin) {
-        final Cmd command = method.getAnnotation(Cmd.class);
+    public static CommandInfo parse(Method method, Object origin) {
+        Cmd command = method.getAnnotation(Cmd.class);
         if (command != null) {
-            final Help help = method.getAnnotation(Help.class);
-            final Async async = method.getAnnotation(Async.class);
-            final Sort sort = method.getAnnotation(Sort.class);
-            final CommandParse cp = CommandParse.get(method);
+            Help help = method.getAnnotation(Help.class);
+            Async async = method.getAnnotation(Async.class);
+            Sort sort = method.getAnnotation(Sort.class);
+            CommandParse cp = CommandParse.get(method);
             return new CommandInfo(method, origin, command, help != null ? help : Help.DEFAULT, async != null, sort != null ? sort.value() : 50, cp);
         }
         return null;
     }
 
     @Override
-    public boolean equals(final Object obj) {
+    public boolean equals(Object obj) {
         if (this == obj) {
             return true;
         }
@@ -119,12 +119,12 @@ public class CommandInfo {
             return false;
         }
         if (check(cmdArgs)) {
-            final Runnable runnable = new Runnable() {
+            Runnable runnable = new Runnable() {
                 @Override
                 public void run() {
                     try {
                         method.invoke(origin, parse.parse(cmdArgs));
-                    } catch (final CommandParseException | CommandArgumentException e) {
+                    } catch (CommandParseException | CommandArgumentException e) {
                         Log.toSender(cmdArgs.getSender(), argErr, e.getMessage());
                     } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                         throw new CommandException(e);
@@ -187,7 +187,7 @@ public class CommandInfo {
      *            需验证命令
      * @return 是否匹配
      */
-    public boolean isValid(final String cmd) {
+    public boolean isValid(String cmd) {
         return name.equalsIgnoreCase(cmd) || aliases.contains(cmd);
     }
 
@@ -198,12 +198,12 @@ public class CommandInfo {
      *            命令信息
      * @return 是否验证通过
      */
-    private boolean check(final CommandArgument cmdArgs) {
-        final CommandSender sender = cmdArgs.getSender();
+    private boolean check(CommandArgument cmdArgs) {
+        CommandSender sender = cmdArgs.getSender();
         return checkSender(sender) && checkArgs(sender, cmdArgs) && checkPerm(sender);
     }
 
-    private boolean checkArgs(final CommandSender sender, final CommandArgument cmdArgs) {
+    private boolean checkArgs(CommandSender sender, CommandArgument cmdArgs) {
         if (cmdArgs.getArgs().length < command.minimumArguments()) {
             Log.toSender(sender, cmdErr);
             Log.toSender(sender, String.format(cmdUse, cmdArgs.getAlias(), getName(), help.possibleArguments()));
@@ -213,8 +213,8 @@ public class CommandInfo {
         return true;
     }
 
-    private boolean checkPerm(final CommandSender sender) {
-        final String perm = command.permission();
+    private boolean checkPerm(CommandSender sender) {
+        String perm = command.permission();
         if (perm != null && !"".equals(perm) && !sender.hasPermission(perm)) {
             Log.toSender(sender, String.format(losePerm, perm));
             return false;
@@ -222,7 +222,7 @@ public class CommandInfo {
         return true;
     }
 
-    private boolean checkSender(final CommandSender sender) {
+    private boolean checkSender(CommandSender sender) {
         if (!executors.contains(Executor.ALL) && !executors.contains(Executor.valueOf(sender))) {
             Log.toSender(sender, String.format(onlyExecutor, executorStr));
             return false;
@@ -230,9 +230,9 @@ public class CommandInfo {
         return true;
     }
 
-    private String eS(final List<Executor> executors) {
-        final StringBuilder str = new StringBuilder();
-        for (final Executor executor : executors) {
+    private String eS(List<Executor> executors) {
+        StringBuilder str = new StringBuilder();
+        for (Executor executor : executors) {
             str.append(executor.getName());
             str.append(", ");
         }

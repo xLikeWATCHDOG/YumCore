@@ -30,15 +30,15 @@ public abstract class ItemSerialize {
         }
     }
 
-    public static String $(final ItemStack item) {
-        final String result = itemSerialize.parse(item);
+    public static String $(ItemStack item) {
+        String result = itemSerialize.parse(item);
         Log.d("%s物品序列化结果: %s", itemSerialize.getName(), result);
         return result;
     }
 
     public abstract String getName();
 
-    public abstract String parse(final ItemStack item);
+    public abstract String parse(ItemStack item);
 
     static class Automatic extends ItemSerialize {
         Method asNMSCopyMethod;
@@ -47,18 +47,18 @@ public abstract class ItemSerialize {
         String ver = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
 
         public Automatic() throws ClassNotFoundException, NoSuchMethodException, SecurityException {
-            final Class<?> cis = getOBCClass("inventory.CraftItemStack");
+            Class<?> cis = getOBCClass("inventory.CraftItemStack");
             asNMSCopyMethod = cis.getMethod("asNMSCopy", ItemStack.class);
-            final Class<?> nmsItemStack = asNMSCopyMethod.getReturnType();
-            for (final Method method : nmsItemStack.getMethods()) {
-                final Class<?> rt = method.getReturnType();
+            Class<?> nmsItemStack = asNMSCopyMethod.getReturnType();
+            for (Method method : nmsItemStack.getMethods()) {
+                Class<?> rt = method.getReturnType();
                 if (method.getParameterTypes().length == 0 && "NBTTagCompound".equals(rt.getSimpleName())) {
                     nmsNBTTagCompound = rt;
                 }
             }
-            for (final Method method : nmsItemStack.getMethods()) {
-                final Class<?>[] paras = method.getParameterTypes();
-                final Class<?> rt = method.getReturnType();
+            for (Method method : nmsItemStack.getMethods()) {
+                Class<?>[] paras = method.getParameterTypes();
+                Class<?> rt = method.getReturnType();
                 if (paras.length == 1 && "NBTTagCompound".equals(paras[0].getSimpleName()) && "NBTTagCompound".equals(rt.getSimpleName())) {
                     nmsSaveNBTMethod = method;
                 }
@@ -70,12 +70,12 @@ public abstract class ItemSerialize {
             return "Automatic";
         }
 
-        public Class getOBCClass(final String cname) throws ClassNotFoundException {
+        public Class getOBCClass(String cname) throws ClassNotFoundException {
             return Class.forName("org.bukkit.craftbukkit." + ver + "." + cname);
         }
 
         @Override
-        public String parse(final ItemStack item) {
+        public String parse(ItemStack item) {
             try {
                 return nmsSaveNBTMethod.invoke(asNMSCopyMethod.invoke(null, item), nmsNBTTagCompound.newInstance()).toString();
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | InstantiationException e) {
@@ -93,7 +93,7 @@ public abstract class ItemSerialize {
         }
 
         @Override
-        public String parse(final ItemStack item) {
+        public String parse(ItemStack item) {
             return serialize(item);
         }
 
@@ -104,8 +104,8 @@ public abstract class ItemSerialize {
          *            物品属性
          * @return 获取显示序列化
          */
-        private String getDisplay(final ItemMeta im) {
-            final StringBuilder display = new StringBuilder();
+        private String getDisplay(ItemMeta im) {
+            StringBuilder display = new StringBuilder();
             display.append("{");
             if (im.hasDisplayName()) {
                 display.append(String.format("Name:\"%s\",", im.getDisplayName()));
@@ -113,7 +113,7 @@ public abstract class ItemSerialize {
             if (im.hasLore()) {
                 display.append("Lore:[");
                 int i = 0;
-                for (final String line : im.getLore()) {
+                for (String line : im.getLore()) {
                     display.append(String.format("%s:\"%s\",", i, new JsonBuilder(line).toString()));
                     i++;
                 }
@@ -132,9 +132,9 @@ public abstract class ItemSerialize {
          *            附魔集合
          * @return 获得附魔序列化
          */
-        private String getEnch(final Set<Entry<Enchantment, Integer>> set) {
-            final StringBuilder enchs = new StringBuilder();
-            for (final Map.Entry<Enchantment, Integer> ench : set) {
+        private String getEnch(Set<Entry<Enchantment, Integer>> set) {
+            StringBuilder enchs = new StringBuilder();
+            for (Map.Entry<Enchantment, Integer> ench : set) {
                 enchs.append(String.format("{id:%s,lvl:%s},", ench.getKey().getId(), ench.getValue()));
             }
             enchs.deleteCharAt(enchs.length() - 1);
@@ -148,8 +148,8 @@ public abstract class ItemSerialize {
          *            物品属性
          * @return 获得属性序列化
          */
-        private String getTag(final ItemMeta im) {
-            final StringBuilder meta = new StringBuilder("{");
+        private String getTag(ItemMeta im) {
+            StringBuilder meta = new StringBuilder("{");
             if (im.hasEnchants()) {
                 meta.append(String.format("ench:[%s],", getEnch(im.getEnchants().entrySet())));
             }
@@ -168,8 +168,8 @@ public abstract class ItemSerialize {
          *            {@link ItemStack}
          * @return 物品字符串
          */
-        private String serialize(final ItemStack item) {
-            final StringBuilder json = new StringBuilder("{");
+        private String serialize(ItemStack item) {
+            StringBuilder json = new StringBuilder("{");
             json.append(String.format("id:\"%s\",Damage:\"%s\"", item.getTypeId(), item.getDurability()));
             if (item.getAmount() > 1) {
                 json.append(String.format(",Count:%s", item.getAmount()));

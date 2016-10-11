@@ -92,7 +92,7 @@ public @interface Cmd {
         UNKNOW("未知");
         private String name;
 
-        private Executor(final String name) {
+        private Executor(String name) {
             this.name = name;
         }
 
@@ -103,7 +103,7 @@ public @interface Cmd {
          *            命令执行者
          * @return {@link Executor}
          */
-        public static Executor valueOf(final CommandSender sender) {
+        public static Executor valueOf(CommandSender sender) {
             if (sender instanceof Player) {
                 return Executor.PLAYER;
             } else if (sender instanceof ConsoleCommandSender) {

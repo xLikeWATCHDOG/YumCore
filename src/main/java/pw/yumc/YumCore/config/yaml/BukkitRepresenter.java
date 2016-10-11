@@ -13,7 +13,7 @@ public class BukkitRepresenter extends YamlRepresenter {
 
     public class RepresentLocation extends RepresentMap {
         @Override
-        public Node representData(final Object data) {
+        public Node representData(Object data) {
             return super.representData(L.serialize((Location) data));
         }
     }

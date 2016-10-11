@@ -10,7 +10,7 @@ import org.bukkit.configuration.ConfigurationSection;
  */
 public abstract class InjectConfigurationSection extends AbstractInjectConfig {
 
-    public InjectConfigurationSection(final ConfigurationSection config) {
+    public InjectConfigurationSection(ConfigurationSection config) {
         inject(config);
     }
 
@@ -20,7 +20,7 @@ public abstract class InjectConfigurationSection extends AbstractInjectConfig {
      * @param config
      *            配置区
      */
-    public void reload(final ConfigurationSection config) {
+    public void reload(ConfigurationSection config) {
         inject(config);
     }
 }

@@ -38,7 +38,7 @@ public class L10N {
      *            物品实体
      * @return 物品名称
      */
-    public static final String getFullName(final ItemStack i) {
+    public static String getFullName(ItemStack i) {
         return getItemName(getItemType(i)) + (i.hasItemMeta() && i.getItemMeta().hasDisplayName() ? "§r(" + i.getItemMeta().getDisplayName() + "§r)" : "");
     }
 
@@ -49,7 +49,7 @@ public class L10N {
      *            物品实体
      * @return 物品名称
      */
-    public static final String getItemName(final ItemStack i) {
+    public static String getItemName(ItemStack i) {
         return getItemName(getItemType(i));
     }
 
@@ -60,7 +60,7 @@ public class L10N {
      *            物品实体
      * @return 物品名称
      */
-    public static final String getName(final ItemStack i) {
+    public static String getName(ItemStack i) {
         return i.hasItemMeta() && i.getItemMeta().hasDisplayName() ? i.getItemMeta().getDisplayName() : getItemName(getItemType(i));
     }
 
@@ -80,7 +80,7 @@ public class L10N {
      *            物品类型名称
      * @return 物品名称
      */
-    private static final String getItemName(final String iname) {
+    private static String getItemName(String iname) {
         String aname = content.get(iname);
         if (aname == null) {
             aname = iname;
@@ -99,13 +99,13 @@ public class L10N {
      *            物品实体
      * @return 物品类型
      */
-    private static final String getItemType(final ItemStack i) {
+    private static String getItemType(ItemStack i) {
         String name = i.getType().name();
         String dura = "";
         if (i.getType() == Material.MONSTER_EGG) {
             name = ((SpawnEgg) i.getData()).getSpawnedType().name();
         } else {
-            final int dur = i.getDurability();
+            int dur = i.getDurability();
             dura = (i.getMaxStackSize() != 1 && dur != 0) ? Integer.toString(dur) : "";
         }
         return (name + (dura.isEmpty() ? "" : "-" + dura)).toUpperCase();
@@ -120,8 +120,8 @@ public class L10N {
             @Override
             public void run() {
                 try {
-                    final Map<String, String> local = YumConfig.getLocal(CONFIG_NAME).getContentMap();
-                    final Map<String, String> remote = YumConfig.getRemote(CONFIG_NAME).getContentMap();
+                    Map<String, String> local = YumConfig.getLocal(CONFIG_NAME).getContentMap();
+                    Map<String, String> remote = YumConfig.getRemote(CONFIG_NAME).getContentMap();
                     if (local != null) {
                         Log.info("本地汉化文件词条数量: " + local.size());
                         content.putAll(local);
@@ -131,7 +131,7 @@ public class L10N {
                         content.putAll(remote);
                     }
                     Log.info("本地化工具初始化完毕...");
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     Log.warning(String.format("本地化工具初始化失败: %s %s", e.getClass().getName(), e.getMessage()));
                     Log.debug(CONFIG_NAME, e);
                 }

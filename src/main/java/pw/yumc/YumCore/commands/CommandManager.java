@@ -40,24 +40,24 @@ import pw.yumc.YumCore.commands.interfaces.CommandHelpParse;
  * @author 喵♂呜
  */
 public class CommandManager implements TabExecutor {
-    private final static String argumentTypeError = "注解命令方法 %s 位于 %s 的参数错误 第一个参数应实现 CommandSender 接口!";
-    private final static String returnTypeError = "注解命令补全 %s 位于 %s 的返回值错误 应实现 List 接口!";
+    private static String argumentTypeError = "注解命令方法 %s 位于 %s 的参数错误 第一个参数应实现 CommandSender 接口!";
+    private static String returnTypeError = "注解命令补全 %s 位于 %s 的返回值错误 应实现 List 接口!";
     private static Constructor<PluginCommand> PluginCommandConstructor;
     private static Map<String, Command> knownCommands;
     private static Map<String, Plugin> lookupNames;
     static {
         try {
-            final PluginManager pluginManager = Bukkit.getPluginManager();
+            PluginManager pluginManager = Bukkit.getPluginManager();
 
-            final Field lookupNamesField = pluginManager.getClass().getDeclaredField("lookupNames");
+            Field lookupNamesField = pluginManager.getClass().getDeclaredField("lookupNames");
             lookupNamesField.setAccessible(true);
             lookupNames = (Map<String, Plugin>) lookupNamesField.get(pluginManager);
 
-            final Field commandMapField = pluginManager.getClass().getDeclaredField("commandMap");
+            Field commandMapField = pluginManager.getClass().getDeclaredField("commandMap");
             commandMapField.setAccessible(true);
-            final SimpleCommandMap commandMap = (SimpleCommandMap) commandMapField.get(pluginManager);
+            SimpleCommandMap commandMap = (SimpleCommandMap) commandMapField.get(pluginManager);
 
-            final Field knownCommandsField = commandMap.getClass().getDeclaredField("knownCommands");
+            Field knownCommandsField = commandMap.getClass().getDeclaredField("knownCommands");
             knownCommandsField.setAccessible(true);
             knownCommands = (Map<String, Command>) knownCommandsField.get(commandMap);
 
@@ -70,7 +70,7 @@ public class CommandManager implements TabExecutor {
     /**
      * 插件实例类
      */
-    private final static JavaPlugin plugin = P.instance;
+    private static JavaPlugin plugin = P.instance;
     /**
      * 默认命令
      */
@@ -78,19 +78,19 @@ public class CommandManager implements TabExecutor {
     /**
      * 命令列表
      */
-    private final Set<CommandInfo> cmds = new HashSet<>();
+    private Set<CommandInfo> cmds = new HashSet<>();
     /**
      * Tab列表
      */
-    private final Set<CommandTabInfo> tabs = new HashSet<>();
+    private Set<CommandTabInfo> tabs = new HashSet<>();
     /**
      * 命令缓存列表
      */
-    private final Map<String, CommandInfo> cmdCache = new HashMap<>();
+    private Map<String, CommandInfo> cmdCache = new HashMap<>();
     /**
      * 命令名称缓存
      */
-    private final List<String> cmdNameCache = new ArrayList<>();
+    private List<String> cmdNameCache = new ArrayList<>();
     /**
      * 命令帮助
      */
@@ -106,7 +106,7 @@ public class CommandManager implements TabExecutor {
      * @param name
      *            注册的命令
      */
-    public CommandManager(final String name) {
+    public CommandManager(String name) {
         cmd = plugin.getCommand(name);
         if (cmd == null) {
             try {
@@ -130,20 +130,20 @@ public class CommandManager implements TabExecutor {
      * @param executor
      *            命令执行类
      */
-    public CommandManager(final String name, final CommandExecutor... executor) {
+    public CommandManager(String name, CommandExecutor... executor) {
         this(name);
         register(executor);
     }
 
     @Override
-    public boolean onCommand(final CommandSender sender, final Command command, final String label, final String[] args) {
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
             if (defCmd != null) {
                 return defCmd.execute(new CommandArgument(sender, command, label, args));
             }
             return help.send(sender, command, label, args);
         }
-        final String subcmd = args[0].toLowerCase();
+        String subcmd = args[0].toLowerCase();
         if (subcmd.equalsIgnoreCase("help")) {
             return help.send(sender, command, label, args);
         }
@@ -151,13 +151,13 @@ public class CommandManager implements TabExecutor {
     }
 
     @Override
-    public List<String> onTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
-        final List<String> completions = new ArrayList<>();
-        final String token = args[args.length - 1];
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> completions = new ArrayList<>();
+        String token = args[args.length - 1];
         if (args.length == 1) {
             StringUtil.copyPartialMatches(args[0], cmdNameCache, completions);
         } else if (args.length >= 2) {
-            for (final CommandTabInfo tab : tabs) {
+            for (CommandTabInfo tab : tabs) {
                 StringUtil.copyPartialMatches(token, tab.execute(sender, command, token, args), completions);
             }
             StringUtil.copyPartialMatches(token, getPlayerTabComplete(sender, command, alias, args), completions);
@@ -172,10 +172,10 @@ public class CommandManager implements TabExecutor {
      * @param clazzs
      *            子命令处理类
      */
-    public void register(final CommandExecutor... clazzs) {
-        for (final CommandExecutor clazz : clazzs) {
-            final Method[] methods = clazz.getClass().getDeclaredMethods();
-            for (final Method method : methods) {
+    public void register(CommandExecutor... clazzs) {
+        for (CommandExecutor clazz : clazzs) {
+            Method[] methods = clazz.getClass().getDeclaredMethods();
+            for (Method method : methods) {
                 if (registerCommand(method, clazz)) {
                     continue;
                 }
@@ -192,7 +192,7 @@ public class CommandManager implements TabExecutor {
      * @param helpParse
      *            帮助解析器
      */
-    public void setHelpParse(final CommandHelpParse helpParse) {
+    public void setHelpParse(CommandHelpParse helpParse) {
         help.setHelpParse(helpParse);
     }
 
@@ -201,7 +201,7 @@ public class CommandManager implements TabExecutor {
      */
     private void buildCmdNameCache() {
         cmdNameCache.clear();
-        for (final CommandInfo cmd : cmds) {
+        for (CommandInfo cmd : cmds) {
             cmdNameCache.add(cmd.getName());
             cmdNameCache.addAll(Arrays.asList(cmd.getCommand().aliases()));
         }
@@ -215,9 +215,9 @@ public class CommandManager implements TabExecutor {
      *            子命令
      * @return 命令信息
      */
-    private CommandInfo getByCache(final String subcmd) {
+    private CommandInfo getByCache(String subcmd) {
         if (!cmdCache.containsKey(subcmd)) {
-            for (final CommandInfo cmdinfo : cmds) {
+            for (CommandInfo cmdinfo : cmds) {
                 if (cmdinfo.isValid(subcmd)) {
                     cmdCache.put(subcmd, cmdinfo);
                     break;
@@ -243,12 +243,12 @@ public class CommandManager implements TabExecutor {
      *            数组
      * @return 在线玩家数组
      */
-    private List<String> getPlayerTabComplete(final CommandSender sender, final Command command, final String alias, final String[] args) {
-        final String lastWord = args[args.length - 1];
-        final Player senderPlayer = sender instanceof Player ? (Player) sender : null;
-        final List<String> matchedPlayers = new ArrayList<>();
-        for (final Player player : C.Player.getOnlinePlayers()) {
-            final String name = player.getName();
+    private List<String> getPlayerTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        String lastWord = args[args.length - 1];
+        Player senderPlayer = sender instanceof Player ? (Player) sender : null;
+        List<String> matchedPlayers = new ArrayList<>();
+        for (Player player : C.Player.getOnlinePlayers()) {
+            String name = player.getName();
             if ((senderPlayer == null || senderPlayer.canSee(player)) && StringUtil.startsWithIgnoreCase(name, lastWord)) {
                 matchedPlayers.add(name);
             }
@@ -265,8 +265,8 @@ public class CommandManager implements TabExecutor {
      *            数组开始位置
      * @return 转移后的数组字符串
      */
-    private String[] moveStrings(final String[] args, final int start) {
-        final String[] ret = new String[args.length - start];
+    private String[] moveStrings(String[] args, int start) {
+        String[] ret = new String[args.length - start];
         System.arraycopy(args, start, ret, 0, ret.length);
         return ret;
     }
@@ -280,10 +280,10 @@ public class CommandManager implements TabExecutor {
      *            调用对象
      * @return 是否成功
      */
-    private boolean registerCommand(final Method method, final CommandExecutor clazz) {
-        final CommandInfo ci = CommandInfo.parse(method, clazz);
+    private boolean registerCommand(Method method, CommandExecutor clazz) {
+        CommandInfo ci = CommandInfo.parse(method, clazz);
         if (ci != null) {
-            final Class<?>[] params = method.getParameterTypes();
+            Class<?>[] params = method.getParameterTypes();
             Log.d("命令 %s 参数类型: %s", ci.getName(), Arrays.toString(params));
             if (params.length > 0 && params[0].isAssignableFrom(CommandSender.class)) {
                 if (method.getReturnType() == boolean.class) {
@@ -308,8 +308,8 @@ public class CommandManager implements TabExecutor {
      *            调用对象
      * @return 是否成功
      */
-    private boolean registerTab(final Method method, final CommandExecutor clazz) {
-        final CommandTabInfo ti = CommandTabInfo.parse(method, clazz);
+    private boolean registerTab(Method method, CommandExecutor clazz) {
+        CommandTabInfo ti = CommandTabInfo.parse(method, clazz);
         if (ti != null) {
             if (method.getReturnType().equals(List.class)) {
                 tabs.add(ti);

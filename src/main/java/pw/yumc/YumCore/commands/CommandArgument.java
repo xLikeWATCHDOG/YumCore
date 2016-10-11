@@ -11,12 +11,12 @@ import org.bukkit.entity.Player;
  * @author 喵♂呜
  */
 public class CommandArgument {
-    private final CommandSender sender;
-    private final Command command;
-    private final String alias;
-    private final String[] args;
+    private CommandSender sender;
+    private Command command;
+    private String alias;
+    private String[] args;
 
-    public CommandArgument(final CommandSender sender, final Command command, final String alias, final String[] args) {
+    public CommandArgument(CommandSender sender, Command command, String alias, String[] args) {
         this.sender = sender;
         this.command = command;
         this.alias = alias;

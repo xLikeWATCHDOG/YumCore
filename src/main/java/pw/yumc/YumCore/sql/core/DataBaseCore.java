@@ -28,7 +28,7 @@ public abstract class DataBaseCore {
      * @throws SQLException
      *             SQL异常
      */
-    public abstract boolean createTables(final String tableName, final KeyValue fields, final String Conditions) throws SQLException;
+    public abstract boolean createTables(String tableName, KeyValue fields, String Conditions) throws SQLException;
 
     /**
      * 执行SQL语句
@@ -39,10 +39,10 @@ public abstract class DataBaseCore {
      * @throws SQLException
      *             SQL执行异常
      */
-    public boolean execute(final String sql) throws SQLException {
+    public boolean execute(String sql) throws SQLException {
         debug(sql);
-        final Statement st = getStatement();
-        final boolean result = st.execute(sql);
+        Statement st = getStatement();
+        boolean result = st.execute(sql);
         st.close();
         return result;
     }
@@ -58,13 +58,13 @@ public abstract class DataBaseCore {
      * @throws SQLException
      *             SQL执行异常
      */
-    public boolean execute(final String sql, final Object... obj) throws SQLException {
+    public boolean execute(String sql, Object... obj) throws SQLException {
         debug(sql);
-        final PreparedStatement ps = prepareStatement(sql);
+        PreparedStatement ps = prepareStatement(sql);
         for (int i = 0; i < obj.length; i++) {
             ps.setObject(i + 1, obj[i]);
         }
-        final boolean result = ps.execute(sql);
+        boolean result = ps.execute(sql);
         ps.close();
         return result;
     }
@@ -92,10 +92,10 @@ public abstract class DataBaseCore {
      * @throws SQLException
      *             SQL查询异常
      */
-    public ResultSet query(final String sql) throws SQLException {
+    public ResultSet query(String sql) throws SQLException {
         debug(sql);
-        final Statement st = getStatement();
-        final ResultSet result = st.executeQuery(sql);
+        Statement st = getStatement();
+        ResultSet result = st.executeQuery(sql);
         return result;
     }
 
@@ -108,10 +108,10 @@ public abstract class DataBaseCore {
      * @throws SQLException
      *             SQL执行异常
      */
-    public int update(final String sql) throws SQLException {
+    public int update(String sql) throws SQLException {
         debug(sql);
-        final Statement st = getStatement();
-        final int result = st.executeUpdate(sql);
+        Statement st = getStatement();
+        int result = st.executeUpdate(sql);
         st.close();
         return result;
     }
@@ -127,13 +127,13 @@ public abstract class DataBaseCore {
      * @throws SQLException
      *             SQL执行异常
      */
-    public int update(final String sql, final Object[] obj) throws SQLException {
+    public int update(String sql, Object[] obj) throws SQLException {
         debug(sql);
-        final PreparedStatement ps = prepareStatement(sql);
+        PreparedStatement ps = prepareStatement(sql);
         for (int i = 0; i < obj.length; i++) {
             ps.setObject(i + 1, obj[i]);
         }
-        final int result = ps.executeUpdate(sql);
+        int result = ps.executeUpdate(sql);
         ps.close();
         return result;
     }
@@ -144,7 +144,7 @@ public abstract class DataBaseCore {
      * @param warn
      *            警告消息
      */
-    public void warn(final String warn) {
+    public void warn(String warn) {
         Log.warning(warn);
     }
 
@@ -154,7 +154,7 @@ public abstract class DataBaseCore {
      * @param sql
      *            SQL语句
      */
-    private void debug(final String sql) {
+    private void debug(String sql) {
         Log.debug("[SQL] " + sql);
     }
 
@@ -178,7 +178,7 @@ public abstract class DataBaseCore {
      * @throws SQLException
      *             SQL执行异常
      */
-    protected PreparedStatement prepareStatement(final String sql) throws SQLException {
+    protected PreparedStatement prepareStatement(String sql) throws SQLException {
         return getConnection().prepareStatement(sql);
     }
 }

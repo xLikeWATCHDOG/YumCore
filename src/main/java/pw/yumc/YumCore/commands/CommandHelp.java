@@ -27,24 +27,24 @@ public class CommandHelp {
     /**
      * 消息配置
      */
-    private final static String prefix = String.format("§6[§b%s§6] ", P.instance.getName());
-    private final static String commandNotFound = prefix + "§c当前插件未注册任何子命令!";
-    private final static String pageNotFound = prefix + "§c不存在的帮助页面 §b请输入 /%s help §e1-%s";
-    private final static String helpTitle = String.format("§6========= %s §6插件帮助列表=========", prefix);
-    private final static String helpBody = "§6/%1$s §a%2$s §e%3$s §6- §b%4$s";
-    private final static String helpFooter = "§6查看更多的帮助页面 §b请输入 /%s help §e1-%s";
+    private static String prefix = String.format("§6[§b%s§6] ", P.instance.getName());
+    private static String commandNotFound = prefix + "§c当前插件未注册任何子命令!";
+    private static String pageNotFound = prefix + "§c不存在的帮助页面 §b请输入 /%s help §e1-%s";
+    private static String helpTitle = String.format("§6========= %s §6插件帮助列表=========", prefix);
+    private static String helpBody = "§6/%1$s §a%2$s §e%3$s §6- §b%4$s";
+    private static String helpFooter = "§6查看更多的帮助页面 §b请输入 /%s help §e1-%s";
     /**
      * 帮助页面每页行数
      */
-    private final static int LINES_PER_PAGE = 7;
+    private static int LINES_PER_PAGE = 7;
     /**
      * 默认命令
      */
-    private final CommandInfo defCmd;
+    private CommandInfo defCmd;
     /**
      * 已排序的命令列表
      */
-    private final List<CommandInfo> cmdlist;
+    private List<CommandInfo> cmdlist;
     /**
      * 命令解析
      */
@@ -52,11 +52,11 @@ public class CommandHelp {
     /**
      * 帮助页面数量
      */
-    private final int HELPPAGECOUNT;
+    private int HELPPAGECOUNT;
     /**
      * 帮助列表缓存
      */
-    private final Map<String, String[]> cacheHelp = new HashMap<>();
+    private Map<String, String[]> cacheHelp = new HashMap<>();
 
     /**
      * 命令帮助
@@ -64,7 +64,7 @@ public class CommandHelp {
      * @param list
      *            子命令列表
      */
-    public CommandHelp(final Collection<? extends CommandInfo> list) {
+    public CommandHelp(Collection<? extends CommandInfo> list) {
         this(null, list);
     }
 
@@ -76,7 +76,7 @@ public class CommandHelp {
      * @param list
      *            子命令列表
      */
-    public CommandHelp(final CommandInfo defCmd, final Collection<? extends CommandInfo> list) {
+    public CommandHelp(CommandInfo defCmd, Collection<? extends CommandInfo> list) {
         this.defCmd = defCmd;
         cmdlist = new LinkedList<>(list);
         Collections.sort(cmdlist, new CommandComparator());
@@ -92,10 +92,10 @@ public class CommandHelp {
      *            命令
      * @return 格式化后的字串
      */
-    public String formatCommand(final CommandInfo ci, final String label) {
-        final String aliases = Arrays.toString(ci.getCommand().aliases());
-        final String cmd = ci.getName() + (aliases.length() == 2 ? "" : "§7" + aliases);
-        final Help help = ci.getHelp();
+    public String formatCommand(CommandInfo ci, String label) {
+        String aliases = Arrays.toString(ci.getCommand().aliases());
+        String cmd = ci.getName() + (aliases.length() == 2 ? "" : "§7" + aliases);
+        Help help = ci.getHelp();
         return String.format(helpBody, label, cmd, help.possibleArguments(), formatHelp(help.value()));
     }
 
@@ -106,7 +106,7 @@ public class CommandHelp {
      *            参数
      * @return 解析后的帮助
      */
-    public String formatHelp(final String value) {
+    public String formatHelp(String value) {
         if (helpParse != null) {
             return helpParse.parse(value);
         }
@@ -125,7 +125,7 @@ public class CommandHelp {
      * @param args
      *            参数
      */
-    public boolean send(final CommandSender sender, final Command command, final String label, final String[] args) {
+    public boolean send(CommandSender sender, Command command, String label, String[] args) {
         if (this.HELPPAGECOUNT == 0) {
             sender.sendMessage(commandNotFound);
             return true;
@@ -134,12 +134,12 @@ public class CommandHelp {
         try {
             page = Integer.parseInt(args[1]);
             page = page == 0 ? 1 : page;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             // Ignore
         }
-        final String helpkey = label + page;
+        String helpkey = label + page;
         if (!cacheHelp.containsKey(helpkey)) {
-            final List<String> helpList = new LinkedList<>();
+            List<String> helpList = new LinkedList<>();
             if (page > this.HELPPAGECOUNT || page < 1) {
                 // 帮助页面不存在
                 helpList.add(String.format(pageNotFound, label, HELPPAGECOUNT));
@@ -149,8 +149,8 @@ public class CommandHelp {
                 if (page == 1 && defCmd != null) {
                     helpList.add(formatCommand(defCmd, label));
                 }
-                final int start = LINES_PER_PAGE * (page - 1);
-                final int end = start + LINES_PER_PAGE;
+                int start = LINES_PER_PAGE * (page - 1);
+                int end = start + LINES_PER_PAGE;
                 for (int i = start; i < end; i++) {
                     if (this.cmdlist.size() > i) {
                         // 帮助列表
@@ -172,7 +172,7 @@ public class CommandHelp {
      * @param helpParse
      *            帮助解析器
      */
-    public void setHelpParse(final CommandHelpParse helpParse) {
+    public void setHelpParse(CommandHelpParse helpParse) {
         this.helpParse = helpParse;
     }
 
@@ -184,7 +184,7 @@ public class CommandHelp {
      */
     static class CommandComparator implements Comparator<CommandInfo> {
         @Override
-        public int compare(final CommandInfo o1, final CommandInfo o2) {
+        public int compare(CommandInfo o1, CommandInfo o2) {
             if (o1.getSort() > o2.getSort()) {
                 return 1;
             } else if (o1.getSort() == o2.getSort()) {

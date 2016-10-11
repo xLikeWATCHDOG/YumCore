@@ -23,7 +23,7 @@ public class PlayerConfig extends FileConfig {
      * @param player
      *            玩家
      */
-    public PlayerConfig(final File dir, final Player player) {
+    public PlayerConfig(File dir, Player player) {
         super(dir, player.getName() + ".yml");
     }
 
@@ -33,7 +33,7 @@ public class PlayerConfig extends FileConfig {
      * @param player
      *            玩家
      */
-    public PlayerConfig(final Player player) {
+    public PlayerConfig(Player player) {
         this(player.getName());
     }
 
@@ -43,7 +43,7 @@ public class PlayerConfig extends FileConfig {
      * @param playername
      *            玩家名称
      */
-    public PlayerConfig(final String playername) {
+    public PlayerConfig(String playername) {
         super(new File(plugin.getDataFolder(), CONFIG_FOLDER), playername + ".yml");
     }
 }

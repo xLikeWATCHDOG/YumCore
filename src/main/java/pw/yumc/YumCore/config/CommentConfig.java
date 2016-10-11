@@ -10,23 +10,23 @@ import org.yaml.snakeyaml.DumperOptions;
 
 public class CommentConfig extends AbstractConfig {
     // 新增保留注释字段
-    protected static final String commentPrefixSymbol = "'注释 ";
-    protected static final String commentSuffixSymbol = "': 注释";
+    protected static String commentPrefixSymbol = "'注释 ";
+    protected static String commentSuffixSymbol = "': 注释";
 
-    protected static final String fromRegex = "( {0,})(#.*)";
-    protected static final Pattern fromPattern = Pattern.compile(fromRegex);
+    protected static String fromRegex = "( {0,})(#.*)";
+    protected static Pattern fromPattern = Pattern.compile(fromRegex);
 
-    protected static final String toRegex = "( {0,})(- ){0,}" + "(" + commentPrefixSymbol + ")" + "(#.*)" + "(" + commentSuffixSymbol + ")";
-    protected static final Pattern toPattern = Pattern.compile(toRegex);
+    protected static String toRegex = "( {0,})(- ){0,}" + "(" + commentPrefixSymbol + ")" + "(#.*)" + "(" + commentSuffixSymbol + ")";
+    protected static Pattern toPattern = Pattern.compile(toRegex);
 
-    protected static final Pattern countSpacePattern = Pattern.compile("( {0,})(- ){0,}(.*)");
+    protected static Pattern countSpacePattern = Pattern.compile("( {0,})(- ){0,}(.*)");
 
-    protected static final int commentSplitWidth = 90;
+    protected static int commentSplitWidth = 90;
 
-    private static String[] split(final String string, final int partLength) {
-        final String[] array = new String[string.length() / partLength + 1];
+    private static String[] split(String string, int partLength) {
+        String[] array = new String[string.length() / partLength + 1];
         for (int i = 0; i < array.length; i++) {
-            final int beginIndex = i * partLength;
+            int beginIndex = i * partLength;
             int endIndex = beginIndex + partLength;
             if (endIndex > string.length()) {
                 endIndex = string.length();
@@ -37,15 +37,15 @@ public class CommentConfig extends AbstractConfig {
     }
 
     @Override
-    public void loadFromString(final String contents) throws InvalidConfigurationException {
-        final String[] parts = contents.split(newLine);
-        final List<String> lastComments = new ArrayList<>();
-        final StringBuilder builder = new StringBuilder();
-        for (final String part : parts) {
+    public void loadFromString(String contents) throws InvalidConfigurationException {
+        String[] parts = contents.split(newLine);
+        List<String> lastComments = new ArrayList<>();
+        StringBuilder builder = new StringBuilder();
+        for (String part : parts) {
             Matcher matcher = fromPattern.matcher(part);
             if (matcher.find()) {
-                final String originComment = matcher.group(2);
-                final String[] splitComments = split(originComment, commentSplitWidth);
+                String originComment = matcher.group(2);
+                String[] splitComments = split(originComment, commentSplitWidth);
                 for (int i = 0; i < splitComments.length; i++) {
                     String comment = splitComments[i];
                     if (i == 0) {
@@ -57,7 +57,7 @@ public class CommentConfig extends AbstractConfig {
             } else {
                 matcher = countSpacePattern.matcher(part);
                 if (matcher.find() && !lastComments.isEmpty()) {
-                    for (final String comment : lastComments) {
+                    for (String comment : lastComments) {
                         builder.append(matcher.group(1));
                         builder.append(this.checkNull(matcher.group(2)));
                         builder.append(commentPrefixSymbol);
@@ -79,16 +79,16 @@ public class CommentConfig extends AbstractConfig {
         yamlOptions.setIndent(options().indent());
         yamlOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         yamlRepresenter.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        final String header = buildHeader();
+        String header = buildHeader();
         String dump = yamlz.dump(getValues(false));
         if (dump.equals(BLANK_CONFIG)) {
             dump = "";
         }
-        final String contents = header + dump;
-        final StringBuilder savcontent = new StringBuilder();
-        final String[] parts = contents.split(newLine);
+        String contents = header + dump;
+        StringBuilder savcontent = new StringBuilder();
+        String[] parts = contents.split(newLine);
         for (String part : parts) {
-            final Matcher matcher = toPattern.matcher(part);
+            Matcher matcher = toPattern.matcher(part);
             if (matcher.find() && matcher.groupCount() == 5) {
                 part = this.checkNull(matcher.group(1)) + matcher.group(4);
             }
@@ -106,7 +106,7 @@ public class CommentConfig extends AbstractConfig {
      *            检查字符串
      * @return 返回非null字符串
      */
-    private String checkNull(final String string) {
+    private String checkNull(String string) {
         return string == null ? "" : string;
     }
 }

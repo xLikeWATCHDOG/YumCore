@@ -14,10 +14,10 @@ import org.bukkit.configuration.ConfigurationSection;
  * @author 喵♂呜
  */
 public class MySQLCore extends DataBaseCore {
-    private static final String driverName = "com.mysql.jdbc.Driver";
+    private static String driverName = "com.mysql.jdbc.Driver";
     private Connection connection;
-    private final Properties info;
-    private final String url;
+    private Properties info;
+    private String url;
 
     /**
      * 初始化连接信息
@@ -25,7 +25,7 @@ public class MySQLCore extends DataBaseCore {
      * @param cfg
      *            配置节点
      */
-    public MySQLCore(final ConfigurationSection cfg) {
+    public MySQLCore(ConfigurationSection cfg) {
         this(cfg.getString("ip", "127.0.0.1"), cfg.getInt("port", 3306), cfg.getString("database", "minecraft"), cfg.getString("username", "root"), cfg.getString("password", ""));
     }
 
@@ -43,7 +43,7 @@ public class MySQLCore extends DataBaseCore {
      * @param password
      *            密码
      */
-    public MySQLCore(final String host, final int port, final String dbname, final String username, final String password) {
+    public MySQLCore(String host, int port, String dbname, String username, String password) {
         this.info = new Properties();
         this.info.put("autoReconnect", "true");
         this.info.put("user", username);
@@ -53,7 +53,7 @@ public class MySQLCore extends DataBaseCore {
         this.url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
         try {
             Class.forName(driverName).newInstance();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             warn("数据库初始化失败 请检查驱动 " + driverName + " 是否存在!");
         }
     }
@@ -72,8 +72,8 @@ public class MySQLCore extends DataBaseCore {
      *             SQL异常
      */
     @Override
-    public boolean createTables(final String tableName, final KeyValue fields, final String Conditions) throws SQLException {
-        final String sql = "CREATE TABLE IF NOT EXISTS `%s` ( %s %s ) ENGINE = InnoDB DEFAULT CHARSET=UTF8";
+    public boolean createTables(String tableName, KeyValue fields, String Conditions) throws SQLException {
+        String sql = "CREATE TABLE IF NOT EXISTS `%s` ( %s %s ) ENGINE = InnoDB DEFAULT CHARSET=UTF8";
         return execute(String.format(sql, tableName, fields.toCreateString(), Conditions == null ? "" : ", " + Conditions));
     }
 
@@ -85,7 +85,7 @@ public class MySQLCore extends DataBaseCore {
             }
             this.connection = DriverManager.getConnection(this.url, this.info);
             return this.connection;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             warn("数据库操作出错: " + e.getMessage());// 得到出错信息
             warn("登录URL: " + this.url); // 发生错误时，将连接数据库信息打印出来
             warn("登录账户: " + this.info.getProperty("user"));

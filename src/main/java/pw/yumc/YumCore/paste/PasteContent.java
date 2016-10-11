@@ -14,11 +14,11 @@ import java.util.List;
  * @author 喵♂呜
  */
 public class PasteContent {
-    private final static String errN = "异常名称: %s";
-    private final static String errM = "异常说明: %s";
-    private final static String errInfo = "简易错误信息如下:";
-    private final static String errStackTrace = "    位于 %s.%s(%s:%s)";
-    private final List<String> TEXT = new ArrayList<>();
+    private static String errN = "异常名称: %s";
+    private static String errM = "异常说明: %s";
+    private static String errInfo = "简易错误信息如下:";
+    private static String errStackTrace = "    位于 %s.%s(%s:%s)";
+    private List<String> TEXT = new ArrayList<>();
 
     /**
      * 添加文件
@@ -28,7 +28,7 @@ public class PasteContent {
      * @throws IOException
      *             IO异常
      */
-    public void addFile(final File file) throws IOException {
+    public void addFile(File file) throws IOException {
         if (file == null) {
             throw new IllegalArgumentException("文件不得为Null!");
         }
@@ -41,7 +41,7 @@ public class PasteContent {
      * @param str
      *            行
      */
-    public void addLine(final String str) {
+    public void addLine(String str) {
         this.TEXT.add(str);
     }
 
@@ -51,7 +51,7 @@ public class PasteContent {
      * @param str
      *            行
      */
-    public void addLines(final List<String> str) {
+    public void addLines(List<String> str) {
         this.TEXT.addAll(str);
     }
 
@@ -61,7 +61,7 @@ public class PasteContent {
      * @param e
      *            异常
      */
-    public void addThrowable(final Throwable e) {
+    public void addThrowable(Throwable e) {
         Throwable temp = e;
         while (temp.getCause() != null) {
             temp = temp.getCause();
@@ -69,15 +69,15 @@ public class PasteContent {
         TEXT.add(String.format(errN, e.getClass().getName()));
         TEXT.add(String.format(errM, e.getMessage()));
         TEXT.add(errInfo);
-        for (final StackTraceElement ste : e.getStackTrace()) {
+        for (StackTraceElement ste : e.getStackTrace()) {
             TEXT.add(String.format(errStackTrace, ste.getClassName(), ste.getMethodName(), ste.getFileName(), ste.getLineNumber() < 0 ? "未知" : ste.getLineNumber()));
         }
     }
 
     @Override
     public String toString() {
-        final StringBuilder text = new StringBuilder();
-        for (final String str : TEXT) {
+        StringBuilder text = new StringBuilder();
+        for (String str : TEXT) {
             text.append(str + '\n');
         }
         return text.toString();

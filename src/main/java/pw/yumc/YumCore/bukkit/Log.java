@@ -17,8 +17,8 @@ import org.bukkit.command.CommandSender;
  */
 public class Log {
     private static boolean debug = new File(String.format("plugins%1$sYumCore%1$sdebug", File.separatorChar)).exists();
-    private static final Logger logger = P.instance.getLogger();
-    private static final CommandSender console = Bukkit.getConsoleSender();
+    private static Logger logger = P.instance.getLogger();
+    private static CommandSender console = Bukkit.getConsoleSender();
     private static String prefix = String.format("§6[§b%s§6]§r ", P.instance.getName());
 
     private Log() {
@@ -37,7 +37,7 @@ public class Log {
      *                if a security manager exists and if
      *                the caller does not have LoggingPermission("control").
      */
-    public static void addHandler(final Handler handler) throws SecurityException {
+    public static void addHandler(Handler handler) throws SecurityException {
         logger.addHandler(handler);
     }
 
@@ -47,7 +47,7 @@ public class Log {
      * @param message
      *            Message to be displayed
      */
-    public static void console(final String message) {
+    public static void console(String message) {
         console.sendMessage(prefix + message);
     }
 
@@ -59,7 +59,7 @@ public class Log {
      * @param object
      *            格式化参数
      */
-    public static void console(final String message, final Object... object) {
+    public static void console(String message, Object... object) {
         console.sendMessage(prefix + String.format(message, object));
     }
 
@@ -69,8 +69,8 @@ public class Log {
      * @param message
      *            Message to be displayed
      */
-    public static void console(final String[] msg) {
-        for (final String str : msg) {
+    public static void console(String[] msg) {
+        for (String str : msg) {
             console(str);
         }
     }
@@ -83,7 +83,7 @@ public class Log {
      * @param object
      *            参数
      */
-    public static void d(final String msg, final Object... object) {
+    public static void d(String msg, Object... object) {
         debug(String.format(msg, object));
     }
 
@@ -93,7 +93,7 @@ public class Log {
      * @param msg
      *            消息
      */
-    public static void debug(final String msg) {
+    public static void debug(String msg) {
         if (debug) {
             logger.info("[DEBUG] " + msg);
         }
@@ -107,7 +107,7 @@ public class Log {
      * @param object
      *            参数
      */
-    public static void debug(final String msg, final Object... object) {
+    public static void debug(String msg, Object... object) {
         if (debug) {
             logger.log(Level.SEVERE, "[DEBUG] " + msg, object);
         }
@@ -121,7 +121,7 @@ public class Log {
      * @param e
      *            异常
      */
-    public static void debug(final String msg, final Throwable e) {
+    public static void debug(String msg, Throwable e) {
         if (debug) {
             logger.info("[DEBUG] " + msg);
             e.printStackTrace();
@@ -134,7 +134,7 @@ public class Log {
      * @param e
      *            异常
      */
-    public static void debug(final Throwable e) {
+    public static void debug(Throwable e) {
         if (debug) {
             e.printStackTrace();
         }
@@ -158,7 +158,7 @@ public class Log {
      * @param msg
      *            The string message (or a key in the message catalog)
      */
-    public static void info(final String msg) {
+    public static void info(String msg) {
         logger.info(msg);
     }
 
@@ -175,7 +175,7 @@ public class Log {
      * @param msg
      *            The string message (or a key in the message catalog)
      */
-    public static void log(final Level level, final String msg) {
+    public static void log(Level level, String msg) {
         logger.log(level, msg);
     }
 
@@ -194,7 +194,7 @@ public class Log {
      * @param param1
      *            parameter to the message
      */
-    public static void log(final Level level, final String msg, final Object param1) {
+    public static void log(Level level, String msg, Object param1) {
         logger.log(level, msg, param1);
     }
 
@@ -213,7 +213,7 @@ public class Log {
      * @param params
      *            array of parameters to the message
      */
-    public static void log(final Level level, final String msg, final Object[] params) {
+    public static void log(Level level, String msg, Object[] params) {
         logger.log(level, msg, params);
     }
 
@@ -237,7 +237,7 @@ public class Log {
      * @param thrown
      *            Throwable associated with log message.
      */
-    public static void log(final Level level, final String msg, final Throwable thrown) {
+    public static void log(Level level, String msg, Throwable thrown) {
         logger.log(level, msg, thrown);
     }
 
@@ -245,7 +245,7 @@ public class Log {
      * @param prefix
      *            插件前缀
      */
-    public static void setPrefix(final String prefix) {
+    public static void setPrefix(String prefix) {
         Log.prefix = ChatColor.translateAlternateColorCodes('&', prefix);
     }
 
@@ -257,7 +257,7 @@ public class Log {
      * @param msg
      *            The string message (or a key in the message catalog)
      */
-    public static void severe(final String msg) {
+    public static void severe(String msg) {
         logger.severe(msg);
     }
 
@@ -269,7 +269,7 @@ public class Log {
      * @param msg
      *            消息
      */
-    public static void toSender(final CommandSender sender, final String msg) {
+    public static void toSender(CommandSender sender, String msg) {
         sender.sendMessage(prefix + msg);
     }
 
@@ -283,7 +283,7 @@ public class Log {
      * @param objs
      *            参数
      */
-    public static void toSender(final CommandSender sender, final String msg, final Object... objs) {
+    public static void toSender(CommandSender sender, String msg, Object... objs) {
         sender.sendMessage(prefix + String.format(msg, objs));
     }
 
@@ -295,8 +295,8 @@ public class Log {
      * @param msg
      *            消息
      */
-    public static void toSender(final CommandSender sender, final String[] msg) {
-        for (final String str : msg) {
+    public static void toSender(CommandSender sender, String[] msg) {
+        for (String str : msg) {
             toSender(sender, str);
         }
     }
@@ -309,7 +309,7 @@ public class Log {
      * @param objects
      *            参数
      */
-    public static void w(final String string, final Object... objects) {
+    public static void w(String string, Object... objects) {
         logger.warning(String.format(string, objects));
     }
 
@@ -324,7 +324,7 @@ public class Log {
      * @param msg
      *            The string message (or a key in the message catalog)
      */
-    public static void warning(final String msg) {
+    public static void warning(String msg) {
         logger.warning(msg);
     }
 

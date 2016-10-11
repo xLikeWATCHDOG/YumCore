@@ -28,16 +28,16 @@ public class MailAuthenticator extends Authenticator {
      * @param password
      *            密码
      */
-    public MailAuthenticator(final String username, final String password) {
+    public MailAuthenticator(String username, String password) {
         this.username = username;
         this.password = password;
     }
 
-    public void setPassword(final String password) {
+    public void setPassword(String password) {
         this.password = password;
     }
 
-    public void setUsername(final String username) {
+    public void setUsername(String username) {
         this.username = username;
     }
 

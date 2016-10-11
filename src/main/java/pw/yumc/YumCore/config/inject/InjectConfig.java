@@ -17,16 +17,16 @@ public abstract class InjectConfig extends AbstractInjectConfig {
         this(new FileConfig());
     }
 
-    public InjectConfig(final File file) {
+    public InjectConfig(File file) {
         this(new FileConfig(file));
     }
 
-    public InjectConfig(final FileConfig config) {
+    public InjectConfig(FileConfig config) {
         this.config = config;
         inject(config);
     }
 
-    public InjectConfig(final String name) {
+    public InjectConfig(String name) {
         this(new FileConfig(name));
     }
 

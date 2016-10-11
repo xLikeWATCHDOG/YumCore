@@ -23,7 +23,7 @@ public class ZipKit {
      *            名称
      * @return
      */
-    public static String getRealName(final String name) {
+    public static String getRealName(String name) {
         return new File(name).getName();
     }
 
@@ -37,7 +37,7 @@ public class ZipKit {
      * @throws IOException
      *             IO异常
      */
-    public static void unzip(final File zipFile, final File destPath) throws ZipException, IOException {
+    public static void unzip(File zipFile, File destPath) throws ZipException, IOException {
         unzip(zipFile, destPath, null);
     }
 
@@ -53,12 +53,12 @@ public class ZipKit {
      * @throws IOException
      *             IO异常
      */
-    public static void unzip(final File zipFile, final File destPath, final String ext) throws ZipException, IOException {
-        final ZipFile zipObj = new ZipFile(zipFile);
-        final Enumeration<? extends ZipEntry> e = zipObj.entries();
+    public static void unzip(File zipFile, File destPath, String ext) throws ZipException, IOException {
+        ZipFile zipObj = new ZipFile(zipFile);
+        Enumeration<? extends ZipEntry> e = zipObj.entries();
         while (e.hasMoreElements()) {
-            final ZipEntry entry = e.nextElement();
-            final File destinationFilePath = new File(destPath, getRealName(entry.getName()));
+            ZipEntry entry = e.nextElement();
+            File destinationFilePath = new File(destPath, getRealName(entry.getName()));
             if (entry.isDirectory() || (ext != null && !destinationFilePath.getName().endsWith(ext))) {
                 continue;
             }

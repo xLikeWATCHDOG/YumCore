@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, James Zhan 詹波 (jfinal@126.com).
+ * Copyright (c) 2011-2015, James Zhan 詹波 (j@126.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,8 +40,8 @@ public class HashKit {
      *            数字比特
      * @return 种子字串
      */
-    public static String generateSalt(final int numberOfBytes) {
-        final byte[] salt = new byte[numberOfBytes];
+    public static String generateSalt(int numberOfBytes) {
+        byte[] salt = new byte[numberOfBytes];
         random.nextBytes(salt);
         return toHex(salt);
     }
@@ -55,20 +55,20 @@ public class HashKit {
      *            字符串
      * @return 加密后的字符串
      */
-    public static String hash(final String algorithm, final String srcStr) {
+    public static String hash(String algorithm, String srcStr) {
         try {
-            final StringBuilder result = new StringBuilder();
-            final MessageDigest md = MessageDigest.getInstance(algorithm);
-            final byte[] bytes = md.digest(srcStr.getBytes("utf-8"));
-            for (final byte b : bytes) {
-                final String hex = Integer.toHexString(b & 0xFF);
+            StringBuilder result = new StringBuilder();
+            MessageDigest md = MessageDigest.getInstance(algorithm);
+            byte[] bytes = md.digest(srcStr.getBytes("utf-8"));
+            for (byte b : bytes) {
+                String hex = Integer.toHexString(b & 0xFF);
                 if (hex.length() == 1) {
                     result.append("0");
                 }
                 result.append(hex);
             }
             return result.toString();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -80,7 +80,7 @@ public class HashKit {
      *            字符串
      * @return 加密后的字符串
      */
-    public static String md5(final String srcStr) {
+    public static String md5(String srcStr) {
         return hash("MD5", srcStr);
     }
 
@@ -91,7 +91,7 @@ public class HashKit {
      *            字符串
      * @return 加密后的字符串
      */
-    public static String sha1(final String srcStr) {
+    public static String sha1(String srcStr) {
         return hash("SHA-1", srcStr);
     }
 
@@ -102,7 +102,7 @@ public class HashKit {
      *            字符串
      * @return 加密后的字符串
      */
-    public static String sha256(final String srcStr) {
+    public static String sha256(String srcStr) {
         return hash("SHA-256", srcStr);
     }
 
@@ -113,7 +113,7 @@ public class HashKit {
      *            字符串
      * @return 加密后的字符串
      */
-    public static String sha384(final String srcStr) {
+    public static String sha384(String srcStr) {
         return hash("SHA-384", srcStr);
     }
 
@@ -124,7 +124,7 @@ public class HashKit {
      *            字符串
      * @return 加密后的字符串
      */
-    public static String sha512(final String srcStr) {
+    public static String sha512(String srcStr) {
         return hash("SHA-512", srcStr);
     }
 
@@ -135,10 +135,10 @@ public class HashKit {
      *            Byte数组
      * @return 字符串
      */
-    private static String toHex(final byte[] bytes) {
-        final StringBuilder result = new StringBuilder();
-        for (final byte b : bytes) {
-            final String hex = Integer.toHexString(b & 0xFF);
+    private static String toHex(byte[] bytes) {
+        StringBuilder result = new StringBuilder();
+        for (byte b : bytes) {
+            String hex = Integer.toHexString(b & 0xFF);
             if (hex.length() == 1) {
                 result.append("0");
             }

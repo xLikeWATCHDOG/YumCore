@@ -13,7 +13,7 @@ class SimpleMail {
     private String from = null;
     private Address sender;
 
-    public SimpleMail(final String subject, final Object content) {
+    public SimpleMail(String subject, Object content) {
         this.subject = subject;
         this.content = content;
     }
@@ -53,19 +53,19 @@ class SimpleMail {
      *
      * @param content
      */
-    public void setContent(final Object content) {
+    public void setContent(Object content) {
         this.content = content;
     }
 
-    public void setFrom(final String from) {
+    public void setFrom(String from) {
         this.from = from;
     }
 
-    public void setSender(final Address sender) {
+    public void setSender(Address sender) {
         this.sender = sender;
     }
 
-    public void setSentDate(final Date date) {
+    public void setSentDate(Date date) {
         this.sentDate = date;
     }
 
@@ -74,7 +74,7 @@ class SimpleMail {
      *
      * @param subject
      */
-    public void setSubject(final String subject) {
+    public void setSubject(String subject) {
         this.subject = subject;
     }
 

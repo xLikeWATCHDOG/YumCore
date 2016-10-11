@@ -7,7 +7,7 @@ package pw.yumc.YumCore.tellraw;
  * @author 喵♂呜
  */
 public class JsonBuilder {
-    public static final String[] REPLACEMENT_CHARS;
+    public static String[] REPLACEMENT_CHARS;
     static {
         REPLACEMENT_CHARS = new String[128];
         for (int i = 0; i <= 0x1f; i++) {
@@ -27,16 +27,16 @@ public class JsonBuilder {
         json = new StringBuilder();
     }
 
-    public JsonBuilder(final String string) {
+    public JsonBuilder(String string) {
         this();
         append(string);
     }
 
-    public void append(final String value) {
+    public void append(String value) {
         int last = 0;
-        final int length = value.length();
+        int length = value.length();
         for (int i = 0; i < length; i++) {
-            final char c = value.charAt(i);
+            char c = value.charAt(i);
             String replacement;
             if (c < 128) {
                 replacement = REPLACEMENT_CHARS[c];

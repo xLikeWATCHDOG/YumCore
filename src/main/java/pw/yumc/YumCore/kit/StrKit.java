@@ -12,7 +12,7 @@ import org.bukkit.ChatColor;
  * @since 2016年9月14日 上午1:02:23
  */
 public class StrKit {
-    private static final String EMPTY = "";
+    private static String EMPTY = "";
 
     private StrKit() {
     }
@@ -22,7 +22,7 @@ public class StrKit {
      *            源字串
      * @return 颜色转化后的字串
      */
-    public static String color(final String string) {
+    public static String color(String string) {
         return ChatColor.translateAlternateColorCodes('&', string);
     }
 
@@ -35,7 +35,7 @@ public class StrKit {
      *            数组开始位置
      * @return 转移后的数组字符串
      */
-    public static String consolidateStrings(final String[] args, final int start) {
+    public static String consolidateStrings(String[] args, int start) {
         String ret = args[start];
         if (args.length > start + 1) {
             for (int i = start + 1; i < args.length; i++) {
@@ -69,12 +69,12 @@ public class StrKit {
      *             if originals contains a null element.
      *             <b>Note: the collection may be modified before this is thrown</b>
      */
-    public static <T extends Collection<? super String>> T copyPartialMatches(final String token, final Iterable<String> originals, final T collection) throws UnsupportedOperationException, IllegalArgumentException {
+    public static <T extends Collection<? super String>> T copyPartialMatches(String token, Iterable<String> originals, T collection) throws UnsupportedOperationException, IllegalArgumentException {
         Validate.notNull(token, "Search token cannot be null");
         Validate.notNull(collection, "Collection cannot be null");
         Validate.notNull(originals, "Originals cannot be null");
 
-        for (final String string : originals) {
+        for (String string : originals) {
             if (startsWithIgnoreCase(string, token)) {
                 collection.add(string);
             }
@@ -88,7 +88,7 @@ public class StrKit {
      *            字串
      * @return 是否为空字串
      */
-    public static boolean isBlank(final String str) {
+    public static boolean isBlank(String str) {
         return str == null || str.isEmpty();
     }
 
@@ -99,7 +99,7 @@ public class StrKit {
      *            数组
      * @return 字符串
      */
-    public static String join(final Object[] arr) {
+    public static String join(Object[] arr) {
         return join(arr, EMPTY);
     }
 
@@ -112,9 +112,9 @@ public class StrKit {
      *            分割符
      * @return 字符串
      */
-    public static String join(final Object[] arr, final String split) {
-        final StringBuffer str = new StringBuffer();
-        for (final Object s : arr) {
+    public static String join(Object[] arr, String split) {
+        StringBuffer str = new StringBuffer();
+        for (Object s : arr) {
             str.append(s.toString());
             str.append(split);
         }
@@ -126,7 +126,7 @@ public class StrKit {
      *            字串
      * @return 是否不为空字串
      */
-    public static boolean notBlank(final String str) {
+    public static boolean notBlank(String str) {
         return str != null && !str.isEmpty();
     }
 
@@ -146,7 +146,7 @@ public class StrKit {
      * @throws IllegalArgumentException
      *             if string is null
      */
-    public static boolean startsWithIgnoreCase(final String string, final String prefix) throws IllegalArgumentException, NullPointerException {
+    public static boolean startsWithIgnoreCase(String string, String prefix) throws IllegalArgumentException, NullPointerException {
         Validate.notNull(string, "Cannot check a null string for a match");
         if (string.length() < prefix.length()) {
             return false;
@@ -200,7 +200,7 @@ public class StrKit {
      * @return substring from start position to end positon,
      *         <code>null</code> if null String input
      */
-    public static String substring(final String str, int start, int end) {
+    public static String substring(String str, int start, int end) {
         if (str == null) {
             return null;
         }

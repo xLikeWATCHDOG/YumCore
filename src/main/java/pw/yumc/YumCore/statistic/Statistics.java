@@ -39,17 +39,17 @@ public class Statistics {
     /**
      * 统计系统版本
      */
-    private final static int REVISION = 10;
+    private static int REVISION = 10;
 
     /**
      * 统计插件基础配置文件
      */
-    private final static File configfile = new File(String.format("plugins%1$sPluginHelper%1$sconfig.yml", File.separatorChar));
+    private static File configfile = new File(String.format("plugins%1$sPluginHelper%1$sconfig.yml", File.separatorChar));
 
     /**
      * UTF-8编码
      */
-    private static final Charset UTF_8 = Charset.forName("UTF-8");
+    private static Charset UTF_8 = Charset.forName("UTF-8");
 
     /**
      * getOnlinePlayers方法
@@ -65,14 +65,14 @@ public class Statistics {
         try {
             getOnlinePlayers = Bukkit.class.getDeclaredMethod("getOnlinePlayers");
             if (getOnlinePlayers.getReturnType() != Player[].class) {
-                for (final Method method : Bukkit.class.getDeclaredMethods()) {
+                for (Method method : Bukkit.class.getDeclaredMethods()) {
                     if (method.getReturnType() == Player[].class && method.getName().endsWith("getOnlinePlayers")) {
                         getOnlinePlayers = method;
                     }
                 }
             }
-            final Object pluginClassLoader = Statistics.class.getClassLoader();
-            final Field field = pluginClassLoader.getClass().getDeclaredField("plugin");
+            Object pluginClassLoader = Statistics.class.getClassLoader();
+            Field field = pluginClassLoader.getClass().getDeclaredField("plugin");
             field.setAccessible(true);
             plugin = (JavaPlugin) field.get(pluginClassLoader);
         } catch (NoSuchMethodException | SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
@@ -87,12 +87,12 @@ public class Statistics {
     /**
      * 调试模式
      */
-    private final boolean debug;
+    private boolean debug;
 
     /**
      * 唯一服务器编码
      */
-    private final String guid;
+    private String guid;
 
     /**
      * 线程任务
@@ -115,7 +115,7 @@ public class Statistics {
             }
             config = YamlConfiguration.loadConfiguration(configfile);
             initFile(config);
-        } catch (final IOException e) {
+        } catch (IOException e) {
         }
         this.guid = config.getString("guid");
         this.debug = config.getBoolean("debug", false);
@@ -132,12 +132,12 @@ public class Statistics {
      * @return 所代表远程资源的响应结果
      * @throws IOException
      */
-    public static String postData(final String url, final String param) throws IOException {
+    public static String postData(String url, String param) throws IOException {
         PrintWriter out = null;
         String result = "";
-        final URL realUrl = new URL(url);
+        URL realUrl = new URL(url);
         // 打开和URL之间的连接
-        final URLConnection conn = realUrl.openConnection();
+        URLConnection conn = realUrl.openConnection();
         // 设置通用的请求属性
         conn.setRequestProperty("Accept", "*/*");
         conn.setRequestProperty("Connection", "Keep-Alive");
@@ -154,7 +154,7 @@ public class Statistics {
         // flush输出流的缓冲
         out.flush();
         String response = "";
-        final BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), UTF_8));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), UTF_8));
         while ((response = reader.readLine()) != null) {
             result += response;
         }
@@ -172,7 +172,7 @@ public class Statistics {
      *            配置文件
      * @throws IOException
      */
-    private static void initFile(final YamlConfiguration config) throws IOException {
+    private static void initFile(YamlConfiguration config) throws IOException {
         if (config.getString("guid") == null) {
             config.options().header("YUMC数据中心 http://www.yumc.pw 收集的数据仅用于统计插件使用情况").copyDefaults(true);
             config.set("guid", UUID.randomUUID().toString());
@@ -196,7 +196,7 @@ public class Statistics {
      * @param msg
      *            输出对象
      */
-    public void print(final String msg) {
+    public void print(String msg) {
         if (debug) {
             System.out.println("[Statistics] " + msg);
         }
@@ -220,7 +220,7 @@ public class Statistics {
             public void run() {
                 try {
                     postPlugin();
-                } catch (final Throwable e) {
+                } catch (Throwable e) {
                     if (debug) {
                         e.printStackTrace();
                     }
@@ -238,7 +238,7 @@ public class Statistics {
     private int getOnlinePlayerNumber() {
         try {
             return ((Player[]) getOnlinePlayers.invoke(Bukkit.getServer())).length;
-        } catch (final Exception ex) {
+        } catch (Exception ex) {
             return Bukkit.getOnlinePlayers().size();
         }
     }
@@ -248,11 +248,11 @@ public class Statistics {
      */
     private void postPlugin() throws IOException {
         // 服务器数据获取
-        final PluginDescriptionFile description = plugin.getDescription();
-        final String pluginname = description.getName();
-        final String tmposarch = System.getProperty("os.arch");
+        PluginDescriptionFile description = plugin.getDescription();
+        String pluginname = description.getName();
+        String tmposarch = System.getProperty("os.arch");
 
-        final Map<String, Object> data = new HashMap<>();
+        Map<String, Object> data = new HashMap<>();
         data.put("guid", guid);
         data.put("server_version", Bukkit.getVersion());
         data.put("server_port", Bukkit.getServer().getPort());
@@ -267,24 +267,24 @@ public class Statistics {
         data.put("auth_mode", Bukkit.getServer().getOnlineMode() ? 1 : 0);
         data.put("java_version", System.getProperty("java.version"));
 
-        final String jsondata = "Info=" + JSONValue.toJSONString(data);
+        String jsondata = "Info=" + JSONValue.toJSONString(data);
 
-        final String url = String.format("http://api.yumc.pw/I/P/S/V/%s/P/%s", REVISION, URLEncoder.encode(pluginname, "UTF-8"));
+        String url = String.format("http://api.yumc.pw/I/P/S/V/%s/P/%s", REVISION, URLEncoder.encode(pluginname, "UTF-8"));
         print("Plugin: " + pluginname + " Send Data To CityCraft Data Center");
         print("Address: " + url);
         print("Data: " + jsondata);
         // 发送数据
-        final JSONObject result = (JSONObject) JSONValue.parse(postData(url, jsondata));
+        JSONObject result = (JSONObject) JSONValue.parse(postData(url, jsondata));
         print("Plugin: " + pluginname + " Recover Data From CityCraft Data Center: " + result.get("info"));
     }
 
     public class StatisticsTimer implements Runnable {
-        private final LinkedList<Double> history = new LinkedList<>();
+        private LinkedList<Double> history = new LinkedList<>();
         private transient long lastPoll = System.nanoTime();
 
         public double getAverageTPS() {
             double avg = 0.0D;
-            for (final Double f : history) {
+            for (Double f : history) {
                 avg += f.doubleValue();
             }
             return avg / history.size();
@@ -292,12 +292,12 @@ public class Statistics {
 
         @Override
         public void run() {
-            final long startTime = System.nanoTime();
-            final long timeSpent = (startTime - lastPoll) / 1000;
+            long startTime = System.nanoTime();
+            long timeSpent = (startTime - lastPoll) / 1000;
             if (history.size() > 10) {
                 history.removeFirst();
             }
-            final double ttps = 2.0E7D / (timeSpent == 0 ? 1 : timeSpent);
+            double ttps = 2.0E7D / (timeSpent == 0 ? 1 : timeSpent);
             if (ttps <= 21.0D) {
                 history.add(ttps);
             }

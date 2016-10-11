@@ -32,26 +32,26 @@ import pw.yumc.YumCore.bukkit.Log;
  */
 @SuppressWarnings({ "unchecked" })
 public class FileConfig extends AbstractConfig {
-    protected static final String VERSION = "Version";
+    protected static String VERSION = "Version";
 
-    private static final char ALT_COLOR_CHAR = '&';
-    private static final String DEFAULT = "config.yml";
-    private static final String DATA_FORMANT = "yyyyMMddHHmmss";
-    private static final String CONFIG_BACKUP = "配置: %s 已备份为 %s !";
-    private static final String CONFIG_UPDATED = "配置: %s 升级成功 版本 %s !";
-    private static final String CONFIG_OVERRIDE = "配置: %s 将覆盖原有字段数据...";
-    private static final String CONFIG_NOT_FOUND = "配置: 文件 %s 不存在!";
-    private static final String CONFIG_READ_ERROR = "配置: %s 读取错误...";
-    private static final String CONFIG_SAVE_ERROR = "配置: %s 保存错误...";
-    private static final String CONFIG_UPDATE_WARN = "配置: %s 版本 %s 过低 正在升级到 %s ...";
-    private static final String CONFIG_CREATE_ERROR = "配置: %s 创建失败...";
-    private static final String CONFIG_FORMAT_ERROR = "配置: %s 格式错误...";
-    private static final String CONFIG_BACKUP_ERROR = "配置: %s 备份失败 异常: %s !";
-    private static final String CONFIG_UPDATE_VALUE = "配置: 更新字段 %s 的值为 %s ...";
-    private static final String CONFIG_BACKUP_AND_RESET = "配置: %s 格式错误 已备份为 %s 并恢复默认配置!";
-    private static final String CONFIG_NOT_FOUND_IN_JAR = "配置: 从插件内部未找到预置的 %s 文件!";
-    private static final String CONFIG_READ_COMMENT_ERROR = "配置: 读取文件注释信息失败!";
-    private static final String STREAM_NOT_BE_NULL = "数据流不能为 NULL";
+    private static char ALT_COLOR_CHAR = '&';
+    private static String DEFAULT = "config.yml";
+    private static String DATA_FORMANT = "yyyyMMddHHmmss";
+    private static String CONFIG_BACKUP = "配置: %s 已备份为 %s !";
+    private static String CONFIG_UPDATED = "配置: %s 升级成功 版本 %s !";
+    private static String CONFIG_OVERRIDE = "配置: %s 将覆盖原有字段数据...";
+    private static String CONFIG_NOT_FOUND = "配置: 文件 %s 不存在!";
+    private static String CONFIG_READ_ERROR = "配置: %s 读取错误...";
+    private static String CONFIG_SAVE_ERROR = "配置: %s 保存错误...";
+    private static String CONFIG_UPDATE_WARN = "配置: %s 版本 %s 过低 正在升级到 %s ...";
+    private static String CONFIG_CREATE_ERROR = "配置: %s 创建失败...";
+    private static String CONFIG_FORMAT_ERROR = "配置: %s 格式错误...";
+    private static String CONFIG_BACKUP_ERROR = "配置: %s 备份失败 异常: %s !";
+    private static String CONFIG_UPDATE_VALUE = "配置: 更新字段 %s 的值为 %s ...";
+    private static String CONFIG_BACKUP_AND_RESET = "配置: %s 格式错误 已备份为 %s 并恢复默认配置!";
+    private static String CONFIG_NOT_FOUND_IN_JAR = "配置: 从插件内部未找到预置的 %s 文件!";
+    private static String CONFIG_READ_COMMENT_ERROR = "配置: 读取文件注释信息失败!";
+    private static String STREAM_NOT_BE_NULL = "数据流不能为 NULL";
 
     protected File file;
 
@@ -70,7 +70,7 @@ public class FileConfig extends AbstractConfig {
      * @param file
      *            配置文件名称
      */
-    public FileConfig(final File file) {
+    public FileConfig(File file) {
         Validate.notNull(file, FILE_NOT_BE_NULL);
         init(file);
     }
@@ -83,7 +83,7 @@ public class FileConfig extends AbstractConfig {
      * @param filename
      *            配置文件名称
      */
-    public FileConfig(final File parent, final String filename) {
+    public FileConfig(File parent, String filename) {
         init(new File(parent, filename), true);
     }
 
@@ -93,7 +93,7 @@ public class FileConfig extends AbstractConfig {
      * @param stream
      *            数据流
      */
-    public FileConfig(final InputStream stream) {
+    public FileConfig(InputStream stream) {
         init(stream);
     }
 
@@ -103,7 +103,7 @@ public class FileConfig extends AbstractConfig {
      * @param filename
      *            配置文件名称
      */
-    public FileConfig(final String filename) {
+    public FileConfig(String filename) {
         init(new File(plugin.getDataFolder(), filename), true);
     }
 
@@ -115,7 +115,7 @@ public class FileConfig extends AbstractConfig {
      * @param filename
      *            配置文件名称
      */
-    public FileConfig(final String parent, final String filename) {
+    public FileConfig(String parent, String filename) {
         init(new File(parent, filename), true);
     }
 
@@ -130,7 +130,7 @@ public class FileConfig extends AbstractConfig {
      *            对象
      * @return {@link FileConfig}
      */
-    public <E> FileConfig addToList(final String path, final E obj) {
+    public <E> FileConfig addToList(String path, E obj) {
         List<E> l = (List<E>) this.getList(path);
         if (null == l) {
             l = new ArrayList<>();
@@ -148,7 +148,7 @@ public class FileConfig extends AbstractConfig {
      *            字符串
      * @return {@link FileConfig}
      */
-    public FileConfig addToStringList(final String path, final String obj) {
+    public FileConfig addToStringList(String path, String obj) {
         addToStringList(path, obj, true);
         return this;
     }
@@ -164,7 +164,7 @@ public class FileConfig extends AbstractConfig {
      *            是否允许重复
      * @return {@link FileConfig}
      */
-    public FileConfig addToStringList(final String path, final String obj, final boolean allowrepeat) {
+    public FileConfig addToStringList(String path, String obj, boolean allowrepeat) {
         List<String> l = this.getStringList(path);
         if (null == l) {
             l = new ArrayList<>();
@@ -183,12 +183,12 @@ public class FileConfig extends AbstractConfig {
      *            待转码的List
      * @return 颜色转码后的文本
      */
-    public List<String> getColorList(final List<String> cfgmsg) {
-        final List<String> message = new ArrayList<>();
+    public List<String> getColorList(List<String> cfgmsg) {
+        List<String> message = new ArrayList<>();
         if (cfgmsg == null) {
             return Collections.emptyList();
         }
-        for (final String msg : cfgmsg) {
+        for (String msg : cfgmsg) {
             message.add(ChatColor.translateAlternateColorCodes('&', msg));
         }
         return message;
@@ -210,7 +210,7 @@ public class FileConfig extends AbstractConfig {
      *            键
      * @return {@link Location}
      */
-    public Location getLocation(final String key) {
+    public Location getLocation(String key) {
         return getLocation(key, null);
     }
 
@@ -223,8 +223,8 @@ public class FileConfig extends AbstractConfig {
      *            默认地点
      * @return {@link Location}
      */
-    public Location getLocation(final String path, final Location def) {
-        final Object val = get(path, def);
+    public Location getLocation(String path, Location def) {
+        Object val = get(path, def);
         return val instanceof Location ? (Location) val : def;
     }
 
@@ -235,7 +235,7 @@ public class FileConfig extends AbstractConfig {
      *            配置路径
      * @return 颜色转码后的文本
      */
-    public String getMessage(final String path) {
+    public String getMessage(String path) {
         return getMessage(path, null);
     }
 
@@ -248,7 +248,7 @@ public class FileConfig extends AbstractConfig {
      *            默认文本
      * @return 颜色转码后的文本
      */
-    public String getMessage(final String path, final String def) {
+    public String getMessage(String path, String def) {
         String message = this.getString(path, def);
         if (message != null) {
             message = ChatColor.translateAlternateColorCodes('&', message);
@@ -263,8 +263,8 @@ public class FileConfig extends AbstractConfig {
      *            配置路径
      * @return 颜色转码后的文本
      */
-    public List<String> getMessageList(final String path) {
-        final List<String> cfgmsg = this.getStringList(path);
+    public List<String> getMessageList(String path) {
+        List<String> cfgmsg = this.getStringList(path);
         if (cfgmsg == null) {
             return Collections.emptyList();
         }
@@ -281,16 +281,16 @@ public class FileConfig extends AbstractConfig {
      *            配置路径
      * @return 字符串数组
      */
-    public String[] getStringArray(final String path) {
+    public String[] getStringArray(String path) {
         return this.getStringList(path).toArray(new String[0]);
     }
 
     @Override
-    public void loadFromString(final String contents) throws InvalidConfigurationException {
+    public void loadFromString(String contents) throws InvalidConfigurationException {
         try {
             commentConfig = new CommentConfig();
             commentConfig.loadFromString(contents);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             Log.debug(CONFIG_READ_COMMENT_ERROR);
             commentConfig = null;
         }
@@ -306,17 +306,17 @@ public class FileConfig extends AbstractConfig {
      *            旧版本
      * @return 是否需要更新
      */
-    public boolean needUpdate(final String newver, final String oldver) {
+    public boolean needUpdate(String newver, String oldver) {
         if (newver == null) {
             return false;
         }
         if (oldver == null) {
             return true;
         }
-        final String[] va1 = newver.split("\\.");// 注意此处为正则匹配，不能用"."；
-        final String[] va2 = oldver.split("\\.");
+        String[] va1 = newver.split("\\.");// 注意此处为正则匹配，不能用"."；
+        String[] va2 = oldver.split("\\.");
         int idx = 0;
-        final int minLength = Math.min(va1.length, va2.length);// 取最小长度值
+        int minLength = Math.min(va1.length, va2.length);// 取最小长度值
         int diff = 0;
         while (idx < minLength
                 && (diff = va1[idx].length() - va2[idx].length()) == 0// 先比较长度
@@ -348,8 +348,8 @@ public class FileConfig extends AbstractConfig {
      *            对象
      * @return {@link FileConfig}
      */
-    public <E> FileConfig removeFromList(final String path, final E obj) {
-        final List<E> l = (List<E>) this.getList(path);
+    public <E> FileConfig removeFromList(String path, E obj) {
+        List<E> l = (List<E>) this.getList(path);
         if (null != l) {
             l.remove(obj);
         }
@@ -365,8 +365,8 @@ public class FileConfig extends AbstractConfig {
      *            对象
      * @return {@link FileConfig}
      */
-    public FileConfig removeFromStringList(final String path, final String obj) {
-        final List<String> l = this.getStringList(path);
+    public FileConfig removeFromStringList(String path, String obj) {
+        List<String> l = this.getStringList(path);
         if (null != l) {
             l.remove(obj);
         }
@@ -383,7 +383,7 @@ public class FileConfig extends AbstractConfig {
         try {
             this.save(file);
             return true;
-        } catch (final IOException e) {
+        } catch (IOException e) {
             Log.warning(String.format(CONFIG_SAVE_ERROR, file.getName()));
             e.printStackTrace();
             return false;
@@ -391,7 +391,7 @@ public class FileConfig extends AbstractConfig {
     }
 
     @Override
-    public void save(final File file) throws IOException {
+    public void save(File file) throws IOException {
         Validate.notNull(file, FILE_NOT_BE_NULL);
         if (commentConfig != null) {
             data = commentConfig.saveToString();
@@ -402,7 +402,7 @@ public class FileConfig extends AbstractConfig {
     }
 
     @Override
-    public void set(final String path, final Object value) {
+    public void set(String path, Object value) {
         if (commentConfig != null) {
             commentConfig.set(path, value);
         }
@@ -415,9 +415,9 @@ public class FileConfig extends AbstractConfig {
     private void saveFromJar() {
         if (plugin != null && file != null) {
             try {
-                final String filename = file.getName();
-                final InputStream filestream = plugin.getResource(file.getName());
-                final String errFileName = this.getErrName(filename);
+                String filename = file.getName();
+                InputStream filestream = plugin.getResource(file.getName());
+                String errFileName = this.getErrName(filename);
                 file.renameTo(new File(file.getParent(), errFileName));
                 if (filestream == null) {
                     file.createNewFile();
@@ -425,7 +425,7 @@ public class FileConfig extends AbstractConfig {
                     plugin.saveResource(filename, true);
                 }
                 Log.warning(String.format(CONFIG_BACKUP_AND_RESET, filename, errFileName));
-            } catch (final IOException | IllegalArgumentException e) {
+            } catch (IOException | IllegalArgumentException e) {
                 throw new IllegalArgumentException(e);
             }
         } else {
@@ -439,14 +439,14 @@ public class FileConfig extends AbstractConfig {
      * @param oldcfg
      *            配置文件
      */
-    protected void backupConfig(final FileConfig oldcfg) {
-        final String filename = oldcfg.getConfigName();
+    protected void backupConfig(FileConfig oldcfg) {
+        String filename = oldcfg.getConfigName();
         try {
-            final String newCfgName = this.getBakName(filename);
-            final File newcfg = new File(file.getParent(), newCfgName);
+            String newCfgName = this.getBakName(filename);
+            File newcfg = new File(file.getParent(), newCfgName);
             oldcfg.save(newcfg);
             Log.warning(String.format(CONFIG_BACKUP, filename, newCfgName));
-        } catch (final IOException e) {
+        } catch (IOException e) {
             Log.warning(String.format(CONFIG_BACKUP_ERROR, filename, e.getMessage()));
             Log.debug(oldcfg.getConfigName(), e);
         }
@@ -458,9 +458,9 @@ public class FileConfig extends AbstractConfig {
      * @param file
      *            配置文件
      */
-    protected void check(final File file) {
-        final String filename = file.getName();
-        final InputStream stream = plugin.getResource(filename);
+    protected void check(File file) {
+        String filename = file.getName();
+        InputStream stream = plugin.getResource(filename);
         try {
             if (!file.exists()) {
                 file.getParentFile().mkdirs();
@@ -473,23 +473,23 @@ public class FileConfig extends AbstractConfig {
                 if (stream == null) {
                     return;
                 }
-                final FileConfig newcfg = new FileConfig(stream);
-                final FileConfig oldcfg = new FileConfig(file);
+                FileConfig newcfg = new FileConfig(stream);
+                FileConfig oldcfg = new FileConfig(file);
                 if (needUpdate(newcfg, oldcfg)) {
                     backupConfig(oldcfg);
                     updateConfig(newcfg, oldcfg).save(file);
                 }
             }
-        } catch (final IOException e) {
+        } catch (IOException e) {
             Log.warning(String.format(CONFIG_CREATE_ERROR, filename));
         }
     }
 
-    protected String getBakName(final String cfgname) {
+    protected String getBakName(String cfgname) {
         return cfgname + "." + getStringDate(DATA_FORMANT) + ".bak";
     }
 
-    protected String getErrName(final String cfgname) {
+    protected String getErrName(String cfgname) {
         return cfgname + "." + getStringDate(DATA_FORMANT) + ".err";
     }
 
@@ -502,7 +502,7 @@ public class FileConfig extends AbstractConfig {
         if (format == null) {
             format = "yyyy-MM-dd HH:mm:ss";
         }
-        final Date currentTime = new Date();
+        Date currentTime = new Date();
         return new SimpleDateFormat(format).format(currentTime);
     }
 
@@ -513,7 +513,7 @@ public class FileConfig extends AbstractConfig {
      *            配置文件
      * @return FileConfig
      */
-    protected FileConfig init(final File file) {
+    protected FileConfig init(File file) {
         init(file, false);
         return this;
     }
@@ -527,7 +527,7 @@ public class FileConfig extends AbstractConfig {
      *            是否检查文件
      * @return FileConfig
      */
-    protected FileConfig init(final File file, final boolean check) {
+    protected FileConfig init(File file, boolean check) {
         Validate.notNull(file, FILE_NOT_BE_NULL);
         this.file = file;
         if (check) {
@@ -535,7 +535,7 @@ public class FileConfig extends AbstractConfig {
         }
         try {
             init(new FileInputStream(file));
-        } catch (final FileNotFoundException e) {
+        } catch (FileNotFoundException e) {
             Log.debug(String.format(CONFIG_NOT_FOUND, file.toPath()));
         }
         return this;
@@ -548,18 +548,18 @@ public class FileConfig extends AbstractConfig {
      *            输入流
      * @return FileConfig
      */
-    protected FileConfig init(final InputStream stream) {
+    protected FileConfig init(InputStream stream) {
         Validate.notNull(stream, STREAM_NOT_BE_NULL);
         try {
             this.load(new InputStreamReader(stream, UTF_8));
-        } catch (final InvalidConfigurationException | IllegalArgumentException ex) {
+        } catch (InvalidConfigurationException | IllegalArgumentException ex) {
             if (file == null) {
                 throw new IllegalArgumentException(ex);
             }
             Log.warning(String.format(CONFIG_FORMAT_ERROR, file.getName()));
             Log.warning(ex.getMessage());
             saveFromJar();
-        } catch (final IOException ex) {
+        } catch (IOException ex) {
             if (file == null) {
                 throw new IllegalStateException(ex);
             }
@@ -577,7 +577,7 @@ public class FileConfig extends AbstractConfig {
      *            旧配置文件
      * @return 是否需要升级
      */
-    protected boolean needUpdate(final FileConfig newcfg, final FileConfig oldcfg) {
+    protected boolean needUpdate(FileConfig newcfg, FileConfig oldcfg) {
         return needUpdate(newcfg.getString(VERSION), oldcfg.getString(VERSION));
     }
 
@@ -590,7 +590,7 @@ public class FileConfig extends AbstractConfig {
      *            旧配置文件
      * @return 更新以后的配置文件
      */
-    protected FileConfig updateConfig(final FileConfig newCfg, final FileConfig oldCfg) {
+    protected FileConfig updateConfig(FileConfig newCfg, FileConfig oldCfg) {
         return updateConfig(newCfg, oldCfg, false);
     }
 
@@ -605,11 +605,11 @@ public class FileConfig extends AbstractConfig {
      *            是否强制更新
      * @return 更新以后的配置文件
      */
-    protected FileConfig updateConfig(final FileConfig newCfg, final FileConfig oldCfg, final boolean force) {
-        final String filename = oldCfg.getConfigName();
-        final String newver = newCfg.getString(VERSION);
-        final String oldver = oldCfg.getString(VERSION);
-        final Set<String> oldConfigKeys = oldCfg.getKeys(true);
+    protected FileConfig updateConfig(FileConfig newCfg, FileConfig oldCfg, boolean force) {
+        String filename = oldCfg.getConfigName();
+        String newver = newCfg.getString(VERSION);
+        String oldver = oldCfg.getString(VERSION);
+        Set<String> oldConfigKeys = oldCfg.getKeys(true);
         Log.warning(String.format(CONFIG_UPDATE_WARN, filename, oldver, newver));
         // 保留版本字段 不更新
         oldConfigKeys.remove(VERSION);
@@ -619,8 +619,8 @@ public class FileConfig extends AbstractConfig {
             oldConfigKeys.removeAll(newCfg.getKeys(true));
         }
         // 复制旧的数据
-        for (final String string : oldConfigKeys) {
-            final Object var = oldCfg.get(string);
+        for (String string : oldConfigKeys) {
+            Object var = oldCfg.get(string);
             if (var != null && !(var instanceof MemorySection)) {
                 Log.debug(String.format(CONFIG_UPDATE_VALUE, string, var));
                 newCfg.set(string, var);

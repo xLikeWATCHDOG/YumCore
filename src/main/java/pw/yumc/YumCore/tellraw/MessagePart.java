@@ -7,10 +7,10 @@ package pw.yumc.YumCore.tellraw;
  * @author 喵♂呜
  */
 public class MessagePart {
-    private static final String TEXT_FORMAT = "\"text\":\"%s\"";
-    private static final String CLICK_FORMAT = "\"clickEvent\":{\"action\":\"%s\",\"value\":\"%s\"}";
-    private static final String HOVER_FORMAT = "\"hoverEvent\":{\"action\":\"%s\",\"value\":\"%s\"}";
-    private static final String INSERT_FORMAT = " \"insertion\":\"%s\"";
+    private static String TEXT_FORMAT = "\"text\":\"%s\"";
+    private static String CLICK_FORMAT = "\"clickEvent\":{\"action\":\"%s\",\"value\":\"%s\"}";
+    private static String HOVER_FORMAT = "\"hoverEvent\":{\"action\":\"%s\",\"value\":\"%s\"}";
+    private static String INSERT_FORMAT = " \"insertion\":\"%s\"";
     /**
      * 消息文本
      */
@@ -40,7 +40,7 @@ public class MessagePart {
         this("");
     }
 
-    public MessagePart(final String text) {
+    public MessagePart(String text) {
         this.text = text;
     }
 
@@ -57,7 +57,7 @@ public class MessagePart {
      * @param str
      *            流对象
      */
-    public void writeJson(final StringBuilder str) {
+    public void writeJson(StringBuilder str) {
         str.append("{");
         str.append(String.format(TEXT_FORMAT, new JsonBuilder(text)));
         if (clickActionName != null) {

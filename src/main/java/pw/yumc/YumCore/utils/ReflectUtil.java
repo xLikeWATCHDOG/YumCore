@@ -14,20 +14,20 @@ import java.util.List;
 @SuppressWarnings("all")
 public class ReflectUtil {
 
-    public static Field getDeclaredFieldByName(final Class source, final String name) {
+    public static Field getDeclaredFieldByName(Class source, String name) {
         try {
-            final Field field = source.getDeclaredField(name);
+            Field field = source.getDeclaredField(name);
             field.setAccessible(true);
             return field;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public static List<Field> getDeclaredFieldByType(final Class source, final Class type) {
-        final List<Field> list = new ArrayList<>();
-        for (final Field field : source.getDeclaredFields()) {
+    public static List<Field> getDeclaredFieldByType(Class source, Class type) {
+        List<Field> list = new ArrayList<>();
+        for (Field field : source.getDeclaredFields()) {
             if (field.getType() == type) {
                 field.setAccessible(true);
                 list.add(field);
@@ -36,17 +36,17 @@ public class ReflectUtil {
         return list;
     }
 
-    public static Method getDeclaredMethod(final Class clzz, final String methodName, final Class... args) {
+    public static Method getDeclaredMethod(Class clzz, String methodName, Class... args) {
         try {
             return clzz.getDeclaredMethod(methodName, args);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public static Method getDeclaredMethodByNameAndParams(final Class source, final String name, final Class... args) {
-        for (final Method method : findMethodByParams(source.getDeclaredMethods(), args)) {
+    public static Method getDeclaredMethodByNameAndParams(Class source, String name, Class... args) {
+        for (Method method : findMethodByParams(source.getDeclaredMethods(), args)) {
             if (method.getName().equals(name)) {
                 return method;
             }
@@ -54,9 +54,9 @@ public class ReflectUtil {
         return null;
     }
 
-    public static List<Method> getDeclaredMethodByNameAndType(final Class source, final String name, final Class returnType) {
-        final List<Method> methods = new ArrayList<>();
-        for (final Method method : source.getDeclaredMethods()) {
+    public static List<Method> getDeclaredMethodByNameAndType(Class source, String name, Class returnType) {
+        List<Method> methods = new ArrayList<>();
+        for (Method method : source.getDeclaredMethods()) {
             if (method.getName().equals(name) && method.getReturnType().equals(returnType)) {
                 methods.add(method);
             }
@@ -64,13 +64,13 @@ public class ReflectUtil {
         return methods;
     }
 
-    public static List<Method> getDeclaredMethodByParams(final Class source, final Class... args) {
+    public static List<Method> getDeclaredMethodByParams(Class source, Class... args) {
         return findMethodByParams(source.getDeclaredMethods(), args);
     }
 
-    public static List<Method> getDeclaredMethodByParamsAndType(final Class source, final Class returnType, final Class... args) {
-        final List<Method> methods = new ArrayList<>();
-        for (final Method method : findMethodByParams(source.getDeclaredMethods(), args)) {
+    public static List<Method> getDeclaredMethodByParamsAndType(Class source, Class returnType, Class... args) {
+        List<Method> methods = new ArrayList<>();
+        for (Method method : findMethodByParams(source.getDeclaredMethods(), args)) {
             if (method.getReturnType().equals(returnType)) {
                 methods.add(method);
             }
@@ -78,9 +78,9 @@ public class ReflectUtil {
         return methods;
     }
 
-    public static List<Method> getDeclaredMethodByType(final Class source, final Class returnType) {
-        final List<Method> methods = new ArrayList<>();
-        for (final Method method : source.getDeclaredMethods()) {
+    public static List<Method> getDeclaredMethodByType(Class source, Class returnType) {
+        List<Method> methods = new ArrayList<>();
+        for (Method method : source.getDeclaredMethods()) {
             if (method.getReturnType().equals(returnType)) {
                 methods.add(method);
             }
@@ -88,20 +88,20 @@ public class ReflectUtil {
         return methods;
     }
 
-    public static Field getFieldByName(final Class source, final String name) {
+    public static Field getFieldByName(Class source, String name) {
         try {
-            final Field field = source.getField(name);
+            Field field = source.getField(name);
             field.setAccessible(true);
             return field;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public static List<Field> getFieldByType(final Class source, final Class type) {
-        final List<Field> list = new ArrayList<>();
-        for (final Field field : source.getFields()) {
+    public static List<Field> getFieldByType(Class source, Class type) {
+        List<Field> list = new ArrayList<>();
+        for (Field field : source.getFields()) {
             if (field.getType() == type) {
                 field.setAccessible(true);
                 list.add(field);
@@ -110,16 +110,16 @@ public class ReflectUtil {
         return list;
     }
 
-    public static Object getHandle(final Object bukkitObj) {
+    public static Object getHandle(Object bukkitObj) {
         try {
             return bukkitObj.getClass().getMethod("getHandle").invoke(bukkitObj);
-        } catch (final Exception e) {
+        } catch (Exception e) {
         }
         return null;
     }
 
-    public static Method getMethodByNameAndParams(final Class source, final String name, final Class... args) {
-        for (final Method method : findMethodByParams(source.getMethods(), args)) {
+    public static Method getMethodByNameAndParams(Class source, String name, Class... args) {
+        for (Method method : findMethodByParams(source.getMethods(), args)) {
             if (method.getName().equals(name)) {
                 return method;
             }
@@ -127,9 +127,9 @@ public class ReflectUtil {
         return null;
     }
 
-    public static List<Method> getMethodByNameAndType(final Class source, final String name, final Class returnType) {
-        final List<Method> methods = new ArrayList<>();
-        for (final Method method : source.getMethods()) {
+    public static List<Method> getMethodByNameAndType(Class source, String name, Class returnType) {
+        List<Method> methods = new ArrayList<>();
+        for (Method method : source.getMethods()) {
             if (method.getName().equals(name) && method.getReturnType().equals(returnType)) {
                 methods.add(method);
             }
@@ -137,13 +137,13 @@ public class ReflectUtil {
         return methods;
     }
 
-    public static List<Method> getMethodByParams(final Class source, final Class... args) {
+    public static List<Method> getMethodByParams(Class source, Class... args) {
         return findMethodByParams(source.getMethods(), args);
     }
 
-    public static List<Method> getMethodByParamsAndType(final Class source, final Class returnType, final Class... args) {
-        final List<Method> methods = new ArrayList<>();
-        for (final Method method : findMethodByParams(source.getMethods(), args)) {
+    public static List<Method> getMethodByParamsAndType(Class source, Class returnType, Class... args) {
+        List<Method> methods = new ArrayList<>();
+        for (Method method : findMethodByParams(source.getMethods(), args)) {
             if (method.getReturnType().equals(returnType)) {
                 methods.add(method);
             }
@@ -151,9 +151,9 @@ public class ReflectUtil {
         return methods;
     }
 
-    public static List<Method> getMethodByType(final Class source, final Class returnType) {
-        final List<Method> methods = new ArrayList<>();
-        for (final Method method : source.getMethods()) {
+    public static List<Method> getMethodByType(Class source, Class returnType) {
+        List<Method> methods = new ArrayList<>();
+        for (Method method : source.getMethods()) {
             if (method.getReturnType().equals(returnType)) {
                 methods.add(method);
             }
@@ -161,39 +161,39 @@ public class ReflectUtil {
         return methods;
     }
 
-    public static void invokeMethod(final Object object, final String methodName, final Class arg, final Object value) {
+    public static void invokeMethod(Object object, String methodName, Class arg, Object value) {
         try {
-            final Method m = object.getClass().getDeclaredMethod(methodName, arg);
+            Method m = object.getClass().getDeclaredMethod(methodName, arg);
             m.invoke(object, value);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void invokeMethod(final Object object, final String methodName, final Class[] args, final Object[] value) {
+    public static void invokeMethod(Object object, String methodName, Class[] args, Object[] value) {
         try {
-            final Method m = object.getClass().getDeclaredMethod(methodName, args);
+            Method m = object.getClass().getDeclaredMethod(methodName, args);
             m.invoke(object, value);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void invokeMethod(final Object object, final String methodName, final Object value) {
+    public static void invokeMethod(Object object, String methodName, Object value) {
         try {
-            final Method m = object.getClass().getDeclaredMethod(methodName, value.getClass());
+            Method m = object.getClass().getDeclaredMethod(methodName, value.getClass());
             m.invoke(object, value);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    private static List<Method> findMethodByParams(final Method[] methods, final Class... args) {
-        final List<Method> list = new ArrayList<>();
+    private static List<Method> findMethodByParams(Method[] methods, Class... args) {
+        List<Method> list = new ArrayList<>();
         start:
-        for (final Method method : methods) {
+        for (Method method : methods) {
             if (method.getParameterTypes().length == args.length) {
-                final Class[] array = method.getParameterTypes();
+                Class[] array = method.getParameterTypes();
                 for (int i = 0; i < args.length; i++) {
                     if (!array[i].equals(args[i])) {
                         continue start;

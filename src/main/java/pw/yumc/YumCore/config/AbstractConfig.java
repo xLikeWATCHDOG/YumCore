@@ -36,20 +36,20 @@ import pw.yumc.YumCore.config.yaml.BukkitRepresenter;
  * @author 喵♂呜
  */
 public abstract class AbstractConfig extends YamlConfiguration {
-    private static final String CONTENT_NOT_BE_NULL = "内容不能为 null";
-    private static final String TOP_KEY_MUST_BE_MAP = "顶层键值必须是Map.";
+    private static String CONTENT_NOT_BE_NULL = "内容不能为 null";
+    private static String TOP_KEY_MUST_BE_MAP = "顶层键值必须是Map.";
 
-    protected static final Charset UTF_8 = Charset.forName("UTF-8");
+    protected static Charset UTF_8 = Charset.forName("UTF-8");
 
-    protected static final String FILE_NOT_BE_NULL = "文件不能为 NULL";
-    protected static final String CREATE_NEW_CONFIG = "配置: 创建新的文件 %s ...";
-    protected static final String newLine = "\n";
+    protected static String FILE_NOT_BE_NULL = "文件不能为 NULL";
+    protected static String CREATE_NEW_CONFIG = "配置: 创建新的文件 %s ...";
+    protected static String newLine = "\n";
 
     protected static Plugin plugin = P.instance;
 
-    protected final DumperOptions yamlOptions = new DumperOptions();
-    protected final Representer yamlRepresenter = new BukkitRepresenter();
-    protected final Yaml yamlz = new Yaml(new BukkitConstructor(), yamlRepresenter, yamlOptions);
+    protected DumperOptions yamlOptions = new DumperOptions();
+    protected Representer yamlRepresenter = new BukkitRepresenter();
+    protected Yaml yamlz = new Yaml(new BukkitConstructor(), yamlRepresenter, yamlOptions);
 
     /**
      * 配置文件内容MAP
@@ -69,16 +69,16 @@ public abstract class AbstractConfig extends YamlConfiguration {
     }
 
     @Override
-    public void load(final File file) throws FileNotFoundException, IOException, InvalidConfigurationException {
+    public void load(File file) throws FileNotFoundException, IOException, InvalidConfigurationException {
         Validate.notNull(file, FILE_NOT_BE_NULL);
-        final FileInputStream stream = new FileInputStream(file);
+        FileInputStream stream = new FileInputStream(file);
         load(new InputStreamReader(stream, UTF_8));
     }
 
     @Override
-    public void load(final Reader reader) throws IOException, InvalidConfigurationException {
-        final BufferedReader input = reader instanceof BufferedReader ? (BufferedReader) reader : new BufferedReader(reader);
-        final StringBuilder builder = new StringBuilder();
+    public void load(Reader reader) throws IOException, InvalidConfigurationException {
+        BufferedReader input = reader instanceof BufferedReader ? (BufferedReader) reader : new BufferedReader(reader);
+        StringBuilder builder = new StringBuilder();
         try {
             String line;
             while ((line = input.readLine()) != null) {
@@ -92,16 +92,16 @@ public abstract class AbstractConfig extends YamlConfiguration {
     }
 
     @Override
-    public void loadFromString(final String contents) throws InvalidConfigurationException {
+    public void loadFromString(String contents) throws InvalidConfigurationException {
         Validate.notNull(contents, CONTENT_NOT_BE_NULL);
         try {
             contentsMap = (Map) yamlz.load(contents);
-        } catch (final YAMLException e) {
+        } catch (YAMLException e) {
             throw new InvalidConfigurationException(e);
-        } catch (final ClassCastException e) {
+        } catch (ClassCastException e) {
             throw new InvalidConfigurationException(TOP_KEY_MUST_BE_MAP);
         }
-        final String header = parseHeader(contents);
+        String header = parseHeader(contents);
         if (header.length() > 0) {
             options().header(header);
         }
@@ -111,14 +111,14 @@ public abstract class AbstractConfig extends YamlConfiguration {
     }
 
     @Override
-    public void save(final File file) throws IOException {
+    public void save(File file) throws IOException {
         Validate.notNull(file, FILE_NOT_BE_NULL);
         Files.createParentDirs(file);
         if (!file.exists()) {
             file.createNewFile();
             Log.info(String.format(CREATE_NEW_CONFIG, file.toPath()));
         }
-        final Writer writer = new OutputStreamWriter(new FileOutputStream(file), UTF_8);
+        Writer writer = new OutputStreamWriter(new FileOutputStream(file), UTF_8);
         try {
             writer.write(data);
         } finally {
@@ -131,7 +131,7 @@ public abstract class AbstractConfig extends YamlConfiguration {
         yamlOptions.setIndent(options().indent());
         yamlOptions.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
         yamlRepresenter.setDefaultFlowStyle(DumperOptions.FlowStyle.BLOCK);
-        final String header = buildHeader();
+        String header = buildHeader();
         String dump = yamlz.dump(getValues(false));
         if (dump.equals(BLANK_CONFIG)) {
             dump = "";

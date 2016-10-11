@@ -26,8 +26,8 @@ public class XMail {
 
     private static boolean autoRegister = true;
 
-    private static final HashMap<String, DataContentHandler> handlers = new HashMap<>();
-    private static final DataContentHandlerFactory defaultDataContentHandlerFactory;
+    private static HashMap<String, DataContentHandler> handlers = new HashMap<>();
+    private static DataContentHandlerFactory defaultDataContentHandlerFactory;
     static {
         // todo
         // activation.jar
@@ -43,8 +43,8 @@ public class XMail {
         handlers.put("image/jpeg", new com.sun.mail.handlers.image_jpeg());
         defaultDataContentHandlerFactory = new DataContentHandlerFactory() {
             @Override
-            public DataContentHandler createDataContentHandler(final String type) {
-                final DataContentHandler handler = handlers.get(type);
+            public DataContentHandler createDataContentHandler(String type) {
+                DataContentHandler handler = handlers.get(type);
                 if (handler != null) {
                     return handler;
                 }
@@ -54,7 +54,7 @@ public class XMail {
         };
     }
 
-    public static void addDataContentHandler(final String type, final DataContentHandler handler) {
+    public static void addDataContentHandler(String type, DataContentHandler handler) {
         handlers.put(type, handler);
     }
 
@@ -66,7 +66,7 @@ public class XMail {
         try {
             DataHandler.setDataContentHandlerFactory(defaultDataContentHandlerFactory);
             return true;
-        } catch (final Exception e) {
+        } catch (Exception e) {
         }
         return false;
     }
@@ -98,19 +98,19 @@ public class XMail {
      *            是否需要验证
      * @return 是否发送成功
      */
-    public static boolean send(final HostAndPort smtp, final String from, String fromName, final String to, final String copyto, final String subject, final String content, final String[] filename, final String username, final String password, final boolean needAuth) {
+    public static boolean send(HostAndPort smtp, String from, String fromName, String to, String copyto, String subject, String content, String[] filename, final String username, final String password, boolean needAuth) {
         try {
             if (isAutoRegister()) {
                 unregisterDefaultDataContentHandlerFactory();
                 registerDefaultDataContentHandlerFactory();
             }
-            final Properties props = new Properties();
+            Properties props = new Properties();
             props.put("mail.smtp.host", smtp.getHostText());
             props.put("mail.smtp.port", smtp.getPort());
             props.put("mail.smtp.socketFactory.port", smtp.getPort());
             props.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
             props.put("mail.smtp.auth", needAuth);
-            final Session mailSession = Session.getInstance(props, new Authenticator() {
+            Session mailSession = Session.getInstance(props, new Authenticator() {
 
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
@@ -120,31 +120,31 @@ public class XMail {
             if (fromName == null) {
                 fromName = from;
             }
-            final MimeMessage mimeMsg = new MimeMessage(mailSession);
+            MimeMessage mimeMsg = new MimeMessage(mailSession);
             mimeMsg.setSubject(subject);
 
-            final MimeMultipart mp = new MimeMultipart();
+            MimeMultipart mp = new MimeMultipart();
 
             if (content != null) {
                 try {
-                    final BodyPart bp = new MimeBodyPart();
+                    BodyPart bp = new MimeBodyPart();
                     bp.setContent("" + content, "text/html;charset=GBK");
                     mp.addBodyPart(bp);
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     System.err.println("设置邮件正文时发生错误！" + e);
                     return false;
                 }
             }
 
             if (filename != null) {
-                for (final String file : filename) {
+                for (String file : filename) {
                     try {
-                        final BodyPart bp = new MimeBodyPart();
-                        final FileDataSource fileds = new FileDataSource(file);
+                        BodyPart bp = new MimeBodyPart();
+                        FileDataSource fileds = new FileDataSource(file);
                         bp.setDataHandler(new DataHandler(fileds));
                         bp.setFileName(fileds.getName());
                         mp.addBodyPart(bp);
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         System.err.println("增加邮件附件：" + file + "发生错误！" + e);
                     }
                 }
@@ -156,10 +156,10 @@ public class XMail {
                 // 设置发信人
                 try {
                     mimeMsg.setFrom(new InternetAddress(from, fromName));
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     mimeMsg.setFrom(new InternetAddress(from));
                 }
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 System.err.println("设置发信人发生错误！");
                 e.printStackTrace();
                 return false;
@@ -167,7 +167,7 @@ public class XMail {
 
             try {
                 mimeMsg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
-            } catch (final Exception e) {
+            } catch (Exception e) {
                 System.err.println("设置接收人发生错误！");
                 e.printStackTrace();
                 return false;
@@ -178,10 +178,10 @@ public class XMail {
                     // 设置抄送人
                     try {
                         mimeMsg.setFrom(new InternetAddress(from, fromName));
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         mimeMsg.setFrom(new InternetAddress(from));
                     }
-                } catch (final Exception e) {
+                } catch (Exception e) {
                     System.err.println("设置抄送人发生错误！");
                     e.printStackTrace();
                 }
@@ -194,7 +194,7 @@ public class XMail {
             Transport.send(mimeMsg);
 
             return true;
-        } catch (final Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if (isAutoRegister()) {
@@ -204,18 +204,18 @@ public class XMail {
         return false;
     }
 
-    public static void setAutoRegister(final boolean autoRegister) {
+    public static void setAutoRegister(boolean autoRegister) {
         XMail.autoRegister = autoRegister;
     }
 
     public static Object unregisterDefaultDataContentHandlerFactory() {
         try {
-            final Field field = DataHandler.class.getDeclaredField("factory");
+            Field field = DataHandler.class.getDeclaredField("factory");
             field.setAccessible(true);
-            final Object object = field.get(null);
+            Object object = field.get(null);
             field.set(null, null);
             return object;
-        } catch (final Exception e) {
+        } catch (Exception e) {
         }
         return null;
     }

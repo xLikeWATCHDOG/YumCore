@@ -16,9 +16,9 @@ import org.bukkit.plugin.Plugin;
  * @author 喵♂呜
  */
 public class SQLiteCore extends DataBaseCore {
-    private static final String driverName = "org.sqlite.JDBC";
+    private static String driverName = "org.sqlite.JDBC";
     private Connection connection;
-    private final File dbFile;
+    private File dbFile;
 
     /**
      * 初始化连接信息
@@ -26,20 +26,20 @@ public class SQLiteCore extends DataBaseCore {
      * @param dbFile
      *            数据库文件
      */
-    public SQLiteCore(final File dbFile) {
+    public SQLiteCore(File dbFile) {
         this.dbFile = dbFile;
         if (this.dbFile.exists()) {
             // So we need a new connection
             try {
                 this.dbFile.createNewFile();
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 warn("数据库文件 " + dbFile.getAbsolutePath() + " 创建失败!");
                 e.printStackTrace();
             }
         }
         try {
             Class.forName(driverName).newInstance();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             warn("数据库初始化失败 请检查驱动 " + driverName + " 是否存在!");
             e.printStackTrace();
         }
@@ -53,7 +53,7 @@ public class SQLiteCore extends DataBaseCore {
      * @param cfg
      *            配置信息
      */
-    public SQLiteCore(final Plugin plugin, final ConfigurationSection cfg) {
+    public SQLiteCore(Plugin plugin, ConfigurationSection cfg) {
         this(plugin, cfg.getString("database"));
     }
 
@@ -65,20 +65,20 @@ public class SQLiteCore extends DataBaseCore {
      * @param filename
      *            文件名称
      */
-    public SQLiteCore(final Plugin plugin, final String filename) {
+    public SQLiteCore(Plugin plugin, String filename) {
         this.dbFile = new File(plugin.getDataFolder(), filename + ".db");
         if (this.dbFile.exists()) {
             // So we need a new connection
             try {
                 this.dbFile.createNewFile();
-            } catch (final IOException e) {
+            } catch (IOException e) {
                 warn("数据库文件 " + this.dbFile.getAbsolutePath() + " 创建失败!");
                 e.printStackTrace();
             }
         }
         try {
             Class.forName(driverName).newInstance();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             warn("数据库初始化失败 请检查驱动 " + driverName + " 是否存在!");
             e.printStackTrace();
         }
@@ -90,13 +90,13 @@ public class SQLiteCore extends DataBaseCore {
      * @param filepath
      *            文件路径
      */
-    public SQLiteCore(final String filepath) {
+    public SQLiteCore(String filepath) {
         this(new File(filepath));
     }
 
     @Override
-    public boolean createTables(final String tableName, final KeyValue fields, final String Conditions) throws SQLException {
-        final String sql = "CREATE TABLE IF NOT EXISTS `%s` ( %s %s )";
+    public boolean createTables(String tableName, KeyValue fields, String Conditions) throws SQLException {
+        String sql = "CREATE TABLE IF NOT EXISTS `%s` ( %s %s )";
         return execute(String.format(sql, tableName, fields.toCreateString().replace("AUTO_INCREMENT", "AUTOINCREMENT"), Conditions == null ? "" : " , " + Conditions));
     }
 
@@ -116,7 +116,7 @@ public class SQLiteCore extends DataBaseCore {
             }
             this.connection = DriverManager.getConnection("jdbc:sqlite:" + this.dbFile);
             return this.connection;
-        } catch (final SQLException e) {
+        } catch (SQLException e) {
             warn("数据库操作出错: " + e.getMessage());// 得到出错信息
             warn("数据库文件: " + this.dbFile.getAbsolutePath()); // 发生错误时，将连接数据库信息打印出来
             return null;

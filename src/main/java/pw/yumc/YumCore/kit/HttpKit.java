@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011-2015, James Zhan 詹波 (jfinal@126.com).
+ * Copyright (c) 2011-2015, James Zhan 詹波 (j@126.com).
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -46,14 +46,14 @@ import javax.net.ssl.X509TrustManager;
  */
 public class HttpKit {
 
-    private static final String GET = "GET";
+    private static String GET = "GET";
 
-    private static final String POST = "POST";
+    private static String POST = "POST";
 
-    private static final String CHARSET = "UTF-8";
+    private static String CHARSET = "UTF-8";
 
-    private static final SSLSocketFactory sslSocketFactory = initSSLSocketFactory();
-    private static final TrustAnyHostnameVerifier trustAnyHostnameVerifier = new HttpKit.TrustAnyHostnameVerifier();
+    private static SSLSocketFactory sslSocketFactory = initSSLSocketFactory();
+    private static TrustAnyHostnameVerifier trustAnyHostnameVerifier = new HttpKit.TrustAnyHostnameVerifier();
 
     private HttpKit() {
     }
@@ -65,7 +65,7 @@ public class HttpKit {
      *            网址
      * @return 网页HTML
      */
-    public static String get(final String url) {
+    public static String get(String url) {
         return get(url, null, null);
     }
 
@@ -78,7 +78,7 @@ public class HttpKit {
      *            查询参数
      * @return 网页HTML
      */
-    public static String get(final String url, final Map<String, String> queryParas) {
+    public static String get(String url, Map<String, String> queryParas) {
         return get(url, queryParas, null);
     }
 
@@ -93,13 +93,13 @@ public class HttpKit {
      *            头信息
      * @return 网页HTML
      */
-    public static String get(final String url, final Map<String, String> queryParas, final Map<String, String> headers) {
+    public static String get(String url, Map<String, String> queryParas, Map<String, String> headers) {
         HttpURLConnection conn = null;
         try {
             conn = getHttpConnection(buildUrlWithQueryString(url, queryParas), GET, headers);
             conn.connect();
             return readResponseString(conn);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
             if (conn != null) {
@@ -119,7 +119,7 @@ public class HttpKit {
      *            数据
      * @return 网页HTML
      */
-    public static String post(final String url, final Map<String, String> queryParas, final String data) {
+    public static String post(String url, Map<String, String> queryParas, String data) {
         return post(url, queryParas, data, null);
     }
 
@@ -136,19 +136,19 @@ public class HttpKit {
      *            头信息
      * @return 网页HTML
      */
-    public static String post(final String url, final Map<String, String> queryParas, final String data, final Map<String, String> headers) {
+    public static String post(String url, Map<String, String> queryParas, String data, Map<String, String> headers) {
         HttpURLConnection conn = null;
         try {
             conn = getHttpConnection(buildUrlWithQueryString(url, queryParas), POST, headers);
             conn.connect();
 
-            final OutputStream out = conn.getOutputStream();
+            OutputStream out = conn.getOutputStream();
             out.write(data.getBytes(CHARSET));
             out.flush();
             out.close();
 
             return readResponseString(conn);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
             if (conn != null) {
@@ -166,7 +166,7 @@ public class HttpKit {
      *            查询参数
      * @return 网页HTML
      */
-    public static String post(final String url, final String data) {
+    public static String post(String url, String data) {
         return post(url, null, data, null);
     }
 
@@ -181,7 +181,7 @@ public class HttpKit {
      *            头信息
      * @return 网页HTML
      */
-    public static String post(final String url, final String data, final Map<String, String> headers) {
+    public static String post(String url, String data, Map<String, String> headers) {
         return post(url, null, data, headers);
     }
 
@@ -194,12 +194,12 @@ public class HttpKit {
      *            参数
      * @return 构建后的地址
      */
-    private static String buildUrlWithQueryString(final String url, final Map<String, String> queryParas) {
+    private static String buildUrlWithQueryString(String url, Map<String, String> queryParas) {
         if (queryParas == null || queryParas.isEmpty()) {
             return url;
         }
 
-        final StringBuilder sb = new StringBuilder(url);
+        StringBuilder sb = new StringBuilder(url);
         boolean isFirst;
         if (url.indexOf("?") == -1) {
             isFirst = true;
@@ -208,19 +208,19 @@ public class HttpKit {
             isFirst = false;
         }
 
-        for (final Entry<String, String> entry : queryParas.entrySet()) {
+        for (Entry<String, String> entry : queryParas.entrySet()) {
             if (isFirst) {
                 isFirst = false;
             } else {
                 sb.append("&");
             }
 
-            final String key = entry.getKey();
+            String key = entry.getKey();
             String value = entry.getValue();
             if (StrKit.notBlank(value)) {
                 try {
                     value = URLEncoder.encode(value, CHARSET);
-                } catch (final UnsupportedEncodingException e) {
+                } catch (UnsupportedEncodingException e) {
                     throw new RuntimeException(e);
                 }
             }
@@ -244,9 +244,9 @@ public class HttpKit {
      * @throws NoSuchProviderException
      * @throws KeyManagementException
      */
-    private static HttpURLConnection getHttpConnection(final String url, final String method, final Map<String, String> headers) throws IOException, NoSuchAlgorithmException, NoSuchProviderException, KeyManagementException {
-        final URL _url = new URL(url);
-        final HttpURLConnection conn = (HttpURLConnection) _url.openConnection();
+    private static HttpURLConnection getHttpConnection(String url, String method, Map<String, String> headers) throws IOException, NoSuchAlgorithmException, NoSuchProviderException, KeyManagementException {
+        URL _url = new URL(url);
+        HttpURLConnection conn = (HttpURLConnection) _url.openConnection();
         if (conn instanceof HttpsURLConnection) {
             ((HttpsURLConnection) conn).setSSLSocketFactory(sslSocketFactory);
             ((HttpsURLConnection) conn).setHostnameVerifier(trustAnyHostnameVerifier);
@@ -263,7 +263,7 @@ public class HttpKit {
         conn.setRequestProperty("User-Agent", "Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/33.0.1750.146 Safari/537.36");
 
         if (headers != null && !headers.isEmpty()) {
-            for (final Entry<String, String> entry : headers.entrySet()) {
+            for (Entry<String, String> entry : headers.entrySet()) {
                 conn.setRequestProperty(entry.getKey(), entry.getValue());
             }
         }
@@ -278,11 +278,11 @@ public class HttpKit {
      */
     private static SSLSocketFactory initSSLSocketFactory() {
         try {
-            final TrustManager[] tm = { new HttpKit.TrustAnyTrustManager() };
-            final SSLContext sslContext = SSLContext.getInstance("TLS", "SunJSSE");
+            TrustManager[] tm = { new HttpKit.TrustAnyTrustManager() };
+            SSLContext sslContext = SSLContext.getInstance("TLS", "SunJSSE");
             sslContext.init(null, tm, new java.security.SecureRandom());
             return sslContext.getSocketFactory();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
@@ -294,24 +294,24 @@ public class HttpKit {
      *            HTTP连接
      * @return 字符串
      */
-    private static String readResponseString(final HttpURLConnection conn) {
-        final StringBuilder sb = new StringBuilder();
+    private static String readResponseString(HttpURLConnection conn) {
+        StringBuilder sb = new StringBuilder();
         InputStream inputStream = null;
         try {
             inputStream = conn.getInputStream();
-            final BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, CHARSET));
+            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, CHARSET));
             String line = null;
             while ((line = reader.readLine()) != null) {
                 sb.append(line).append("\n");
             }
             return sb.toString();
-        } catch (final Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
             if (inputStream != null) {
                 try {
                     inputStream.close();
-                } catch (final IOException e) {
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -326,7 +326,7 @@ public class HttpKit {
      */
     private static class TrustAnyHostnameVerifier implements HostnameVerifier {
         @Override
-        public boolean verify(final String hostname, final SSLSession session) {
+        public boolean verify(String hostname, SSLSession session) {
             return true;
         }
     }
@@ -339,11 +339,11 @@ public class HttpKit {
      */
     private static class TrustAnyTrustManager implements X509TrustManager {
         @Override
-        public void checkClientTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
+        public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
         }
 
         @Override
-        public void checkServerTrusted(final X509Certificate[] chain, final String authType) throws CertificateException {
+        public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
         }
 
         @Override

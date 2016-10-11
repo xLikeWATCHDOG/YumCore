@@ -8,15 +8,15 @@ package pw.yumc.YumCore.commands.exception;
  */
 public class CommandParseException extends CommandException {
 
-    public CommandParseException(final Exception e) {
+    public CommandParseException(Exception e) {
         super(e);
     }
 
-    public CommandParseException(final String string) {
+    public CommandParseException(String string) {
         super(string);
     }
 
-    public CommandParseException(final String string, final Exception e) {
+    public CommandParseException(String string, Exception e) {
         super(string, e);
     }
 }

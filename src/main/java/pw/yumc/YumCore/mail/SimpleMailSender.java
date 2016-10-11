@@ -20,7 +20,7 @@ public class SimpleMailSender {
     /**
      * 发送邮件的props文件
      */
-    private final transient Properties props = System.getProperties();
+    private transient Properties props = System.getProperties();
 
     /**
      * 邮件服务器登录验证
@@ -40,9 +40,9 @@ public class SimpleMailSender {
      * @param password
      *            发送邮件的密码
      */
-    public SimpleMailSender(final String username, final String password) {
+    public SimpleMailSender(String username, String password) {
         // 通过邮箱地址解析出smtp服务器，对大多数邮箱都管用
-        final String smtpHostName = "smtp." + username.split("@")[1];
+        String smtpHostName = "smtp." + username.split("@")[1];
         init(smtpHostName, username, password);
     }
 
@@ -56,7 +56,7 @@ public class SimpleMailSender {
      * @param password
      *            发送邮件的密码
      */
-    public SimpleMailSender(final String smtpHostName, final String username, final String password) {
+    public SimpleMailSender(String smtpHostName, String username, String password) {
         init(username, password, smtpHostName);
     }
 
@@ -70,9 +70,9 @@ public class SimpleMailSender {
      * @throws AddressException
      * @throws MessagingException
      */
-    public void send(final SimpleMail mail, final String... recipients) throws AddressException, MessagingException {
+    public void send(SimpleMail mail, String... recipients) throws AddressException, MessagingException {
         // 创建mime类型邮件
-        final MimeMessage message = new MimeMessage(session);
+        MimeMessage message = new MimeMessage(session);
         // 设置发信人
         if (mail.getFrom() != null) {
             message.setFrom(new InternetAddress(mail.getFrom()));
@@ -80,8 +80,8 @@ public class SimpleMailSender {
             message.setFrom(new InternetAddress(authenticator.getUsername()));
         }
         // 设置收件人们
-        final int num = recipients.length;
-        final InternetAddress[] addresses = new InternetAddress[num];
+        int num = recipients.length;
+        InternetAddress[] addresses = new InternetAddress[num];
         for (int i = 0; i < num; i++) {
             addresses[i] = new InternetAddress(recipients[i]);
         }
@@ -112,7 +112,7 @@ public class SimpleMailSender {
      * @throws AddressException
      * @throws MessagingException
      */
-    public void send(final String subject, final Object content, final String... recipients) throws AddressException, MessagingException {
+    public void send(String subject, Object content, String... recipients) throws AddressException, MessagingException {
         this.send(new SimpleMail(subject, content), recipients);
     }
 
@@ -126,7 +126,7 @@ public class SimpleMailSender {
      * @param smtpHostName
      *            SMTP主机地址
      */
-    private void init(final String smtpHostName, final String username, final String password) {
+    private void init(String smtpHostName, String username, String password) {
         // 初始化props
         props.put("mail.smtp.auth", "true");
         props.put("mail.smtp.host", smtpHostName);

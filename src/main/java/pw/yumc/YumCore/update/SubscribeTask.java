@@ -29,12 +29,12 @@ public class SubscribeTask implements Runnable {
     private static JavaPlugin instance;
 
     static {
-        final Object pluginClassLoader = SubscribeTask.class.getClassLoader();
+        Object pluginClassLoader = SubscribeTask.class.getClassLoader();
         try {
-            final Field field = pluginClassLoader.getClass().getDeclaredField("plugin");
+            Field field = pluginClassLoader.getClass().getDeclaredField("plugin");
             field.setAccessible(true);
             instance = (JavaPlugin) field.get(pluginClassLoader);
-        } catch (final Exception e) {
+        } catch (Exception e) {
             debug(e);
         }
     }
@@ -44,44 +44,44 @@ public class SubscribeTask implements Runnable {
     /**
      * 检查间隔
      */
-    private final static int interval = 25;
+    private static int interval = 25;
     /**
      * 直链POM
      */
-    private final static String url = d("­­¥¥kch¤¢ g£¥c®hjbcjmpekcc©hZ¥`¢­d¤«h^¨a¡£¦g­");
-    // private final static String url = "https://coding.net/u/502647092/p/%s/git/raw/%s/pom.xml";
+    private static String url = d("­­¥¥kch¤¢ g£¥c®hjbcjmpekcc©hZ¥`¢­d¤«h^¨a¡£¦g­");
+    // private static String url = "https://coding.net/u/502647092/p/%s/git/raw/%s/pom.xml";
     /**
      * 直链下载
      */
-    private final static String direct = d("­­¥l`c¢c«¦¡g¥©`¨dWbX¬h¡¤¨®§¬ªs©¢¥a¦­¢¨h­¤­hZcU§g£¤");
-    // private final static String direct = "http://ci.yumc.pw/job/%1$s/lastSuccessfulBuild/artifact/target/%1$s.jar";
+    private static String direct = d("­­¥l`c¢c«¦¡g¥©`¨dWbX¬h¡¤¨®§¬ªs©¢¥a¦­¢¨h­¤­hZcU§g£¤");
+    // private static String direct = "http://ci.yumc.pw/job/%1$s/lastSuccessfulBuild/artifact/target/%1$s.jar";
     /**
      * 构建POM
      */
-    private final static String pom = d("­­¥l`c¢c«¦¡g¥©`¨dW¤c¥¨¦©¥¤®¥w§ h¤¥¦`¤¨¦cª ");
-    // private final static String pom = "http://ci.yumc.pw/job/%s/lastSuccessfulBuild/artifact/pom.xml";
+    private static String pom = d("­­¥l`c¢c«¦¡g¥©`¨dW¤c¥¨¦©¥¤®¥w§ h¤¥¦`¤¨¦cª ");
+    // private static String pom = "http://ci.yumc.pw/job/%s/lastSuccessfulBuild/artifact/pom.xml";
     /**
      * 构建下载
      */
-    private final static String maven = d("­­¥l`c¢c«¦¡g¥©`¤¥®c«¥¡¤­¨§«`¯§«¥¢§aVe]¬dWcX¬hZeU§f^gV¤b£§");
-    // private final static String maven = "http://ci.yumc.pw/plugin/repository/everything/%1$s/%2$s/%3$s-%2$s.jar";
+    private static String maven = d("­­¥l`c¢c«¦¡g¥©`¤¥®c«¥¡¤­¨§«`¯§«¥¢§aVe]¬dWcX¬hZeU§f^gV¤b£§");
+    // private static String maven = "http://ci.yumc.pw/plugin/repository/everything/%1$s/%2$s/%3$s-%2$s.jar";
     /**
      * 调试模式
      */
-    private final static boolean debug = new File(String.format(d("¤¥®§^jY¥©¦|¤¤Yj]¨® "), File.separatorChar)).exists();
-    // private final static boolean debug = new File(String.format("plugins%1$sYumCore%1$sdebug", File.separatorChar)).exists();
+    private static boolean debug = new File(String.format(d("¤¥®§^jY¥©¦|¤¤Yj]¨® "), File.separatorChar)).exists();
+    // private static boolean debug = new File(String.format("plugins%1$sYumCore%1$sdebug", File.separatorChar)).exists();
     /**
      * 分支
      */
-    private final String branch;
+    private String branch;
     /**
      * 是否为Maven
      */
-    private final boolean isMaven;
+    private boolean isMaven;
     /**
      * 是否非公开
      */
-    private final boolean isSecret;
+    private boolean isSecret;
 
     /**
      * 自动更新
@@ -96,7 +96,7 @@ public class SubscribeTask implements Runnable {
      * @param isMaven
      *            是否为Maven
      */
-    public SubscribeTask(final boolean isMaven) {
+    public SubscribeTask(boolean isMaven) {
         this(false, isMaven);
     }
 
@@ -108,7 +108,7 @@ public class SubscribeTask implements Runnable {
      * @param isMaven
      *            是否为Maven
      */
-    public SubscribeTask(final boolean isSecret, final boolean isMaven) {
+    public SubscribeTask(boolean isSecret, boolean isMaven) {
         this("master", isSecret, isMaven);
     }
 
@@ -122,7 +122,7 @@ public class SubscribeTask implements Runnable {
      * @param isMaven
      *            是否为Maven
      */
-    public SubscribeTask(final String branch, final boolean isSecret, final boolean isMaven) {
+    public SubscribeTask(String branch, boolean isSecret, boolean isMaven) {
         this.branch = branch;
         this.isSecret = isSecret;
         this.isMaven = isMaven;
@@ -138,9 +138,9 @@ public class SubscribeTask implements Runnable {
      *            密串
      * @return 解密后的地址
      */
-    public static String d(final String s) {
-        final String key = "499521";
-        final StringBuilder str = new StringBuilder();
+    public static String d(String s) {
+        String key = "499521";
+        StringBuilder str = new StringBuilder();
         int ch;
         for (int i = 0, j = 0; i < s.length(); i++, j++) {
             if (j > key.length() - 1) {
@@ -159,7 +159,7 @@ public class SubscribeTask implements Runnable {
      * @param e
      *            调试异常
      */
-    private static void debug(final Throwable e) {
+    private static void debug(Throwable e) {
         if (debug) {
             e.printStackTrace();
         }
@@ -172,16 +172,16 @@ public class SubscribeTask implements Runnable {
      *            - 插件
      * @return 插件的绝对路径
      */
-    public File getPluginFile(final Plugin plugin) {
+    public File getPluginFile(Plugin plugin) {
         File file = null;
-        final ClassLoader cl = plugin.getClass().getClassLoader();
+        ClassLoader cl = plugin.getClass().getClassLoader();
         if ((cl instanceof URLClassLoader)) {
             @SuppressWarnings("resource")
-            final URLClassLoader ucl = (URLClassLoader) cl;
-            final URL url = ucl.getURLs()[0];
+            URLClassLoader ucl = (URLClassLoader) cl;
+            URL url = ucl.getURLs()[0];
             try {
                 file = new File(URLDecoder.decode(url.getFile(), "UTF-8"));
-            } catch (final UnsupportedEncodingException e) {
+            } catch (UnsupportedEncodingException e) {
                 debug(e);
             }
         }
@@ -197,11 +197,11 @@ public class SubscribeTask implements Runnable {
      *            旧版本
      * @return 是否需要更新
      */
-    public boolean needUpdate(final String v1, final String v2) {
-        final String[] va1 = v1.split("\\.");// 注意此处为正则匹配，不能用"."；
-        final String[] va2 = v2.split("\\.");
+    public boolean needUpdate(String v1, String v2) {
+        String[] va1 = v1.split("\\.");// 注意此处为正则匹配，不能用"."；
+        String[] va2 = v2.split("\\.");
         int idx = 0;
-        final int minLength = Math.min(va1.length, va2.length);// 取最小长度值
+        int minLength = Math.min(va1.length, va2.length);// 取最小长度值
         int diff = 0;
         while (idx < minLength
                 && (diff = va1[idx].length() - va2[idx].length()) == 0// 先比较长度
@@ -216,22 +216,22 @@ public class SubscribeTask implements Runnable {
     @Override
     public void run() {
         try {
-            final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            final DocumentBuilder builder = factory.newDocumentBuilder();
-            final String result = builder.parse(String.format(navite || isSecret ? pom : url, instance.getName(), branch)).getElementsByTagName("version").item(0).getTextContent().split("-")[0];
-            final String current = instance.getDescription().getVersion().split("-")[0];
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder builder = factory.newDocumentBuilder();
+            String result = builder.parse(String.format(navite || isSecret ? pom : url, instance.getName(), branch)).getElementsByTagName("version").item(0).getTextContent().split("-")[0];
+            String current = instance.getDescription().getVersion().split("-")[0];
             if (needUpdate(result, current)) {
-                final File parent = new File(d("¤¥®§h®¥¨h"));
-                final File target = new File(parent, getPluginFile(instance).getName());
-                final File temp = new File(parent, getPluginFile(instance).getName() + d("b¨¬ £ "));
+                File parent = new File(d("¤¥®§h®¥¨h"));
+                File target = new File(parent, getPluginFile(instance).getName());
+                File temp = new File(parent, getPluginFile(instance).getName() + d("b¨¬ £ "));
                 if (target.exists()) {
                     try {
-                        final PluginDescriptionFile desc = instance.getPluginLoader().getPluginDescription(target);
+                        PluginDescriptionFile desc = instance.getPluginLoader().getPluginDescription(target);
                         if (!needUpdate(result, desc.getVersion().split("-")[0])) {
                             return;
                         }
                         target.delete();
-                    } catch (final Exception e) {
+                    } catch (Exception e) {
                         debug(e);
                     }
                 }
@@ -247,7 +247,7 @@ public class SubscribeTask implements Runnable {
                 Files.copy(new URL(durl).openStream(), temp.toPath());
                 temp.renameTo(target);
             }
-        } catch (final Exception e) {
+        } catch (Exception e) {
             debug(e);
         }
     }

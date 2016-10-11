@@ -18,7 +18,7 @@ public class VaultChat extends VaultBase {
     private static Chat chat;
 
     static {
-        final RegisteredServiceProvider<Chat> rsp = Bukkit.getServer().getServicesManager().getRegistration(Chat.class);
+        RegisteredServiceProvider<Chat> rsp = Bukkit.getServer().getServicesManager().getRegistration(Chat.class);
         if (rsp == null || (chat = rsp.getProvider()) == null) {
             PKit.disable("已加载 Vault 但是未找到聊天相关插件 停止加载...");
         } else {
@@ -42,7 +42,7 @@ public class VaultChat extends VaultBase {
      *            玩家实体
      * @return 玩家称号
      */
-    public static String getPlayerPrefix(final Player player) {
+    public static String getPlayerPrefix(Player player) {
         return chat.getPlayerPrefix(player);
     }
 
@@ -54,7 +54,7 @@ public class VaultChat extends VaultBase {
      * @param prefix
      *            玩家称号
      */
-    public static void setPlayerPrefix(final Player player, final String prefix) {
+    public static void setPlayerPrefix(Player player, String prefix) {
         chat.setPlayerPrefix(player, prefix);
     }
 }

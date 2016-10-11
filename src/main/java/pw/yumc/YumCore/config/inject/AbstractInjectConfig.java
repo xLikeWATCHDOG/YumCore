@@ -23,12 +23,12 @@ import pw.yumc.YumCore.config.annotation.Nullable;
  * @author 喵♂呜
  */
 public abstract class AbstractInjectConfig {
-    private static final String INJECT_TYPE_ERROR = "配置节点 %s 数据类型不匹配 应该为: %s 但实际为: %s!";
-    private static final String INJECT_ERROR = "自动注入配置失败 可能造成插件运行错误 %s: %s!";
-    private static final String DATE_PARSE_ERROR = "配置节点 {0} 日期解析失败 格式应该为: {1} 但输入值为: {2}!";
-    private static final String PATH_NOT_FOUND = "配置节点 %s 丢失 将使用默认值!";
-    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    private static final SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
+    private static String INJECT_TYPE_ERROR = "配置节点 %s 数据类型不匹配 应该为: %s 但实际为: %s!";
+    private static String INJECT_ERROR = "自动注入配置失败 可能造成插件运行错误 %s: %s!";
+    private static String DATE_PARSE_ERROR = "配置节点 {0} 日期解析失败 格式应该为: {1} 但输入值为: {2}!";
+    private static String PATH_NOT_FOUND = "配置节点 %s 丢失 将使用默认值!";
+    private static String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
     private ConfigurationSection config;
 
     /**
@@ -37,7 +37,7 @@ public abstract class AbstractInjectConfig {
      * @param config
      *            配置区
      */
-    public void inject(final ConfigurationSection config) {
+    public void inject(ConfigurationSection config) {
         inject(config, false);
     }
 
@@ -49,17 +49,17 @@ public abstract class AbstractInjectConfig {
      * @param save
      *            是否为保存
      */
-    public void inject(final ConfigurationSection config, final boolean save) {
+    public void inject(ConfigurationSection config, boolean save) {
         if (config == null) {
             Log.w("尝试%s ConfigurationSection 为 Null 的数据!", save ? "保存" : "读取");
             return;
         }
         this.config = config;
-        for (final Field field : getClass().getDeclaredFields()) {
+        for (Field field : getClass().getDeclaredFields()) {
             if (Modifier.isTransient(field.getModifiers()) || field.getType().isPrimitive()) {
                 continue;
             }
-            final ConfigNode node = field.getAnnotation(ConfigNode.class);
+            ConfigNode node = field.getAnnotation(ConfigNode.class);
             String path = field.getName();
             if (node != null && !node.value().isEmpty()) {
                 path = node.value();
@@ -79,7 +79,7 @@ public abstract class AbstractInjectConfig {
      * @param config
      *            配置文件区
      */
-    public ConfigurationSection save(final ConfigurationSection config) {
+    public ConfigurationSection save(ConfigurationSection config) {
         inject(config, true);
         return config;
     }
@@ -94,7 +94,7 @@ public abstract class AbstractInjectConfig {
      * @throws IllegalAccessException
      * @throws IllegalArgumentException
      */
-    private void applyDefault(final Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
+    private void applyDefault(Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
         switch (field.getType().getName()) {
         case "java.util.List":
             value = new ArrayList<>();
@@ -122,7 +122,7 @@ public abstract class AbstractInjectConfig {
      * @throws NoSuchMethodException
      * @throws SecurityException
      */
-    private Object convertType(final Class<?> type, final String path, final Object value) throws ParseException, IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException {
+    private Object convertType(Class<?> type, String path, Object value) throws ParseException, IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException {
         switch (type.getName()) {
         case "java.util.Date":
             return df.parse((String) value);
@@ -152,7 +152,7 @@ public abstract class AbstractInjectConfig {
      * @throws NoSuchMethodException
      * @throws SecurityException
      */
-    private Object hanldeDefault(final Class<?> field, final String path, final Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException {
+    private Object hanldeDefault(Class<?> field, String path, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException {
         if (InjectConfigurationSection.class.isAssignableFrom(field)) {
             if (config.isConfigurationSection(path)) {
                 return field.getConstructor(ConfigurationSection.class).newInstance(config.getConfigurationSection(path));
@@ -179,8 +179,8 @@ public abstract class AbstractInjectConfig {
      * @throws IllegalArgumentException
      * @throws IllegalAccessException
      */
-    private void hanldeValue(final String path, final Field field, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException, ParseException {
-        final Class<?> type = field.getType();
+    private void hanldeValue(String path, Field field, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException, ParseException {
+        Class<?> type = field.getType();
         if (!type.equals(value.getClass())) {
             value = convertType(type, path, value);
         }
@@ -199,7 +199,7 @@ public abstract class AbstractInjectConfig {
      * @param field
      *            字段
      */
-    protected void setConfig(final String path, final Field field) {
+    protected void setConfig(String path, Field field) {
         try {
             config.set(path, field.get(this));
         } catch (IllegalArgumentException | IllegalAccessException e) {
@@ -216,10 +216,10 @@ public abstract class AbstractInjectConfig {
      * @param field
      *            字段
      */
-    protected void setField(final String path, final Field field) {
+    protected void setField(String path, Field field) {
         Object value = config.get(path);
         try {
-            final Default def = field.getAnnotation(Default.class);
+            Default def = field.getAnnotation(Default.class);
             if (value == null && def != null) {
                 value = def.value();
             }
@@ -231,12 +231,12 @@ public abstract class AbstractInjectConfig {
                 return;
             }
             hanldeValue(path, field, value);
-        } catch (final IllegalArgumentException ex) {
+        } catch (IllegalArgumentException ex) {
             Log.w(INJECT_TYPE_ERROR, path, field.getType().getName(), value.getClass().getName());
             Log.debug(ex);
-        } catch (final ParseException e) {
+        } catch (ParseException e) {
             Log.w(DATE_PARSE_ERROR, path, DATE_FORMAT, value);
-        } catch (final InstantiationException | InvocationTargetException | NoSuchMethodException | SecurityException | IllegalAccessException ex) {
+        } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | SecurityException | IllegalAccessException ex) {
             Log.w(INJECT_ERROR, ex.getClass().getName(), ex.getMessage());
             Log.debug(ex);
         }

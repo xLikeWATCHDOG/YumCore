@@ -18,7 +18,7 @@ public class VaultPermission extends VaultBase {
     private static Permission permission;
 
     static {
-        final RegisteredServiceProvider<Permission> rsp = Bukkit.getServer().getServicesManager().getRegistration(Permission.class);
+        RegisteredServiceProvider<Permission> rsp = Bukkit.getServer().getServicesManager().getRegistration(Permission.class);
         if (rsp == null || (permission = rsp.getProvider()) == null) {
             PKit.disable("已加载 Vault 但是未找到权限相关插件 停止加载...");
         } else {
@@ -35,7 +35,7 @@ public class VaultPermission extends VaultBase {
      *            权限
      * @return 结果
      */
-    public static boolean add(final Player player, final String perm) {
+    public static boolean add(Player player, String perm) {
         return permission.playerAdd(player, perm);
     }
 
@@ -46,7 +46,7 @@ public class VaultPermission extends VaultBase {
      *            玩家
      * @return 权限组
      */
-    public static String getGroup(final Player player) {
+    public static String getGroup(Player player) {
         return permission.getPrimaryGroup(player);
     }
 
@@ -68,7 +68,7 @@ public class VaultPermission extends VaultBase {
      *            权限
      * @return 结果
      */
-    public static boolean has(final Player player, final String perm) {
+    public static boolean has(Player player, String perm) {
         return permission.has(player, perm);
     }
 
@@ -81,7 +81,7 @@ public class VaultPermission extends VaultBase {
      *            权限
      * @return 结果
      */
-    public static boolean remove(final Player player, final String perm) {
+    public static boolean remove(Player player, String perm) {
         return permission.playerRemove(player, perm);
     }
 }

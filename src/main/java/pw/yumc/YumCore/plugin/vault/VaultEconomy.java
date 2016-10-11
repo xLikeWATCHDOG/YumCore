@@ -19,7 +19,7 @@ public class VaultEconomy extends VaultBase {
     private static Economy economy;
 
     static {
-        final RegisteredServiceProvider<Economy> rsp = Bukkit.getServer().getServicesManager().getRegistration(Economy.class);
+        RegisteredServiceProvider<Economy> rsp = Bukkit.getServer().getServicesManager().getRegistration(Economy.class);
         if (rsp == null || (economy = rsp.getProvider()) == null) {
             PKit.disable("已加载 Vault 但是未找到经济相关插件 停止加载...");
         } else {
@@ -36,7 +36,7 @@ public class VaultEconomy extends VaultBase {
      *            数量
      * @return {@link EconomyResponse}
      */
-    public static EconomyResponse add(final OfflinePlayer oPlayer, final double amont) {
+    public static EconomyResponse add(OfflinePlayer oPlayer, double amont) {
         return economy.depositPlayer(oPlayer, amont);
     }
 
@@ -58,7 +58,7 @@ public class VaultEconomy extends VaultBase {
      *            数量
      * @return 是否
      */
-    public static boolean had(final OfflinePlayer oPlayer, final double amont) {
+    public static boolean had(OfflinePlayer oPlayer, double amont) {
         return economy.has(oPlayer, amont);
     }
 
@@ -71,7 +71,7 @@ public class VaultEconomy extends VaultBase {
      *            数量
      * @return {@link EconomyResponse}
      */
-    public static EconomyResponse remove(final OfflinePlayer oPlayer, final double amont) {
+    public static EconomyResponse remove(OfflinePlayer oPlayer, double amont) {
         return economy.withdrawPlayer(oPlayer, amont);
     }
 }

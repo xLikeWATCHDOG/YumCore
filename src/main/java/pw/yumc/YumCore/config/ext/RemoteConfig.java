@@ -14,11 +14,11 @@ import pw.yumc.YumCore.config.FileConfig;
  * @author 喵♂呜
  */
 public class RemoteConfig extends FileConfig {
-    public RemoteConfig(final String url) throws MalformedURLException, IOException {
+    public RemoteConfig(String url) throws MalformedURLException, IOException {
         this(new URL(url));
     }
 
-    public RemoteConfig(final URL url) throws IOException {
+    public RemoteConfig(URL url) throws IOException {
         super(url.openStream());
     }
 
@@ -29,10 +29,10 @@ public class RemoteConfig extends FileConfig {
      *            配置文件地址
      * @return {@link FileConfig}
      */
-    public static FileConfig getConfig(final String url) {
+    public static FileConfig getConfig(String url) {
         try {
             return new RemoteConfig(url);
-        } catch (final IOException e) {
+        } catch (IOException e) {
             Log.debug("获取远程配置文件失败!", e);
             return null;
         }
@@ -49,11 +49,11 @@ public class RemoteConfig extends FileConfig {
      *            默认值
      * @return 插件信息
      */
-    public static String getYamlTag(final String url, final String tag, final String def) {
+    public static String getYamlTag(String url, String tag, String def) {
         String result = def;
         try {
             result = getConfig(url).getString(tag);
-        } catch (final NullPointerException e) {
+        } catch (NullPointerException e) {
             // Ignore
         }
         return result;
