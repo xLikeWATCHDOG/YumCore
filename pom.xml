@@ -6,7 +6,7 @@
 	<version>1.1</version>
 	<name>YumCore</name>
 	<build>
-		<Name>${project.name}</Name>
+		<finalName>${project.name}</finalName>
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>

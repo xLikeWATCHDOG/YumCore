@@ -36,8 +36,8 @@ import pw.yumc.YumCore.commands.interfaces.CommandHelpParse;
 /**
  * 命令管理类
  *
- * @since 2016年7月23日 上午9:06:03
  * @author 喵♂呜
+ * @since 2016年7月23日 上午9:06:03
  */
 public class CommandManager implements TabExecutor {
     private static String argumentTypeError = "注解命令方法 %s 位于 %s 的参数错误 第一个参数应实现 CommandSender 接口!";
@@ -45,6 +45,7 @@ public class CommandManager implements TabExecutor {
     private static Constructor<PluginCommand> PluginCommandConstructor;
     private static Map<String, Command> knownCommands;
     private static Map<String, Plugin> lookupNames;
+
     static {
         try {
             PluginManager pluginManager = Bukkit.getPluginManager();
@@ -67,6 +68,7 @@ public class CommandManager implements TabExecutor {
             Log.debug(e);
         }
     }
+
     /**
      * 插件实例类
      */
@@ -103,8 +105,7 @@ public class CommandManager implements TabExecutor {
     /**
      * 命令管理器
      *
-     * @param name
-     *            注册的命令
+     * @param name 注册的命令
      */
     public CommandManager(String name) {
         cmd = plugin.getCommand(name);
@@ -112,7 +113,7 @@ public class CommandManager implements TabExecutor {
             try {
                 knownCommands.put(name, PluginCommandConstructor.newInstance(name, plugin));
                 lookupNames.put(name, plugin);
-            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ignored) {
             }
             if ((cmd = plugin.getCommand(name)) == null) {
                 throw new IllegalStateException("未找到命令 必须在plugin.yml先注册 " + name + " 命令!");
@@ -125,10 +126,8 @@ public class CommandManager implements TabExecutor {
     /**
      * 命令管理器
      *
-     * @param name
-     *            注册的命令
-     * @param executor
-     *            命令执行类
+     * @param name     注册的命令
+     * @param executor 命令执行类
      */
     public CommandManager(String name, CommandExecutor... executor) {
         this(name);
@@ -169,8 +168,7 @@ public class CommandManager implements TabExecutor {
     /**
      * 通过注解读取命令并注册
      *
-     * @param clazzs
-     *            子命令处理类
+     * @param clazzs 子命令处理类
      */
     public void register(CommandExecutor... clazzs) {
         for (CommandExecutor clazz : clazzs) {
@@ -189,8 +187,7 @@ public class CommandManager implements TabExecutor {
     /**
      * 设置帮助解析器
      *
-     * @param helpParse
-     *            帮助解析器
+     * @param helpParse 帮助解析器
      */
     public void setHelpParse(CommandHelpParse helpParse) {
         help.setHelpParse(helpParse);
@@ -211,8 +208,7 @@ public class CommandManager implements TabExecutor {
     /**
      * 检查缓存并获得命令
      *
-     * @param subcmd
-     *            子命令
+     * @param subcmd 子命令
      * @return 命令信息
      */
     private CommandInfo getByCache(String subcmd) {
@@ -233,14 +229,10 @@ public class CommandManager implements TabExecutor {
     /**
      * 获取玩家命令补全
      *
-     * @param sender
-     *            命令发送者
-     * @param command
-     *            命令
-     * @param alias
-     *            别名
-     * @param args
-     *            数组
+     * @param sender  命令发送者
+     * @param command 命令
+     * @param alias   别名
+     * @param args    数组
      * @return 在线玩家数组
      */
     private List<String> getPlayerTabComplete(CommandSender sender, Command command, String alias, String[] args) {
@@ -259,10 +251,8 @@ public class CommandManager implements TabExecutor {
     /**
      * 转移数组
      *
-     * @param args
-     *            原数组
-     * @param start
-     *            数组开始位置
+     * @param args  原数组
+     * @param start 数组开始位置
      * @return 转移后的数组字符串
      */
     private String[] moveStrings(String[] args, int start) {
@@ -274,10 +264,8 @@ public class CommandManager implements TabExecutor {
     /**
      * 注册命令
      *
-     * @param method
-     *            方法
-     * @param clazz
-     *            调用对象
+     * @param method 方法
+     * @param clazz  调用对象
      * @return 是否成功
      */
     private boolean registerCommand(Method method, CommandExecutor clazz) {
@@ -302,10 +290,8 @@ public class CommandManager implements TabExecutor {
     /**
      * 注册Tab补全
      *
-     * @param method
-     *            方法
-     * @param clazz
-     *            调用对象
+     * @param method 方法
+     * @param clazz  调用对象
      * @return 是否成功
      */
     private boolean registerTab(Method method, CommandExecutor clazz) {

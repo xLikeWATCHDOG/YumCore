@@ -70,7 +70,7 @@ public class CommandParse {
             try {
                 Parse p = parse.get(i);
                 String param = i < args.length ? args[i] : p.def;
-                pobjs.add(param == null ? param : p.parse(cmdArgs.getSender(), param));
+                pobjs.add(param == null ? null : p.parse(cmdArgs.getSender(), param));
             } catch (Exception e) {
                 Log.debug(e);
                 throw new CommandParseException(String.format("第 %s 个参数 ", isMain ? 1 : 2 + i) + e.getMessage());
