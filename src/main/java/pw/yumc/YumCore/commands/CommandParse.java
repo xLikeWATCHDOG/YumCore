@@ -1,24 +1,18 @@
 package pw.yumc.YumCore.commands;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.commands.annotation.Default;
 import pw.yumc.YumCore.commands.annotation.KeyValue;
 import pw.yumc.YumCore.commands.annotation.Limit;
-import pw.yumc.YumCore.commands.exception.CommandException;
 import pw.yumc.YumCore.commands.exception.CommandParseException;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * 命令参数解析
@@ -28,6 +22,7 @@ import pw.yumc.YumCore.commands.exception.CommandParseException;
  */
 public class CommandParse {
     private static Map<Class, Parse> allparses = new HashMap<>();
+
     static {
         new IntegerParse();
         new LongParse();
@@ -35,6 +30,7 @@ public class CommandParse {
         new PlayerParse();
         new StringParse();
     }
+
     private List<Parse> parse = new LinkedList<>();
 
     private boolean isMain;
@@ -168,7 +164,7 @@ public class CommandParse {
             try {
                 return Material.valueOf(arg);
             } catch (Exception e) {
-                throw new CommandParseException("玩家 " + arg + "不存在或不在线!");
+                throw new CommandParseException(String.format("%s 不是一个有效的Material枚举", arg), e);
             }
         }
     }
@@ -213,8 +209,12 @@ public class CommandParse {
             throwRange(null);
         }
 
+        public void throwException(String str, Object... objects) {
+            throw new CommandParseException(String.format(str, objects));
+        }
+
         public void throwRange(String str) {
-            throw new CommandException(String.format(str == null ? "必须在 %s 到 %s 之间!" : str, min, max));
+            throw new CommandParseException(String.format(str == null ? "范围必须在 %s 到 %s 之间!" : str, min, max));
         }
     }
 
@@ -239,7 +239,7 @@ public class CommandParse {
         public StringParse() {
             allparses.put(String.class, this);
             if (attrs.containsKey("option")) {
-
+                options = Arrays.asList(attrs.get("option").split(","));
             }
         }
 
@@ -247,6 +247,9 @@ public class CommandParse {
         public String parse(CommandSender sender, String arg) {
             if (min > arg.length() || arg.length() > max) {
                 throwRange("长度必须在 %s 和 %s 之间!");
+            }
+            if (options != null && !options.contains(arg)) {
+                throwException("参数 %s 不是一个有效的选项 有效值为 %s", arg, options);
             }
             return arg;
         }
