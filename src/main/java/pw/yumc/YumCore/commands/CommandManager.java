@@ -105,7 +105,8 @@ public class CommandManager implements TabExecutor {
     /**
      * 命令管理器
      *
-     * @param name 注册的命令
+     * @param name
+     *            注册的命令
      */
     public CommandManager(String name) {
         cmd = plugin.getCommand(name);
@@ -126,8 +127,10 @@ public class CommandManager implements TabExecutor {
     /**
      * 命令管理器
      *
-     * @param name     注册的命令
-     * @param executor 命令执行类
+     * @param name
+     *            注册的命令
+     * @param executor
+     *            命令执行类
      */
     public CommandManager(String name, CommandExecutor... executor) {
         this(name);
@@ -154,13 +157,12 @@ public class CommandManager implements TabExecutor {
         List<String> completions = new ArrayList<>();
         String token = args[args.length - 1];
         if (args.length == 1) {
-            StringUtil.copyPartialMatches(args[0], cmdNameCache, completions);
-        } else if (args.length >= 2) {
-            for (CommandTabInfo tab : tabs) {
-                StringUtil.copyPartialMatches(token, tab.execute(sender, command, token, args), completions);
-            }
-            StringUtil.copyPartialMatches(token, getPlayerTabComplete(sender, command, alias, args), completions);
+            StringUtil.copyPartialMatches(token, cmdNameCache, completions);
         }
+        for (CommandTabInfo tab : tabs) {
+            StringUtil.copyPartialMatches(token, tab.execute(sender, command, token, args), completions);
+        }
+        StringUtil.copyPartialMatches(token, getPlayerTabComplete(sender, command, alias, args), completions);
         Collections.sort(completions, String.CASE_INSENSITIVE_ORDER);
         return completions;
     }
@@ -168,7 +170,8 @@ public class CommandManager implements TabExecutor {
     /**
      * 通过注解读取命令并注册
      *
-     * @param clazzs 子命令处理类
+     * @param clazzs
+     *            子命令处理类
      */
     public void register(CommandExecutor... clazzs) {
         for (CommandExecutor clazz : clazzs) {
@@ -187,7 +190,8 @@ public class CommandManager implements TabExecutor {
     /**
      * 设置帮助解析器
      *
-     * @param helpParse 帮助解析器
+     * @param helpParse
+     *            帮助解析器
      */
     public void setHelpParse(CommandHelpParse helpParse) {
         help.setHelpParse(helpParse);
@@ -208,7 +212,8 @@ public class CommandManager implements TabExecutor {
     /**
      * 检查缓存并获得命令
      *
-     * @param subcmd 子命令
+     * @param subcmd
+     *            子命令
      * @return 命令信息
      */
     private CommandInfo getByCache(String subcmd) {
@@ -229,10 +234,14 @@ public class CommandManager implements TabExecutor {
     /**
      * 获取玩家命令补全
      *
-     * @param sender  命令发送者
-     * @param command 命令
-     * @param alias   别名
-     * @param args    数组
+     * @param sender
+     *            命令发送者
+     * @param command
+     *            命令
+     * @param alias
+     *            别名
+     * @param args
+     *            数组
      * @return 在线玩家数组
      */
     private List<String> getPlayerTabComplete(CommandSender sender, Command command, String alias, String[] args) {
@@ -251,8 +260,10 @@ public class CommandManager implements TabExecutor {
     /**
      * 转移数组
      *
-     * @param args  原数组
-     * @param start 数组开始位置
+     * @param args
+     *            原数组
+     * @param start
+     *            数组开始位置
      * @return 转移后的数组字符串
      */
     private String[] moveStrings(String[] args, int start) {
@@ -264,23 +275,29 @@ public class CommandManager implements TabExecutor {
     /**
      * 注册命令
      *
-     * @param method 方法
-     * @param clazz  调用对象
+     * @param method
+     *            方法
+     * @param clazz
+     *            调用对象
      * @return 是否成功
      */
     private boolean registerCommand(Method method, CommandExecutor clazz) {
         CommandInfo ci = CommandInfo.parse(method, clazz);
         if (ci != null) {
-            Class<?>[] params = method.getParameterTypes();
+            Class[] params = method.getParameterTypes();
             Log.d("命令 %s 参数类型: %s", ci.getName(), Arrays.toString(params));
-            if (params.length > 0 && params[0].isAssignableFrom(CommandSender.class)) {
-                if (method.getReturnType() == boolean.class) {
-                    defCmd = ci;
-                } else {
-                    cmds.add(ci);
-                    cmdCache.put(ci.getName(), ci);
+            if (params.length > 0) {
+                try {
+                    Class<? extends CommandSender> sender = params[0];
+                    if (method.getReturnType() == boolean.class) {
+                        defCmd = ci;
+                    } else {
+                        cmds.add(ci);
+                        cmdCache.put(ci.getName(), ci);
+                    }
+                    return true;
+                } catch (ClassCastException ignored) {
                 }
-                return true;
             }
             Log.warning(String.format(argumentTypeError, method.getName(), clazz.getClass().getName()));
         }
@@ -290,8 +307,10 @@ public class CommandManager implements TabExecutor {
     /**
      * 注册Tab补全
      *
-     * @param method 方法
-     * @param clazz  调用对象
+     * @param method
+     *            方法
+     * @param clazz
+     *            调用对象
      * @return 是否成功
      */
     private boolean registerTab(Method method, CommandExecutor clazz) {

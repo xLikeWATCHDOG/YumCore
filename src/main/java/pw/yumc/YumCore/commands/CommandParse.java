@@ -1,18 +1,23 @@
 package pw.yumc.YumCore.commands;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.commands.annotation.Default;
 import pw.yumc.YumCore.commands.annotation.KeyValue;
 import pw.yumc.YumCore.commands.annotation.Limit;
 import pw.yumc.YumCore.commands.exception.CommandParseException;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.*;
 
 /**
  * 命令参数解析
@@ -37,12 +42,10 @@ public class CommandParse {
 
     public CommandParse(Class[] classes, Annotation[][] annons, boolean isMain) {
         this.isMain = isMain;
-        for (int i = 0; i < classes.length; i++) {
+        // 第一个参数实现了CommandSender忽略
+        for (int i = 1; i < classes.length; i++) {
             Class clazz = classes[i];
             Annotation[] annotations = annons[i];
-            if (clazz.isAssignableFrom(CommandSender.class)) {
-                continue;
-            }
             Parse parse = allparses.get(clazz);
             if (parse == null) {
                 if (!clazz.isEnum()) {
@@ -72,10 +75,10 @@ public class CommandParse {
                 String param = i < args.length ? args[i] : p.def;
                 pobjs.add(param == null ? null : p.parse(cmdArgs.getSender(), param));
             } catch (Exception e) {
-                Log.debug(e);
                 throw new CommandParseException(String.format("第 %s 个参数 ", isMain ? 1 : 2 + i) + e.getMessage());
             }
         }
+        Log.d("解析参数: %s => %s", Arrays.toString(args), pobjs);
         return pobjs.toArray();
     }
 
@@ -205,12 +208,12 @@ public class CommandParse {
             return this;
         }
 
-        public void throwRange() {
-            throwRange(null);
-        }
-
         public void throwException(String str, Object... objects) {
             throw new CommandParseException(String.format(str, objects));
+        }
+
+        public void throwRange() {
+            throwRange(null);
         }
 
         public void throwRange(String str) {

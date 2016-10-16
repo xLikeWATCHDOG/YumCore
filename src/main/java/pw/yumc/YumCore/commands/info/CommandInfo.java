@@ -1,5 +1,6 @@
 package pw.yumc.YumCore.commands.info;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -24,8 +25,8 @@ import pw.yumc.YumCore.commands.exception.CommandParseException;
 /**
  * 命令信息存储类
  *
- * @since 2016年7月23日 上午9:56:42
  * @author 喵♂呜
+ * @since 2016年7月23日 上午9:56:42
  */
 public class CommandInfo {
     public static CommandInfo Unknow = new CommandInfo();
@@ -35,6 +36,22 @@ public class CommandInfo {
     private static String cmdErr = "§6错误原因: §4命令参数不正确!";
     private static String cmdUse = "§6使用方法: §e/%s %s %s";
     private static String cmdDes = "§6命令描述: §3%s";
+    private static Help defHelp = new Help() {
+        @Override
+        public Class<? extends Annotation> annotationType() {
+            return Help.class;
+        }
+
+        @Override
+        public String possibleArguments() {
+            return "这家伙很懒";
+        }
+
+        @Override
+        public String value() {
+            return "没写帮助信息";
+        }
+    };
     private Object origin;
     private Method method;
     private String name;
@@ -55,7 +72,7 @@ public class CommandInfo {
         this.executors = Arrays.asList(command.executor());
         this.executorStr = eS(executors);
         this.command = command;
-        this.help = help;
+        this.help = help != null ? help : defHelp;
         this.async = async;
         this.sort = sort;
         this.parse = parse;
@@ -78,10 +95,8 @@ public class CommandInfo {
     /**
      * 解析CommandInfo
      *
-     * @param method
-     *            方法
-     * @param origin
-     *            源对象
+     * @param method 方法
+     * @param origin 源对象
      * @return {@link CommandInfo}
      */
     public static CommandInfo parse(Method method, Object origin) {
@@ -91,7 +106,7 @@ public class CommandInfo {
             Async async = method.getAnnotation(Async.class);
             Sort sort = method.getAnnotation(Sort.class);
             CommandParse cp = CommandParse.get(method);
-            return new CommandInfo(method, origin, command, help != null ? help : Help.DEFAULT, async != null, sort != null ? sort.value() : 50, cp);
+            return new CommandInfo(method, origin, command, help, async != null, sort != null ? sort.value() : 50, cp);
         }
         return null;
     }
@@ -110,8 +125,7 @@ public class CommandInfo {
     /**
      * 执行命令
      *
-     * @param cmdArgs
-     *            命令参数
+     * @param cmdArgs 命令参数
      * @return 是否执行成功
      */
     public boolean execute(final CommandArgument cmdArgs) {
@@ -183,8 +197,7 @@ public class CommandInfo {
     /**
      * 验证命令是否匹配
      *
-     * @param cmd
-     *            需验证命令
+     * @param cmd 需验证命令
      * @return 是否匹配
      */
     public boolean isValid(String cmd) {
@@ -194,8 +207,7 @@ public class CommandInfo {
     /**
      * 检查命令
      *
-     * @param info
-     *            命令信息
+     * @param cmdArgs 命令信息
      * @return 是否验证通过
      */
     private boolean check(CommandArgument cmdArgs) {
@@ -206,8 +218,8 @@ public class CommandInfo {
     private boolean checkArgs(CommandSender sender, CommandArgument cmdArgs) {
         if (cmdArgs.getArgs().length < command.minimumArguments()) {
             Log.toSender(sender, cmdErr);
-            Log.toSender(sender, String.format(cmdUse, cmdArgs.getAlias(), getName(), help.possibleArguments()));
-            Log.toSender(sender, String.format(cmdDes, help.value()));
+            Log.toSender(sender, cmdUse, cmdArgs.getAlias(), getName(), help.possibleArguments());
+            Log.toSender(sender, cmdDes, help.value());
             return false;
         }
         return true;
@@ -215,8 +227,8 @@ public class CommandInfo {
 
     private boolean checkPerm(CommandSender sender) {
         String perm = command.permission();
-        if (perm != null && !"".equals(perm) && !sender.hasPermission(perm)) {
-            Log.toSender(sender, String.format(losePerm, perm));
+        if (!"".equals(perm) && !sender.hasPermission(perm)) {
+            Log.toSender(sender, losePerm, perm);
             return false;
         }
         return true;
@@ -224,7 +236,7 @@ public class CommandInfo {
 
     private boolean checkSender(CommandSender sender) {
         if (!executors.contains(Executor.ALL) && !executors.contains(Executor.valueOf(sender))) {
-            Log.toSender(sender, String.format(onlyExecutor, executorStr));
+            Log.toSender(sender, onlyExecutor, executorStr);
             return false;
         }
         return true;

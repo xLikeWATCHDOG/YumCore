@@ -15,23 +15,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Help {
-    public static Help DEFAULT = new Help() {
-        @Override
-        public Class<? extends Annotation> annotationType() {
-            return Help.class;
-        }
-
-        @Override
-        public String possibleArguments() {
-            return "这家伙很懒";
-        }
-
-        @Override
-        public String value() {
-            return "没写帮助信息";
-        }
-    };
-
     /**
      * @return 当前命令可能需要的参数
      */
