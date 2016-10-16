@@ -12,23 +12,27 @@ import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
 
 import pw.yumc.YumCore.bukkit.Log;
+import pw.yumc.YumCore.commands.exception.CommandParseException;
 import pw.yumc.YumCore.config.annotation.ConfigNode;
 import pw.yumc.YumCore.config.annotation.Default;
 import pw.yumc.YumCore.config.annotation.Nullable;
+import pw.yumc.YumCore.config.exception.ConfigParseException;
 
 /**
  * 抽象注入配置
  *
- * @since 2016年7月5日 上午10:11:22
  * @author 喵♂呜
+ * @since 2016年7月5日 上午10:11:22
  */
 public abstract class AbstractInjectConfig {
     private static String INJECT_TYPE_ERROR = "配置节点 %s 数据类型不匹配 应该为: %s 但实际为: %s!";
     private static String INJECT_ERROR = "自动注入配置失败 可能造成插件运行错误 %s: %s!";
-    private static String DATE_PARSE_ERROR = "配置节点 {0} 日期解析失败 格式应该为: {1} 但输入值为: {2}!";
     private static String PATH_NOT_FOUND = "配置节点 %s 丢失 将使用默认值!";
     private static String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
+    static {
+
+    }
     private ConfigurationSection config;
 
     /**
@@ -122,17 +126,9 @@ public abstract class AbstractInjectConfig {
      * @throws NoSuchMethodException
      * @throws SecurityException
      */
-    private Object convertType(Class<?> type, String path, Object value) throws ParseException, IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException {
-        switch (type.getName()) {
-        case "java.util.Date":
-            return df.parse((String) value);
-        case "java.util.List":
-            return config.getList(path);
-        case "java.util.Map":
-            return config.getConfigurationSection(path).getValues(true);
-        default:
-            return hanldeDefault(type, path, value);
-        }
+    private Object convertType(Class<?> type, String path, Object value) throws CommandParseException, IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException {
+        Object result = InjectParse.parse(type, config, path);
+        return result == null ? hanldeDefault(type, path, value) : result;
     }
 
     /**
@@ -179,7 +175,7 @@ public abstract class AbstractInjectConfig {
      * @throws IllegalArgumentException
      * @throws IllegalAccessException
      */
-    private void hanldeValue(String path, Field field, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException, ParseException {
+    private void hanldeValue(String path, Field field, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException, ConfigParseException {
         Class<?> type = field.getType();
         if (!type.equals(value.getClass())) {
             value = convertType(type, path, value);
@@ -232,10 +228,10 @@ public abstract class AbstractInjectConfig {
             }
             hanldeValue(path, field, value);
         } catch (IllegalArgumentException ex) {
-            Log.w(INJECT_TYPE_ERROR, path, field.getType().getName(), value.getClass().getName());
+            Log.w(INJECT_TYPE_ERROR, path, field.getType().getName(), value != null ? value.getClass().getName() : "空指针");
             Log.debug(ex);
-        } catch (ParseException e) {
-            Log.w(DATE_PARSE_ERROR, path, DATE_FORMAT, value);
+        } catch (ConfigParseException e) {
+            Log.w(e.getMessage());
         } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | SecurityException | IllegalAccessException ex) {
             Log.w(INJECT_ERROR, ex.getClass().getName(), ex.getMessage());
             Log.debug(ex);

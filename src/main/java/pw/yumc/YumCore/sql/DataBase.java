@@ -15,6 +15,9 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.Plugin;
 
 import pw.yumc.YumCore.bukkit.Log;
+import pw.yumc.YumCore.bukkit.P;
+import pw.yumc.YumCore.config.inject.InjectParse;
+import pw.yumc.YumCore.config.inject.InjectParse.Parse;
 import pw.yumc.YumCore.sql.core.DataBaseCore;
 import pw.yumc.YumCore.sql.core.KeyValue;
 import pw.yumc.YumCore.sql.core.MySQLCore;
@@ -231,29 +234,6 @@ public class DataBase {
 
     }
 
-    // @SuppressWarnings("unchecked")
-    // public <M> List<M> dbSelect( Class<? extends Model<?>> model, KeyValue selCondition) {
-    // List<M> modellist = new ArrayList<>();
-    // String sql = "SELECT " + toKeys(model) + " FROM `" + model.getAnnotation(Entity.class).name() + "`" + (selCondition == null ? "" : " WHERE " + selCondition.toWhereString());
-    // try {
-    // ResultSet dbresult = this.dataBaseCore.execute(sql);
-    // while (dbresult.next()) {
-    // M m = (M) model.newInstance();
-    // Field[] fields = model.getDeclaredFields();
-    // for ( Field col : fields) {
-    // col.set(m, dbresult.getObject(col.getName()));
-    // }
-    // modellist.add(m);
-    // }
-    // } catch ( InstantiationException e) {
-    // info("模型类实例化失败!");
-    // e.printStackTrace();
-    // } catch ( Exception e) {
-    // sqlerr(sql, e);
-    // }
-    // return modellist;
-    // }
-
     /**
      * 对数据库表进行选择操作！
      *
@@ -282,6 +262,29 @@ public class DataBase {
         }
         return kvlist;
     }
+
+    // @SuppressWarnings("unchecked")
+    // public <M> List<M> dbSelect( Class<? extends Model<?>> model, KeyValue selCondition) {
+    // List<M> modellist = new ArrayList<>();
+    // String sql = "SELECT " + toKeys(model) + " FROM `" + model.getAnnotation(Entity.class).name() + "`" + (selCondition == null ? "" : " WHERE " + selCondition.toWhereString());
+    // try {
+    // ResultSet dbresult = this.dataBaseCore.execute(sql);
+    // while (dbresult.next()) {
+    // M m = (M) model.newInstance();
+    // Field[] fields = model.getDeclaredFields();
+    // for ( Field col : fields) {
+    // col.set(m, dbresult.getObject(col.getName()));
+    // }
+    // modellist.add(m);
+    // }
+    // } catch ( InstantiationException e) {
+    // info("模型类实例化失败!");
+    // e.printStackTrace();
+    // } catch ( Exception e) {
+    // sqlerr(sql, e);
+    // }
+    // return modellist;
+    // }
 
     /**
      * 对数据库表进行选择操作！
@@ -487,6 +490,17 @@ public class DataBase {
 
     private void info(String info) {
         Log.info(info);
+    }
+
+    public static class DataBaseParse implements Parse<DataBase> {
+        public DataBaseParse() {
+            InjectParse.register(DataBase.class, this);
+        }
+
+        @Override
+        public DataBase parse(ConfigurationSection config, String path) {
+            return DataBase.create(P.instance, config.getConfigurationSection(path));
+        }
     }
 
     // private String toKeys( Class<? extends Model<?>> model) {

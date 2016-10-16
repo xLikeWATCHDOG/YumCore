@@ -30,7 +30,7 @@ import pw.yumc.YumCore.bukkit.Log;
  * @version 1.0
  * @since 2015年11月7日 下午2:36:07
  */
-@SuppressWarnings({ "unchecked" })
+@SuppressWarnings({"unchecked"})
 public class FileConfig extends AbstractConfig {
     protected static String VERSION = "Version";
 
@@ -67,8 +67,7 @@ public class FileConfig extends AbstractConfig {
     /**
      * 从文件载入配置
      *
-     * @param file
-     *            配置文件名称
+     * @param file 配置文件名称
      */
     public FileConfig(File file) {
         Validate.notNull(file, FILE_NOT_BE_NULL);
@@ -78,10 +77,8 @@ public class FileConfig extends AbstractConfig {
     /**
      * 从文件载入配置
      *
-     * @param parent
-     *            文件夹
-     * @param filename
-     *            配置文件名称
+     * @param parent   文件夹
+     * @param filename 配置文件名称
      */
     public FileConfig(File parent, String filename) {
         init(new File(parent, filename), true);
@@ -90,8 +87,7 @@ public class FileConfig extends AbstractConfig {
     /**
      * 从数据流载入配置文件
      *
-     * @param stream
-     *            数据流
+     * @param stream 数据流
      */
     public FileConfig(InputStream stream) {
         init(stream);
@@ -100,8 +96,7 @@ public class FileConfig extends AbstractConfig {
     /**
      * 从文件载入配置
      *
-     * @param filename
-     *            配置文件名称
+     * @param filename 配置文件名称
      */
     public FileConfig(String filename) {
         init(new File(plugin.getDataFolder(), filename), true);
@@ -110,10 +105,8 @@ public class FileConfig extends AbstractConfig {
     /**
      * 从文件载入配置
      *
-     * @param parent
-     *            文件夹
-     * @param filename
-     *            配置文件名称
+     * @param parent   文件夹
+     * @param filename 配置文件名称
      */
     public FileConfig(String parent, String filename) {
         init(new File(parent, filename), true);
@@ -122,12 +115,9 @@ public class FileConfig extends AbstractConfig {
     /**
      * 添加到List末尾
      *
-     * @param <E>
-     *            List内容类型
-     * @param path
-     *            路径
-     * @param obj
-     *            对象
+     * @param <E>  List内容类型
+     * @param path 路径
+     * @param obj  对象
      * @return {@link FileConfig}
      */
     public <E> FileConfig addToList(String path, E obj) {
@@ -142,10 +132,8 @@ public class FileConfig extends AbstractConfig {
     /**
      * 添加到StringList末尾
      *
-     * @param path
-     *            路径
-     * @param obj
-     *            字符串
+     * @param path 路径
+     * @param obj  字符串
      * @return {@link FileConfig}
      */
     public FileConfig addToStringList(String path, String obj) {
@@ -156,12 +144,9 @@ public class FileConfig extends AbstractConfig {
     /**
      * 添加到StringList末尾
      *
-     * @param path
-     *            路径
-     * @param obj
-     *            字符串
-     * @param allowrepeat
-     *            是否允许重复
+     * @param path        路径
+     * @param obj         字符串
+     * @param allowrepeat 是否允许重复
      * @return {@link FileConfig}
      */
     public FileConfig addToStringList(String path, String obj, boolean allowrepeat) {
@@ -179,8 +164,7 @@ public class FileConfig extends AbstractConfig {
     /**
      * 获得已颜色转码的文本
      *
-     * @param cfgmsg
-     *            待转码的List
+     * @param cfgmsg 待转码的List
      * @return 颜色转码后的文本
      */
     public List<String> getColorList(List<String> cfgmsg) {
@@ -206,8 +190,7 @@ public class FileConfig extends AbstractConfig {
     /**
      * 获得Location
      *
-     * @param key
-     *            键
+     * @param key 键
      * @return {@link Location}
      */
     public Location getLocation(String key) {
@@ -217,10 +200,8 @@ public class FileConfig extends AbstractConfig {
     /**
      * 获得Location
      *
-     * @param path
-     *            键
-     * @param def
-     *            默认地点
+     * @param path 键
+     * @param def  默认地点
      * @return {@link Location}
      */
     public Location getLocation(String path, Location def) {
@@ -231,8 +212,7 @@ public class FileConfig extends AbstractConfig {
     /**
      * 获得已颜色转码的文本
      *
-     * @param path
-     *            配置路径
+     * @param path 配置路径
      * @return 颜色转码后的文本
      */
     public String getMessage(String path) {
@@ -242,10 +222,8 @@ public class FileConfig extends AbstractConfig {
     /**
      * 获得已颜色转码的文本
      *
-     * @param path
-     *            配置路径
-     * @param def
-     *            默认文本
+     * @param path 配置路径
+     * @param def  默认文本
      * @return 颜色转码后的文本
      */
     public String getMessage(String path, String def) {
@@ -259,8 +237,7 @@ public class FileConfig extends AbstractConfig {
     /**
      * 获得已颜色转码的文本
      *
-     * @param path
-     *            配置路径
+     * @param path 配置路径
      * @return 颜色转码后的文本
      */
     public List<String> getMessageList(String path) {
@@ -277,8 +254,7 @@ public class FileConfig extends AbstractConfig {
     /**
      * 获得字符串数组
      *
-     * @param path
-     *            配置路径
+     * @param path 配置路径
      * @return 字符串数组
      */
     public String[] getStringArray(String path) {
@@ -300,10 +276,8 @@ public class FileConfig extends AbstractConfig {
     /**
      * 比较版本号
      *
-     * @param newver
-     *            新版本
-     * @param oldver
-     *            旧版本
+     * @param newver 新版本
+     * @param oldver 旧版本
      * @return 是否需要更新
      */
     public boolean needUpdate(String newver, String oldver) {
@@ -340,12 +314,9 @@ public class FileConfig extends AbstractConfig {
     /**
      * 从List移除对象
      *
-     * @param <E>
-     *            List内容对象类型
-     * @param path
-     *            路径
-     * @param obj
-     *            对象
+     * @param <E>  List内容对象类型
+     * @param path 路径
+     * @param obj  对象
      * @return {@link FileConfig}
      */
     public <E> FileConfig removeFromList(String path, E obj) {
@@ -359,10 +330,8 @@ public class FileConfig extends AbstractConfig {
     /**
      * 从StringList移除对象
      *
-     * @param path
-     *            路径
-     * @param obj
-     *            对象
+     * @param path 路径
+     * @param obj  对象
      * @return {@link FileConfig}
      */
     public FileConfig removeFromStringList(String path, String obj) {
@@ -436,8 +405,7 @@ public class FileConfig extends AbstractConfig {
     /**
      * 备份配置文件
      *
-     * @param oldcfg
-     *            配置文件
+     * @param oldcfg 配置文件
      */
     protected void backupConfig(FileConfig oldcfg) {
         String filename = oldcfg.getConfigName();
@@ -455,8 +423,7 @@ public class FileConfig extends AbstractConfig {
     /**
      * 检查配置文件
      *
-     * @param file
-     *            配置文件
+     * @param file 配置文件
      */
     protected void check(File file) {
         String filename = file.getName();
@@ -509,8 +476,7 @@ public class FileConfig extends AbstractConfig {
     /**
      * 初始化FileConfig
      *
-     * @param file
-     *            配置文件
+     * @param file 配置文件
      * @return FileConfig
      */
     protected FileConfig init(File file) {
@@ -521,10 +487,8 @@ public class FileConfig extends AbstractConfig {
     /**
      * 初始化FileConfig
      *
-     * @param file
-     *            配置文件
-     * @param check
-     *            是否检查文件
+     * @param file  配置文件
+     * @param check 是否检查文件
      * @return FileConfig
      */
     protected FileConfig init(File file, boolean check) {
@@ -544,8 +508,7 @@ public class FileConfig extends AbstractConfig {
     /**
      * 初始化FileConfig
      *
-     * @param stream
-     *            输入流
+     * @param stream 输入流
      * @return FileConfig
      */
     protected FileConfig init(InputStream stream) {
@@ -571,10 +534,8 @@ public class FileConfig extends AbstractConfig {
     /**
      * 检查配置文件版本
      *
-     * @param newcfg
-     *            新配置文件
-     * @param oldcfg
-     *            旧配置文件
+     * @param newcfg 新配置文件
+     * @param oldcfg 旧配置文件
      * @return 是否需要升级
      */
     protected boolean needUpdate(FileConfig newcfg, FileConfig oldcfg) {
@@ -584,10 +545,8 @@ public class FileConfig extends AbstractConfig {
     /**
      * 更新配置文件
      *
-     * @param newcfg
-     *            新配置文件
-     * @param oldcfg
-     *            旧配置文件
+     * @param newcfg 新配置文件
+     * @param oldcfg 旧配置文件
      * @return 更新以后的配置文件
      */
     protected FileConfig updateConfig(FileConfig newCfg, FileConfig oldCfg) {
@@ -597,12 +556,9 @@ public class FileConfig extends AbstractConfig {
     /**
      * 更新配置文件
      *
-     * @param newCfg
-     *            新的配置文件
-     * @param oldCfg
-     *            老的配置文件
-     * @param force
-     *            是否强制更新
+     * @param newCfg 新的配置文件
+     * @param oldCfg 老的配置文件
+     * @param force  是否强制更新
      * @return 更新以后的配置文件
      */
     protected FileConfig updateConfig(FileConfig newCfg, FileConfig oldCfg, boolean force) {
@@ -621,7 +577,8 @@ public class FileConfig extends AbstractConfig {
         // 复制旧的数据
         for (String string : oldConfigKeys) {
             Object var = oldCfg.get(string);
-            if (var != null && !(var instanceof MemorySection)) {
+            // 需要进行节点检查 还有类型检查 不同类型情况下 使用新配置
+            if (var != null && !(var instanceof MemorySection) && newCfg.get(string).getClass().equals(var.getClass())) {
                 Log.debug(String.format(CONFIG_UPDATE_VALUE, string, var));
                 newCfg.set(string, var);
             }
