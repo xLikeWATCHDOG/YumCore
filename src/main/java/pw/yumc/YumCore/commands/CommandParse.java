@@ -61,7 +61,7 @@ public class CommandParse {
         return new CommandParse(method.getParameterTypes(), method.getParameterAnnotations(), method.getReturnType().equals(boolean.class));
     }
 
-    public static void registerParse(Class clazz, Parse parse) {
+    public static void register(Class clazz, Parse parse) {
         allparses.put(clazz, parse);
     }
 
@@ -241,9 +241,6 @@ public class CommandParse {
 
         public StringParse() {
             allparses.put(String.class, this);
-            if (attrs.containsKey("option")) {
-                options = Arrays.asList(attrs.get("option").split(","));
-            }
         }
 
         @Override
@@ -255,6 +252,14 @@ public class CommandParse {
                 throwException("参数 %s 不是一个有效的选项 有效值为 %s", arg, options);
             }
             return arg;
+        }
+
+        @Override
+        public Parse<String> parseAnnotation(Annotation[] annotations) {
+            if (attrs.containsKey("option")) {
+                options = Arrays.asList(attrs.get("option").split(","));
+            }
+            return super.parseAnnotation(annotations);
         }
     }
 }
