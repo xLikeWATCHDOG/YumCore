@@ -4,7 +4,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -28,11 +27,6 @@ public abstract class AbstractInjectConfig {
     private static String INJECT_TYPE_ERROR = "配置节点 %s 数据类型不匹配 应该为: %s 但实际为: %s!";
     private static String INJECT_ERROR = "自动注入配置失败 可能造成插件运行错误 %s: %s!";
     private static String PATH_NOT_FOUND = "配置节点 %s 丢失 将使用默认值!";
-    private static String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    private static SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
-    static {
-
-    }
     private ConfigurationSection config;
 
     /**
