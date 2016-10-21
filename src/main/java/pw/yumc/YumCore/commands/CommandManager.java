@@ -116,9 +116,8 @@ public class CommandManager implements TabExecutor {
                 lookupNames.put(name, plugin);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ignored) {
             }
-            if ((cmd = plugin.getCommand(name)) == null) {
-                throw new IllegalStateException("未找到命令 必须在plugin.yml先注册 " + name + " 命令!");
-            }
+            if ((cmd = plugin.getCommand(name)) == null) { throw new IllegalStateException("未找到命令 必须在plugin.yml先注册 "
+                    + name + " 命令!"); }
         }
         cmd.setExecutor(this);
         cmd.setTabCompleter(this);
@@ -135,66 +134,6 @@ public class CommandManager implements TabExecutor {
     public CommandManager(String name, CommandExecutor... executor) {
         this(name);
         register(executor);
-    }
-
-    @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (args.length == 0) {
-            if (defCmd != null) {
-                return defCmd.execute(new CommandArgument(sender, command, label, args));
-            }
-            return help.send(sender, command, label, args);
-        }
-        String subcmd = args[0].toLowerCase();
-        if (subcmd.equalsIgnoreCase("help")) {
-            return help.send(sender, command, label, args);
-        }
-        return getByCache(subcmd).execute(new CommandArgument(sender, command, label, moveStrings(args, 1)));
-    }
-
-    @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        List<String> completions = new ArrayList<>();
-        String token = args[args.length - 1];
-        if (args.length == 1) {
-            StringUtil.copyPartialMatches(token, cmdNameCache, completions);
-        }
-        for (CommandTabInfo tab : tabs) {
-            StringUtil.copyPartialMatches(token, tab.execute(sender, command, token, args), completions);
-        }
-        StringUtil.copyPartialMatches(token, getPlayerTabComplete(sender, command, alias, args), completions);
-        Collections.sort(completions, String.CASE_INSENSITIVE_ORDER);
-        return completions;
-    }
-
-    /**
-     * 通过注解读取命令并注册
-     *
-     * @param clazzs
-     *            子命令处理类
-     */
-    public void register(CommandExecutor... clazzs) {
-        for (CommandExecutor clazz : clazzs) {
-            Method[] methods = clazz.getClass().getDeclaredMethods();
-            for (Method method : methods) {
-                if (registerCommand(method, clazz)) {
-                    continue;
-                }
-                registerTab(method, clazz);
-            }
-        }
-        help = new CommandHelp(cmds);
-        buildCmdNameCache();
-    }
-
-    /**
-     * 设置帮助解析器
-     *
-     * @param helpParse
-     *            帮助解析器
-     */
-    public void setHelpParse(CommandHelpParse helpParse) {
-        help.setHelpParse(helpParse);
     }
 
     /**
@@ -250,7 +189,8 @@ public class CommandManager implements TabExecutor {
         List<String> matchedPlayers = new ArrayList<>();
         for (Player player : C.Player.getOnlinePlayers()) {
             String name = player.getName();
-            if ((senderPlayer == null || senderPlayer.canSee(player)) && StringUtil.startsWithIgnoreCase(name, lastWord)) {
+            if ((senderPlayer == null || senderPlayer.canSee(player))
+                    && StringUtil.startsWithIgnoreCase(name, lastWord)) {
                 matchedPlayers.add(name);
             }
         }
@@ -272,6 +212,52 @@ public class CommandManager implements TabExecutor {
         return ret;
     }
 
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (args.length == 0) {
+            if (defCmd != null) { return defCmd.execute(new CommandArgument(sender, command, label, args)); }
+            return help.send(sender, command, label, args);
+        }
+        String subcmd = args[0].toLowerCase();
+        if (subcmd.equalsIgnoreCase("help")) { return help.send(sender, command, label, args); }
+        return getByCache(subcmd).execute(new CommandArgument(sender, command, label, moveStrings(args, 1)));
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        List<String> completions = new ArrayList<>();
+        String token = args[args.length - 1];
+        if (args.length == 1) {
+            StringUtil.copyPartialMatches(token, cmdNameCache, completions);
+        }
+        for (CommandTabInfo tab : tabs) {
+            StringUtil.copyPartialMatches(token, tab.execute(sender, command, token, args), completions);
+        }
+        StringUtil.copyPartialMatches(token, getPlayerTabComplete(sender, command, alias, args), completions);
+        Collections.sort(completions, String.CASE_INSENSITIVE_ORDER);
+        return completions;
+    }
+
+    /**
+     * 通过注解读取命令并注册
+     *
+     * @param clazzs
+     *            子命令处理类
+     */
+    public void register(CommandExecutor... clazzs) {
+        for (CommandExecutor clazz : clazzs) {
+            Method[] methods = clazz.getClass().getDeclaredMethods();
+            for (Method method : methods) {
+                if (registerCommand(method, clazz)) {
+                    continue;
+                }
+                registerTab(method, clazz);
+            }
+        }
+        help = new CommandHelp(cmds);
+        buildCmdNameCache();
+    }
+
     /**
      * 注册命令
      *
@@ -286,18 +272,14 @@ public class CommandManager implements TabExecutor {
         if (ci != null) {
             Class[] params = method.getParameterTypes();
             Log.d("命令 %s 参数类型: %s", ci.getName(), Arrays.toString(params));
-            if (params.length > 0) {
-                try {
-                    Class<? extends CommandSender> sender = params[0];
-                    if (method.getReturnType() == boolean.class) {
-                        defCmd = ci;
-                    } else {
-                        cmds.add(ci);
-                        cmdCache.put(ci.getName(), ci);
-                    }
-                    return true;
-                } catch (ClassCastException ignored) {
+            if (params.length > 0 && params[0].isInstance(CommandSender.class)) {
+                if (method.getReturnType() == boolean.class) {
+                    defCmd = ci;
+                } else {
+                    cmds.add(ci);
+                    cmdCache.put(ci.getName(), ci);
                 }
+                return true;
             }
             Log.warning(String.format(argumentTypeError, method.getName(), clazz.getClass().getName()));
         }
@@ -323,5 +305,15 @@ public class CommandManager implements TabExecutor {
             Log.warning(String.format(returnTypeError, method.getName(), clazz.getClass().getName()));
         }
         return false;
+    }
+
+    /**
+     * 设置帮助解析器
+     *
+     * @param helpParse
+     *            帮助解析器
+     */
+    public void setHelpParse(CommandHelpParse helpParse) {
+        help.setHelpParse(helpParse);
     }
 }
