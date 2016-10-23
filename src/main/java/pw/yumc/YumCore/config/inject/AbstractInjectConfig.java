@@ -14,6 +14,7 @@ import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.commands.exception.CommandParseException;
 import pw.yumc.YumCore.config.annotation.ConfigNode;
 import pw.yumc.YumCore.config.annotation.Default;
+import pw.yumc.YumCore.config.annotation.NotSave;
 import pw.yumc.YumCore.config.annotation.Nullable;
 import pw.yumc.YumCore.config.exception.ConfigParseException;
 
@@ -28,59 +29,6 @@ public abstract class AbstractInjectConfig {
     private static String INJECT_ERROR = "自动注入配置失败 可能造成插件运行错误 %s: %s!";
     private static String PATH_NOT_FOUND = "配置节点 %s 丢失 将使用默认值!";
     private ConfigurationSection config;
-
-    /**
-     * 注入配置数据
-     *
-     * @param config
-     *            配置区
-     */
-    public void inject(ConfigurationSection config) {
-        inject(config, false);
-    }
-
-    /**
-     * 注入配置数据
-     *
-     * @param config
-     *            配置区
-     * @param save
-     *            是否为保存
-     */
-    public void inject(ConfigurationSection config, boolean save) {
-        if (config == null) {
-            Log.w("尝试%s ConfigurationSection 为 Null 的数据!", save ? "保存" : "读取");
-            return;
-        }
-        this.config = config;
-        for (Field field : getClass().getDeclaredFields()) {
-            if (Modifier.isTransient(field.getModifiers()) || field.getType().isPrimitive()) {
-                continue;
-            }
-            ConfigNode node = field.getAnnotation(ConfigNode.class);
-            String path = field.getName();
-            if (node != null && !node.value().isEmpty()) {
-                path = node.value();
-            }
-            field.setAccessible(true);
-            if (save) {
-                setConfig(path, field);
-            } else {
-                setField(path, field);
-            }
-        }
-    }
-
-    /**
-     * 自动化保存
-     *
-     * @param config
-     *            配置文件区
-     */
-    public ConfigurationSection save(ConfigurationSection config) {
-        inject(config, true);
-        return config;
-    }
 
     /**
      * 添加默认值
@@ -144,9 +92,9 @@ public abstract class AbstractInjectConfig {
      */
     private Object hanldeDefault(Class<?> field, String path, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException {
         if (InjectConfigurationSection.class.isAssignableFrom(field)) {
-            if (config.isConfigurationSection(path)) {
-                return field.getConstructor(ConfigurationSection.class).newInstance(config.getConfigurationSection(path));
-            }
+            if (config.isConfigurationSection(path)) { return field
+                    .getConstructor(ConfigurationSection.class)
+                    .newInstance(config.getConfigurationSection(path)); }
             Log.w(INJECT_TYPE_ERROR, path, ConfigurationSection.class.getName(), value.getClass().getName());
         }
         return value;
@@ -182,6 +130,59 @@ public abstract class AbstractInjectConfig {
     }
 
     /**
+     * 注入配置数据
+     *
+     * @param config
+     *            配置区
+     */
+    public void inject(ConfigurationSection config) {
+        inject(config, false);
+    }
+
+    /**
+     * 注入配置数据
+     *
+     * @param config
+     *            配置区
+     * @param save
+     *            是否为保存
+     */
+    public void inject(ConfigurationSection config, boolean save) {
+        if (config == null) {
+            Log.w("尝试%s ConfigurationSection 为 Null 的数据!", save ? "保存" : "读取");
+            return;
+        }
+        this.config = config;
+        for (Field field : getClass().getDeclaredFields()) {
+            if (Modifier.isTransient(field.getModifiers()) || field.getType().isPrimitive()) {
+                continue;
+            }
+            ConfigNode node = field.getAnnotation(ConfigNode.class);
+            String path = field.getName();
+            if (node != null && !node.value().isEmpty()) {
+                path = node.value();
+            }
+            field.setAccessible(true);
+            if (save) {
+                setConfig(path, field);
+            } else {
+                setField(path, field);
+            }
+        }
+    }
+
+    /**
+     * 自动化保存
+     *
+     * @param config
+     *            配置文件区
+     */
+    public ConfigurationSection save(ConfigurationSection config) {
+        inject(config, true);
+        return config;
+    }
+
+    /**
      * 通用保存流程
      *
      * @param path
@@ -191,7 +192,9 @@ public abstract class AbstractInjectConfig {
      */
     protected void setConfig(String path, Field field) {
         try {
-            config.set(path, field.get(this));
+            if (field.getAnnotation(NotSave.class) == null) {
+                config.set(path, field.get(this));
+            }
         } catch (IllegalArgumentException | IllegalAccessException e) {
             Log.w(INJECT_ERROR, e.getClass().getName(), e.getMessage());
             Log.debug(e);
@@ -222,7 +225,10 @@ public abstract class AbstractInjectConfig {
             }
             hanldeValue(path, field, value);
         } catch (IllegalArgumentException ex) {
-            Log.w(INJECT_TYPE_ERROR, path, field.getType().getName(), value != null ? value.getClass().getName() : "空指针");
+            Log.w(INJECT_TYPE_ERROR,
+                    path,
+                    field.getType().getName(),
+                    value != null ? value.getClass().getName() : "空指针");
             Log.debug(ex);
         } catch (ConfigParseException e) {
             Log.w(e.getMessage());
