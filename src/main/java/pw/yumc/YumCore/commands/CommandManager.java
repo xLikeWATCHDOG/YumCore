@@ -272,14 +272,17 @@ public class CommandManager implements TabExecutor {
         if (ci != null) {
             Class[] params = method.getParameterTypes();
             Log.d("命令 %s 参数类型: %s", ci.getName(), Arrays.toString(params));
-            if (params.length > 0 && params[0].isInstance(CommandSender.class)) {
-                if (method.getReturnType() == boolean.class) {
+            try {
+                Class<? extends CommandSender> sender = params[0];
+                // 用于消除unuse警告
+                if (!sender.getName().isEmpty() && method.getReturnType() == boolean.class) {
                     defCmd = ci;
                 } else {
                     cmds.add(ci);
                     cmdCache.put(ci.getName(), ci);
                 }
                 return true;
+            } catch (ArrayIndexOutOfBoundsException | ClassCastException ignored) {
             }
             Log.warning(String.format(argumentTypeError, method.getName(), clazz.getClass().getName()));
         }
