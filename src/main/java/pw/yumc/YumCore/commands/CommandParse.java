@@ -35,9 +35,7 @@ public class CommandParse {
         new PlayerParse();
         new StringParse();
     }
-
     private List<Parse> parse = new LinkedList<>();
-
     private boolean isMain;
 
     public CommandParse(Class[] classes, Annotation[][] annons, boolean isMain) {
@@ -47,18 +45,34 @@ public class CommandParse {
             Class clazz = classes[i];
             Annotation[] annotations = annons[i];
             Parse parse = allparses.get(clazz);
-            if (parse == null) {
-                if (!clazz.isEnum()) {
-                    throw new CommandParseException(String.format("存在无法解析的参数类型 %s", clazz.getName()));
-                }
+            if (clazz.isEnum()) {
                 parse = new EnumParse(clazz);
             }
+            if (parse == null) { throw new CommandParseException(String.format("存在无法解析的参数类型 %s", clazz.getName())); }
             this.parse.add(parse.clone().parseAnnotation(annotations));
         }
     }
 
     public static CommandParse get(Method method) {
         return new CommandParse(method.getParameterTypes(), method.getParameterAnnotations(), method.getReturnType().equals(boolean.class));
+    }
+
+    /**
+     * 转化数组为字符串
+     *
+     * @param arr
+     *            数组
+     * @param split
+     *            分割符
+     * @return 字符串
+     */
+    public static String join(Object[] arr, String split) {
+        StringBuffer str = new StringBuffer();
+        for (Object s : arr) {
+            str.append(s.toString());
+            str.append(split);
+        }
+        return str.length() > split.length() ? str.toString().substring(0, str.length() - split.length()) : str.toString();
     }
 
     public static void register(Class clazz, Parse parse) {
@@ -73,6 +87,10 @@ public class CommandParse {
             try {
                 Parse p = parse.get(i);
                 String param = i < args.length ? args[i] : p.def;
+                // 参数大于解析器 并且为最后一个参数
+                if (i + 1 == parse.size() && args.length >= parse.size()) {
+                    param = join(Arrays.copyOfRange(args, i, args.length), " ");
+                }
                 pobjs.add(param == null ? null : p.parse(cmdArgs.getSender(), param));
             } catch (Exception e) {
                 throw new CommandParseException(String.format("第 %s 个参数 ", isMain ? 1 : 2 + i) + e.getMessage());
@@ -229,9 +247,7 @@ public class CommandParse {
         @Override
         public Player parse(CommandSender sender, String arg) {
             Player p = Bukkit.getPlayerExact(arg);
-            if (attrs.containsKey("check") && p == null) {
-                throw new CommandParseException("玩家 " + arg + "不存在或不在线!");
-            }
+            if (attrs.containsKey("check") && p == null) { throw new CommandParseException("玩家 " + arg + "不存在或不在线!"); }
             return p;
         }
     }
