@@ -1,5 +1,6 @@
 package pw.yumc.YumCore.commands;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.Arrays;
@@ -27,16 +28,16 @@ import pw.yumc.YumCore.commands.exception.CommandParseException;
  */
 public class CommandParse {
     private static Map<Class, Parse> allparses = new HashMap<>();
-
+    private boolean isMain;
+    private List<Parse> parse = new LinkedList<>();
     static {
         new IntegerParse();
         new LongParse();
         new BooleanParse();
         new PlayerParse();
         new StringParse();
+        new FileParse();
     }
-    private List<Parse> parse = new LinkedList<>();
-    private boolean isMain;
 
     public CommandParse(Class[] classes, Annotation[][] annons, boolean isMain) {
         this.isMain = isMain;
@@ -102,8 +103,8 @@ public class CommandParse {
 
     public static class BooleanParse extends Parse<Boolean> {
         public BooleanParse() {
-            allparses.put(Boolean.class, this);
-            allparses.put(boolean.class, this);
+            register(Boolean.class, this);
+            register(boolean.class, this);
         }
 
         @Override
@@ -117,8 +118,8 @@ public class CommandParse {
     }
 
     public static class EnumParse extends Parse<Enum> {
-        Class<Enum> etype;
         Enum[] elist;
+        Class<Enum> etype;
 
         public EnumParse(Class<Enum> etype) {
             this.etype = etype;
@@ -135,10 +136,23 @@ public class CommandParse {
         }
     }
 
+    public static class FileParse extends Parse<File> {
+        public FileParse() {
+            register(File.class, this);
+        }
+
+        @Override
+        public File parse(CommandSender sender, String arg) throws CommandParseException {
+            File file = new File(arg);
+            if (attrs.containsKey("check") && !file.exists()) { throw new CommandParseException("文件 " + arg + "不存在!"); }
+            return file;
+        }
+    }
+
     public static class IntegerParse extends Parse<Integer> {
         public IntegerParse() {
-            allparses.put(Integer.class, this);
-            allparses.put(int.class, this);
+            register(Integer.class, this);
+            register(int.class, this);
         }
 
         @Override
@@ -157,8 +171,8 @@ public class CommandParse {
 
     public static class LongParse extends Parse<Long> {
         public LongParse() {
-            allparses.put(Long.class, this);
-            allparses.put(long.class, this);
+            register(Long.class, this);
+            register(long.class, this);
         }
 
         @Override
@@ -177,7 +191,7 @@ public class CommandParse {
 
     public static class MaterialParse extends Parse<Material> {
         public MaterialParse() {
-            allparses.put(String.class, this);
+            register(Material.class, this);
         }
 
         @Override
@@ -191,10 +205,10 @@ public class CommandParse {
     }
 
     public static abstract class Parse<RT> implements Cloneable {
-        protected String def;
         protected Map<String, String> attrs = new HashMap<>();
-        protected int min = 0;
+        protected String def;
         protected int max = Integer.MAX_VALUE;
+        protected int min = 0;
 
         @Override
         public Parse<RT> clone() {
@@ -241,7 +255,7 @@ public class CommandParse {
 
     public static class PlayerParse extends Parse<Player> {
         public PlayerParse() {
-            allparses.put(Player.class, this);
+            register(Player.class, this);
         }
 
         @Override
@@ -256,7 +270,7 @@ public class CommandParse {
         List<String> options;
 
         public StringParse() {
-            allparses.put(String.class, this);
+            register(String.class, this);
         }
 
         @Override
