@@ -1,13 +1,21 @@
 package pw.yumc.YumCore.commands;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.commands.annotation.Help;
 import pw.yumc.YumCore.commands.info.CommandInfo;
 import pw.yumc.YumCore.commands.interfaces.CommandHelpParse;
-
-import java.util.*;
 
 /**
  * 命令帮助生成类
@@ -22,7 +30,7 @@ public class CommandHelp {
     private static String prefix = String.format("§6[§b%s§6] ", P.instance.getName());
     private static String commandNotFound = prefix + "§c当前插件未注册默认命令以及子命令!";
     private static String pageNotFound = prefix + "§c不存在的帮助页面 §b请输入 /%s help §e1-%s";
-    private static String helpTitle = String.format("§6========= %s §6插件帮助列表 §aBy §b喵♂呜 §6=========", prefix);
+    private static String helpTitle = String.format("§6========= %s §6帮助 §aBy §b喵♂呜 §6=========", prefix);
     private static String helpBody = "§6/%1$s §a%2$s §e%3$s §6- §b%4$s";
     private static String helpFooter = "§6查看更多的帮助页面 §b请输入 /%s help §e1-%s";
     /**
@@ -99,9 +107,7 @@ public class CommandHelp {
      * @return 解析后的帮助
      */
     public String formatHelp(String value) {
-        if (helpParse != null) {
-            return helpParse.parse(value);
-        }
+        if (helpParse != null) { return helpParse.parse(value); }
         return value;
     }
 
