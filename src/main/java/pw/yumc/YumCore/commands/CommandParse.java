@@ -1,24 +1,19 @@
 package pw.yumc.YumCore.commands;
 
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.commands.annotation.Default;
 import pw.yumc.YumCore.commands.annotation.KeyValue;
 import pw.yumc.YumCore.commands.annotation.Limit;
 import pw.yumc.YumCore.commands.exception.CommandParseException;
+
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * 命令参数解析
@@ -31,12 +26,14 @@ public class CommandParse {
     private boolean isMain;
     private List<Parse> parse = new LinkedList<>();
     static {
-        new IntegerParse();
-        new LongParse();
         new BooleanParse();
+        new FileParse();
+        new IntegerParse();
+        new DoubleParse();
+        new LongParse();
+        new MaterialParse();
         new PlayerParse();
         new StringParse();
-        new FileParse();
     }
 
     public CommandParse(Class[] classes, Annotation[][] annons, boolean isMain) {
@@ -68,7 +65,7 @@ public class CommandParse {
      * @return 字符串
      */
     public static String join(Object[] arr, String split) {
-        StringBuffer str = new StringBuffer();
+        StringBuilder str = new StringBuilder();
         for (Object s : arr) {
             str.append(s.toString());
             str.append(split);
@@ -144,7 +141,7 @@ public class CommandParse {
         @Override
         public File parse(CommandSender sender, String arg) throws CommandParseException {
             File file = new File(arg);
-            if (attrs.containsKey("check") && !file.exists()) { throw new CommandParseException("文件 " + arg + "不存在!"); }
+            if (attrs.containsKey("check") && !file.exists()) { throw new CommandParseException("文件 " + arg + " 不存在!"); }
             return file;
         }
     }
@@ -159,6 +156,26 @@ public class CommandParse {
         public Integer parse(CommandSender sender, String arg) {
             try {
                 int result = Integer.parseInt(arg);
+                if (min > result || result > max) {
+                    throwRange();
+                }
+                return result;
+            } catch (NumberFormatException e) {
+                throw new CommandParseException("必须为数字!", e);
+            }
+        }
+    }
+
+    public static class DoubleParse extends Parse<Double> {
+        public DoubleParse() {
+            register(Double.class, this);
+            register(double.class, this);
+        }
+
+        @Override
+        public Double parse(CommandSender sender, String arg) {
+            try {
+                double result = Double.parseDouble(arg);
                 if (min > result || result > max) {
                     throwRange();
                 }
