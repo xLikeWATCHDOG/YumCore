@@ -14,8 +14,8 @@ import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.commands.exception.CommandParseException;
 import pw.yumc.YumCore.config.annotation.ConfigNode;
 import pw.yumc.YumCore.config.annotation.Default;
-import pw.yumc.YumCore.config.annotation.NotSave;
 import pw.yumc.YumCore.config.annotation.Nullable;
+import pw.yumc.YumCore.config.annotation.ReadOnly;
 import pw.yumc.YumCore.config.exception.ConfigParseException;
 
 /**
@@ -192,7 +192,7 @@ public abstract class AbstractInjectConfig {
      */
     protected void setConfig(String path, Field field) {
         try {
-            if (field.getAnnotation(NotSave.class) == null) {
+            if (field.getAnnotation(ReadOnly.class) == null) {
                 config.set(path, field.get(this));
             }
         } catch (IllegalArgumentException | IllegalAccessException e) {
