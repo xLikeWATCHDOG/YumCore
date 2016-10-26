@@ -1,13 +1,6 @@
 package pw.yumc.YumCore.commands;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -155,9 +148,9 @@ public class CommandHelp {
                         helpList.add(formatCommand(cmdlist.get(i), label));
                     }
                 }
+                // 帮助结尾
+                helpList.add(String.format(helpFooter, label, HELPPAGECOUNT));
             }
-            // 帮助结尾
-            helpList.add(String.format(helpFooter, label, HELPPAGECOUNT));
             cacheHelp.put(helpkey, helpList.toArray(new String[0]));
         }
         sender.sendMessage(cacheHelp.get(helpkey));

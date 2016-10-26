@@ -4,21 +4,10 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.PluginCommand;
-import org.bukkit.command.SimpleCommandMap;
-import org.bukkit.command.TabExecutor;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -116,8 +105,7 @@ public class CommandManager implements TabExecutor {
                 lookupNames.put(name, plugin);
             } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ignored) {
             }
-            if ((cmd = plugin.getCommand(name)) == null) { throw new IllegalStateException("未找到命令 必须在plugin.yml先注册 "
-                    + name + " 命令!"); }
+            if ((cmd = plugin.getCommand(name)) == null) { throw new IllegalStateException("未找到命令 必须在plugin.yml先注册 " + name + " 命令!"); }
         }
         cmd.setExecutor(this);
         cmd.setTabCompleter(this);
@@ -189,8 +177,7 @@ public class CommandManager implements TabExecutor {
         List<String> matchedPlayers = new ArrayList<>();
         for (Player player : C.Player.getOnlinePlayers()) {
             String name = player.getName();
-            if ((senderPlayer == null || senderPlayer.canSee(player))
-                    && StringUtil.startsWithIgnoreCase(name, lastWord)) {
+            if ((senderPlayer == null || senderPlayer.canSee(player)) && StringUtil.startsWithIgnoreCase(name, lastWord)) {
                 matchedPlayers.add(name);
             }
         }
@@ -254,7 +241,7 @@ public class CommandManager implements TabExecutor {
                 registerTab(method, clazz);
             }
         }
-        help = new CommandHelp(cmds);
+        help = new CommandHelp(defCmd, cmds);
         buildCmdNameCache();
     }
 

@@ -74,7 +74,7 @@ public class CommandTabInfo {
         try {
             return (List<String>) method.invoke(origin, cmdArgs);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            throw new CommandException("调用Tab自动补全发生错误 请反馈给开发者 " + Arrays.toString(P.instance.getDescription().getAuthors().toArray()) + " !", e);
+            throw new CommandException("调用Tab自动补全发生错误 请反馈给开发者 " + Arrays.toString(P.getDescription().getAuthors().toArray()) + " !", e);
         }
     }
 
