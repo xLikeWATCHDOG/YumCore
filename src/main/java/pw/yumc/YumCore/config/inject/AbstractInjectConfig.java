@@ -35,17 +35,18 @@ public abstract class AbstractInjectConfig {
      *
      * @param field
      *            字段
-     * @param value
-     *            值
      * @throws IllegalAccessException
      * @throws IllegalArgumentException
      */
-    private void applyDefault(Field field, Object value) throws IllegalArgumentException, IllegalAccessException {
+    private void applyDefault(Field field) throws IllegalArgumentException, IllegalAccessException {
+        Object value = null;
         switch (field.getType().getName()) {
         case "java.util.List":
             value = new ArrayList<>();
+            break;
         case "java.util.Map":
             value = new HashMap<>();
+            break;
         }
         field.set(this, value);
     }
@@ -92,9 +93,7 @@ public abstract class AbstractInjectConfig {
      */
     private Object hanldeDefault(Class<?> field, String path, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException {
         if (InjectConfigurationSection.class.isAssignableFrom(field)) {
-            if (config.isConfigurationSection(path)) { return field
-                    .getConstructor(ConfigurationSection.class)
-                    .newInstance(config.getConfigurationSection(path)); }
+            if (config.isConfigurationSection(path)) { return field.getConstructor(ConfigurationSection.class).newInstance(config.getConfigurationSection(path)); }
             Log.w(INJECT_TYPE_ERROR, path, ConfigurationSection.class.getName(), value.getClass().getName());
         }
         return value;
@@ -123,7 +122,7 @@ public abstract class AbstractInjectConfig {
             value = convertType(type, path, value);
         }
         if (type.equals(String.class)) {
-            value = ChatColor.translateAlternateColorCodes('&', (String) value);
+            value = ChatColor.translateAlternateColorCodes('&', String.valueOf(value));
         }
         field.set(this, value);
         Log.d("设置字段 %s 为 %s ", field.getName(), value);
@@ -219,16 +218,13 @@ public abstract class AbstractInjectConfig {
             if (value == null) {
                 if (field.getAnnotation(Nullable.class) == null) {
                     Log.w(PATH_NOT_FOUND, path);
-                    applyDefault(field, value);
+                    applyDefault(field);
                 }
                 return;
             }
             hanldeValue(path, field, value);
         } catch (IllegalArgumentException ex) {
-            Log.w(INJECT_TYPE_ERROR,
-                    path,
-                    field.getType().getName(),
-                    value != null ? value.getClass().getName() : "空指针");
+            Log.w(INJECT_TYPE_ERROR, path, field.getType().getName(), value != null ? value.getClass().getName() : "空指针");
             Log.debug(ex);
         } catch (ConfigParseException e) {
             Log.w(e.getMessage());

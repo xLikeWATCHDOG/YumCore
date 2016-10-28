@@ -84,7 +84,7 @@ public class InjectParse {
         }
     }
 
-    public static interface Parse<FC> {
-        public FC parse(ConfigurationSection config, String path);
+    public interface Parse<FC> {
+        FC parse(ConfigurationSection config, String path);
     }
 }

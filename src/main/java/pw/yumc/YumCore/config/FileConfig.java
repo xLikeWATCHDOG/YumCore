@@ -560,9 +560,9 @@ public class FileConfig extends AbstractConfig {
     /**
      * 更新配置文件
      *
-     * @param newcfg
+     * @param newCfg
      *            新配置文件
-     * @param oldcfg
+     * @param oldCfg
      *            旧配置文件
      * @return 更新以后的配置文件
      */
@@ -599,7 +599,8 @@ public class FileConfig extends AbstractConfig {
             Object var = oldCfg.get(string);
             // 需要进行节点检查 还有类型检查 不同类型情况下 使用新配置
             if (var != null && !(var instanceof MemorySection)) {
-                if (!newCfg.get(string).getClass().equals(var.getClass())) {
+                Object newVer = newCfg.get(string);
+                if (newVer != null && !newVer.getClass().equals(var.getClass())) {
                     Log.w("警告! 旧数据类型与新配置类型不匹配!");
                 }
                 Log.debug(String.format(CONFIG_UPDATE_VALUE, string, var));
