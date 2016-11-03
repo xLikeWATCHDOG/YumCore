@@ -1,18 +1,17 @@
 package pw.yumc.YumCore.tellraw;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.bukkit.compatible.C;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * TellRaw简易处理类
@@ -22,7 +21,9 @@ import pw.yumc.YumCore.bukkit.compatible.C;
  */
 public class Tellraw {
     static boolean isPaper = Bukkit.getVersion().contains("Paper");
-    List<MessagePart> messageParts = new ArrayList<>();
+    private List<MessagePart> messageParts = new ArrayList<>();
+    private String json = null;
+    private String oldjson = null;
 
     public Tellraw(String text) {
         messageParts.add(new MessagePart(text));
@@ -161,16 +162,17 @@ public class Tellraw {
      *            命令发送者
      */
     public void send(final CommandSender sender) {
-        if (sender instanceof Player) {
+        final String json = toJsonString();
+        if (sender instanceof Player && json.getBytes().length < 32000) {
             if (isPaper && !Bukkit.isPrimaryThread()) {
                 Bukkit.getScheduler().runTask(P.instance, new Runnable() {
                     @Override
                     public void run() {
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName() + " " + toJsonString());
+                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName() + " " + json);
                     }
                 });
             } else {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName() + " " + toJsonString());
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName() + " " + json);
             }
         } else {
             sender.sendMessage(toOldMessageFormat());
@@ -258,9 +260,7 @@ public class Tellraw {
      * @return {@link Tellraw}
      */
     public Tellraw tip(List<String> texts) {
-        if (texts.isEmpty()) {
-            return this;
-        }
+        if (texts.isEmpty()) { return this; }
         StringBuilder text = new StringBuilder();
         for (String t : texts) {
             text.append(t).append("\n");
