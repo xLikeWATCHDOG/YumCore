@@ -1,18 +1,6 @@
 package pw.yumc.YumCore.config;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.util.Map;
-
+import com.google.common.io.Files;
 import org.apache.commons.lang.Validate;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -21,13 +9,14 @@ import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.representer.Representer;
-
-import com.google.common.io.Files;
-
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.config.yaml.BukkitConstructor;
 import pw.yumc.YumCore.config.yaml.BukkitRepresenter;
+
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.Map;
 
 /**
  * 抽象配置文件
@@ -37,7 +26,6 @@ import pw.yumc.YumCore.config.yaml.BukkitRepresenter;
  */
 public abstract class AbstractConfig extends YamlConfiguration {
     private static String CONTENT_NOT_BE_NULL = "内容不能为 null";
-    private static String TOP_KEY_MUST_BE_MAP = "顶层键值必须是Map.";
 
     protected static Charset UTF_8 = Charset.forName("UTF-8");
 
@@ -48,8 +36,8 @@ public abstract class AbstractConfig extends YamlConfiguration {
     protected static Plugin plugin = P.instance;
 
     protected DumperOptions yamlOptions = new DumperOptions();
-    protected Representer yamlRepresenter = new BukkitRepresenter();
-    protected Yaml yamlz = new Yaml(new BukkitConstructor(), yamlRepresenter, yamlOptions);
+    protected Representer yamlRepresenter = BukkitRepresenter.DEFAULT;
+    protected Yaml yamlz = new Yaml(BukkitConstructor.DEFAULT, yamlRepresenter, yamlOptions);
 
     /**
      * 配置文件内容MAP
@@ -69,7 +57,7 @@ public abstract class AbstractConfig extends YamlConfiguration {
     }
 
     @Override
-    public void load(File file) throws FileNotFoundException, IOException, InvalidConfigurationException {
+    public void load(File file) throws IOException, InvalidConfigurationException {
         Validate.notNull(file, FILE_NOT_BE_NULL);
         FileInputStream stream = new FileInputStream(file);
         load(new InputStreamReader(stream, UTF_8));
@@ -77,16 +65,13 @@ public abstract class AbstractConfig extends YamlConfiguration {
 
     @Override
     public void load(Reader reader) throws IOException, InvalidConfigurationException {
-        BufferedReader input = reader instanceof BufferedReader ? (BufferedReader) reader : new BufferedReader(reader);
         StringBuilder builder = new StringBuilder();
-        try {
+        try (BufferedReader input = reader instanceof BufferedReader ? (BufferedReader) reader : new BufferedReader(reader)) {
             String line;
             while ((line = input.readLine()) != null) {
                 builder.append(line);
                 builder.append(newLine);
             }
-        } finally {
-            input.close();
         }
         loadFromString(builder.toString());
     }
@@ -96,10 +81,8 @@ public abstract class AbstractConfig extends YamlConfiguration {
         Validate.notNull(contents, CONTENT_NOT_BE_NULL);
         try {
             contentsMap = (Map) yamlz.load(contents);
-        } catch (YAMLException e) {
+        } catch (YAMLException | ClassCastException e) {
             throw new InvalidConfigurationException(e);
-        } catch (ClassCastException e) {
-            throw new InvalidConfigurationException(TOP_KEY_MUST_BE_MAP);
         }
         String header = parseHeader(contents);
         if (header.length() > 0) {
@@ -118,11 +101,8 @@ public abstract class AbstractConfig extends YamlConfiguration {
             file.createNewFile();
             Log.info(String.format(CREATE_NEW_CONFIG, file.toPath()));
         }
-        Writer writer = new OutputStreamWriter(new FileOutputStream(file), UTF_8);
-        try {
+        try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), UTF_8)) {
             writer.write(data);
-        } finally {
-            writer.close();
         }
     }
 

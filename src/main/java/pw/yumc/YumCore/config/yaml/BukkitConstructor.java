@@ -1,26 +1,30 @@
 package pw.yumc.YumCore.config.yaml;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 import org.bukkit.Location;
 import org.bukkit.configuration.file.YamlConstructor;
 import org.bukkit.configuration.serialization.ConfigurationSerialization;
 import org.yaml.snakeyaml.error.YAMLException;
 import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.Tag;
-
 import pw.yumc.YumCore.bukkit.L;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 public class BukkitConstructor extends YamlConstructor {
+    public static BukkitConstructor DEFAULT = new BukkitConstructor();
     Map<String, Method> constructor = new HashMap<>();
 
     public BukkitConstructor() {
         this.yamlConstructors.put(Tag.MAP, new ConstructCustomObject());
         this.loadConstructor();
+    }
+
+    public static void register(String classname, Method method) {
+        DEFAULT.constructor.put(classname, method);
     }
 
     private void loadConstructor() {
@@ -30,9 +34,7 @@ public class BukkitConstructor extends YamlConstructor {
     private class ConstructCustomObject extends ConstructYamlMap {
         @Override
         public Object construct(Node node) {
-            if (node.isTwoStepsConstruction()) {
-                throw new YAMLException("Unexpected referential mapping structure. Node: " + node);
-            }
+            if (node.isTwoStepsConstruction()) { throw new YAMLException("Unexpected referential mapping structure. Node: " + node); }
 
             Map<?, ?> raw = (Map<?, ?>) super.construct(node);
 

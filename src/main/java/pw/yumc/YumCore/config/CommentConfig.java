@@ -1,25 +1,25 @@
 package pw.yumc.YumCore.config;
 
+import org.bukkit.configuration.InvalidConfigurationException;
+import org.yaml.snakeyaml.DumperOptions;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.yaml.snakeyaml.DumperOptions;
 
 public class CommentConfig extends AbstractConfig {
     // 新增保留注释字段
     protected static String commentPrefixSymbol = "'注释 ";
     protected static String commentSuffixSymbol = "': 注释";
 
-    protected static String fromRegex = "( {0,})(#.*)";
+    protected static String fromRegex = "( *)(#.*)";
     protected static Pattern fromPattern = Pattern.compile(fromRegex);
 
-    protected static String toRegex = "( {0,})(- ){0,}" + "(" + commentPrefixSymbol + ")" + "(#.*)" + "(" + commentSuffixSymbol + ")";
+    protected static String toRegex = "( *)(- )*" + "(" + commentPrefixSymbol + ")" + "(#.*)" + "(" + commentSuffixSymbol + ")";
     protected static Pattern toPattern = Pattern.compile(toRegex);
 
-    protected static Pattern countSpacePattern = Pattern.compile("( {0,})(- ){0,}(.*)");
+    protected static Pattern countSpacePattern = Pattern.compile("( *)(- )*(.*)");
 
     protected static int commentSplitWidth = 90;
 
