@@ -24,7 +24,6 @@ public abstract class InjectConfig extends AbstractInjectConfig {
     public InjectConfig(FileConfig config) {
         this.config = config;
         inject(config);
-        init();
     }
 
     public InjectConfig(String name) {
@@ -41,18 +40,11 @@ public abstract class InjectConfig extends AbstractInjectConfig {
     }
 
     /**
-     * 初始化配置(对象初始化也要在此处)
-     */
-    public void init() {
-    }
-
-    /**
      * 重载配置文件
      */
     public void reload() {
         config.reload();
         inject(config);
-        init();
     }
 
     /**

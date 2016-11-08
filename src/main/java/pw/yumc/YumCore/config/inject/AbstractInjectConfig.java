@@ -1,15 +1,7 @@
 package pw.yumc.YumCore.config.inject;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
-
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.commands.exception.CommandParseException;
 import pw.yumc.YumCore.config.annotation.ConfigNode;
@@ -17,6 +9,13 @@ import pw.yumc.YumCore.config.annotation.Default;
 import pw.yumc.YumCore.config.annotation.Nullable;
 import pw.yumc.YumCore.config.annotation.ReadOnly;
 import pw.yumc.YumCore.config.exception.ConfigParseException;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * 抽象注入配置
@@ -129,6 +128,12 @@ public abstract class AbstractInjectConfig {
     }
 
     /**
+     * 配置注入后的初始化操作(对象初始化也要在此处)
+     */
+    protected void init() {
+    }
+
+    /**
      * 注入配置数据
      *
      * @param config
@@ -136,6 +141,7 @@ public abstract class AbstractInjectConfig {
      */
     public void inject(ConfigurationSection config) {
         inject(config, false);
+        init();
     }
 
     /**
