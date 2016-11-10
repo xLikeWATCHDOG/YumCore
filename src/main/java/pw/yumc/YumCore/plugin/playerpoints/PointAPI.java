@@ -20,6 +20,13 @@ public class PointAPI {
     }
 
     /**
+     * @return 获取{@PlayerPointsAPI}
+     */
+    public static PlayerPointsAPI getAPI() {
+        return api;
+    }
+
+    /**
      * 添加点券
      * 
      * @param player
