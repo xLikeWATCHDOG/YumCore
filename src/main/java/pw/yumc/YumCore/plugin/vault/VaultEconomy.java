@@ -1,11 +1,10 @@
 package pw.yumc.YumCore.plugin.vault;
 
+import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.RegisteredServiceProvider;
-
-import net.milkbowl.vault.economy.Economy;
-import net.milkbowl.vault.economy.EconomyResponse;
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.kit.PKit;
 
@@ -58,7 +57,7 @@ public class VaultEconomy extends VaultBase {
      *            数量
      * @return 是否
      */
-    public static boolean had(OfflinePlayer oPlayer, double amont) {
+    public static boolean has(OfflinePlayer oPlayer, double amont) {
         return economy.has(oPlayer, amont);
     }
 
