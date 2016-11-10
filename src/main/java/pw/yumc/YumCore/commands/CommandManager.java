@@ -1,11 +1,5 @@
 package pw.yumc.YumCore.commands;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
-
 import org.bukkit.Bukkit;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
@@ -13,7 +7,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.StringUtil;
-
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.bukkit.compatible.C;
@@ -21,6 +14,12 @@ import pw.yumc.YumCore.commands.info.CommandInfo;
 import pw.yumc.YumCore.commands.info.CommandTabInfo;
 import pw.yumc.YumCore.commands.interfaces.CommandExecutor;
 import pw.yumc.YumCore.commands.interfaces.CommandHelpParse;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * 命令管理类
@@ -150,6 +149,9 @@ public class CommandManager implements TabExecutor {
                     cmdCache.put(subcmd, cmdinfo);
                     break;
                 }
+            }
+            if (defCmd != null) {
+                cmdCache.put(subcmd, defCmd);
             }
             if (!cmdCache.containsKey(subcmd)) {
                 cmdCache.put(subcmd, CommandInfo.Unknow);
