@@ -1,16 +1,16 @@
 package pw.yumc.YumCore.commands.info;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
-
 import org.bukkit.command.CommandSender;
-
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.commands.CommandArgument;
 import pw.yumc.YumCore.commands.annotation.Tab;
 import pw.yumc.YumCore.commands.exception.CommandException;
+
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * Tab补全
@@ -38,21 +38,8 @@ public class CommandTabInfo {
      */
     public static CommandTabInfo parse(Method method, Object origin) {
         Tab tab = method.getAnnotation(Tab.class);
-        if (tab != null) {
-            return new CommandTabInfo(method, origin);
-        }
+        if (tab != null) { return new CommandTabInfo(method, origin); }
         return null;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj instanceof CommandTabInfo) {
-            return method.equals(((CommandTabInfo) obj).getMethod());
-        }
-        return super.equals(obj);
     }
 
     /**
@@ -78,12 +65,16 @@ public class CommandTabInfo {
         }
     }
 
-    public Method getMethod() {
-        return method;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CommandTabInfo that = (CommandTabInfo) o;
+        return Objects.equals(origin, that.origin) && Objects.equals(method, that.method);
     }
 
     @Override
     public int hashCode() {
-        return method.hashCode() + origin.hashCode();
+        return Objects.hash(origin, method);
     }
 }

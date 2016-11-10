@@ -150,9 +150,6 @@ public class CommandManager implements TabExecutor {
                     break;
                 }
             }
-            if (defCmd != null) {
-                cmdCache.put(subcmd, defCmd);
-            }
             if (!cmdCache.containsKey(subcmd)) {
                 cmdCache.put(subcmd, CommandInfo.Unknow);
             }
@@ -209,7 +206,12 @@ public class CommandManager implements TabExecutor {
         }
         String subcmd = args[0].toLowerCase();
         if (subcmd.equalsIgnoreCase("help")) { return help.send(sender, command, label, args); }
-        return getByCache(subcmd).execute(new CommandArgument(sender, command, label, moveStrings(args, 1)));
+        CommandInfo cmd = getByCache(subcmd);
+        if (cmd.equals(CommandInfo.Unknow) && defCmd != null) {
+            return defCmd.execute(new CommandArgument(sender, command, label, args));
+        } else {
+            return cmd.execute(new CommandArgument(sender, command, label, moveStrings(args, 1)));
+        }
     }
 
     @Override

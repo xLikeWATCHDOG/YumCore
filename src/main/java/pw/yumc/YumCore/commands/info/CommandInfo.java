@@ -1,14 +1,7 @@
 package pw.yumc.YumCore.commands.info;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
-
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
-
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.commands.CommandArgument;
@@ -21,6 +14,13 @@ import pw.yumc.YumCore.commands.annotation.Sort;
 import pw.yumc.YumCore.commands.exception.CommandArgumentException;
 import pw.yumc.YumCore.commands.exception.CommandException;
 import pw.yumc.YumCore.commands.exception.CommandParseException;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * 命令信息存储类
@@ -95,8 +95,10 @@ public class CommandInfo {
     /**
      * 解析CommandInfo
      *
-     * @param method 方法
-     * @param origin 源对象
+     * @param method
+     *            方法
+     * @param origin
+     *            源对象
      * @return {@link CommandInfo}
      */
     public static CommandInfo parse(Method method, Object origin) {
@@ -111,27 +113,15 @@ public class CommandInfo {
         return null;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj instanceof CommandInfo) {
-            return name.equalsIgnoreCase(((CommandInfo) obj).getName());
-        }
-        return super.equals(obj);
-    }
-
     /**
      * 执行命令
      *
-     * @param cmdArgs 命令参数
+     * @param cmdArgs
+     *            命令参数
      * @return 是否执行成功
      */
     public boolean execute(final CommandArgument cmdArgs) {
-        if (method == null) {
-            return false;
-        }
+        if (method == null) { return false; }
         if (check(cmdArgs)) {
             Runnable runnable = new Runnable() {
                 @Override
@@ -182,11 +172,6 @@ public class CommandInfo {
         return sort;
     }
 
-    @Override
-    public int hashCode() {
-        return name.toLowerCase().hashCode() + method.hashCode() + origin.hashCode();
-    }
-
     /**
      * @return 是否为异步命令
      */
@@ -197,19 +182,27 @@ public class CommandInfo {
     /**
      * 验证命令是否匹配
      *
-     * @param cmd 需验证命令
+     * @param cmd
+     *            需验证命令
      * @return 是否匹配
      */
     public boolean isValid(String cmd) {
         return name.equalsIgnoreCase(cmd) || aliases.contains(cmd);
     }
 
-    /**
-     * 检查命令
-     *
-     * @param cmdArgs 命令信息
-     * @return 是否验证通过
-     */
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CommandInfo that = (CommandInfo) o;
+        return Objects.equals(origin, that.origin) && Objects.equals(method, that.method) && Objects.equals(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(origin, method, name);
+    }
+
     private boolean check(CommandArgument cmdArgs) {
         CommandSender sender = cmdArgs.getSender();
         return checkSender(sender) && checkArgs(sender, cmdArgs) && checkPerm(sender);
