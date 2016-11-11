@@ -1,14 +1,13 @@
 package pw.yumc.YumCore.commands;
 
-import java.util.*;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.commands.annotation.Help;
 import pw.yumc.YumCore.commands.info.CommandInfo;
 import pw.yumc.YumCore.commands.interfaces.CommandHelpParse;
+
+import java.util.*;
 
 /**
  * 命令帮助生成类
@@ -72,6 +71,7 @@ public class CommandHelp {
     public CommandHelp(CommandInfo defCmd, Collection<? extends CommandInfo> list) {
         this.defCmd = defCmd;
         cmdlist = new LinkedList<>(list);
+        Collections.sort(cmdlist, new CommandNameComparator());
         Collections.sort(cmdlist, new CommandComparator());
         HELPPAGECOUNT = (int) Math.ceil((double) cmdlist.size() / LINES_PER_PAGE);
     }
@@ -165,6 +165,19 @@ public class CommandHelp {
      */
     public void setHelpParse(CommandHelpParse helpParse) {
         this.helpParse = helpParse;
+    }
+
+    /**
+     * 命令名称比较器
+     *
+     * @since 2016年7月23日 下午4:17:18
+     * @author 喵♂呜
+     */
+    static class CommandNameComparator implements Comparator<CommandInfo> {
+        @Override
+        public int compare(CommandInfo o1, CommandInfo o2) {
+            return o1.getName().compareTo(o2.getName());
+        }
     }
 
     /**
