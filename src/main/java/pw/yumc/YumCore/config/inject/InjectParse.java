@@ -80,7 +80,7 @@ public class InjectParse {
 
         @Override
         public Map parse(ConfigurationSection config, String path) {
-            return config.getConfigurationSection(path).getValues(true);
+            return config.getConfigurationSection(path).getValues(false);
         }
     }
 

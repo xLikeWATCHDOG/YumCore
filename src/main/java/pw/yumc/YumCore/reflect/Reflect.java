@@ -1,47 +1,6 @@
-/**
- * Copyright (c) 2011-2013, Lukas Eder, lukas.eder@gmail.com
- * All rights reserved.
- *
- * This software is licensed to you under the Apache License, Version 2.0
- * (the "License"); You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *
- * . Redistributions of source code must retain the above copyright notice, this
- * list of conditions and the following disclaimer.
- *
- * . Redistributions in binary form must reproduce the above copyright notice,
- * this list of conditions and the following disclaimer in the documentation
- * and/or other materials provided with the distribution.
- *
- * . Neither the name "jOOR" nor the names of its contributors may be
- * used to endorse or promote products derived from this software without
- * specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- */
 package pw.yumc.YumCore.reflect;
 
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -106,9 +65,7 @@ public class Reflect {
      * @return The argument object rendered accessible
      */
     public static <T extends AccessibleObject> T accessible(final T accessible) {
-        if (accessible == null) {
-            return null;
-        }
+        if (accessible == null) { return null; }
 
         if (!accessible.isAccessible()) {
             accessible.setAccessible(true);
@@ -140,9 +97,7 @@ public class Reflect {
                 clazz = clazz.getSuperclass();
             }
         }
-        if (field == null) {
-            throw new NoSuchFieldException("name is not found");
-        }
+        if (field == null) { throw new NoSuchFieldException("name is not found"); }
         return field;
     }
 
@@ -220,9 +175,7 @@ public class Reflect {
                 return Float.class;
             } else if (char.class == type) {
                 return Character.class;
-            } else if (void.class == type) {
-                return Void.class;
-            }
+            } else if (void.class == type) { return Void.class; }
         }
 
         return type;
@@ -290,9 +243,7 @@ public class Reflect {
      * @see Object#getClass()
      */
     private static Class<?>[] types(final Object... values) {
-        if (values == null) {
-            return new Class[0];
-        }
+        if (values == null) { return new Class[0]; }
 
         final Class<?>[] result = new Class[values.length];
 
@@ -308,9 +259,7 @@ public class Reflect {
      * Unwrap an object
      */
     private static Object unwrap(final Object object) {
-        if (object instanceof Reflect) {
-            return ((Reflect) object).get();
-        }
+        if (object instanceof Reflect) { return ((Reflect) object).get(); }
 
         return object;
     }
@@ -322,7 +271,6 @@ public class Reflect {
      *            The interface type that is implemented by the proxy
      * @return A proxy for the wrapped object
      */
-    @SuppressWarnings("unchecked")
     public <P> P as(final Class<P> proxyType) {
         final boolean isMap = (object instanceof Map);
         final InvocationHandler handler = new InvocationHandler() {
@@ -506,9 +454,7 @@ public class Reflect {
         // signature if primitive argument types are converted to their wrappers
         catch (final NoSuchMethodException e) {
             for (final Constructor<?> constructor : type().getConstructors()) {
-                if (match(constructor.getParameterTypes(), types)) {
-                    return on(constructor, args);
-                }
+                if (match(constructor.getParameterTypes(), types)) { return on(constructor, args); }
             }
 
             throw new ReflectException(e);
@@ -520,11 +466,7 @@ public class Reflect {
      */
     @Override
     public boolean equals(final Object obj) {
-        if (obj instanceof Reflect) {
-            return object.equals(((Reflect) obj).get());
-        }
-
-        return false;
+        return obj instanceof Reflect && object.equals(((Reflect) obj).get());
     }
 
     /**
@@ -579,7 +521,7 @@ public class Reflect {
      * @return A map containing field names and wrapped values.
      */
     public Map<String, Reflect> fields() {
-        final Map<String, Reflect> result = new LinkedHashMap<String, Reflect>();
+        final Map<String, Reflect> result = new LinkedHashMap<>();
 
         for (final Field field : type().getFields()) {
             if (!isClass ^ Modifier.isStatic(field.getModifiers())) {
@@ -596,7 +538,6 @@ public class Reflect {
      * @param <T>
      *            A convenience generic parameter for automatic unsafe casting
      */
-    @SuppressWarnings("unchecked")
     public <T> T get() {
         return (T) object;
     }
@@ -618,7 +559,7 @@ public class Reflect {
      * @see #field(String)
      */
     public <T> T get(final String name) throws ReflectException {
-        return field(name).<T> get();
+        return field(name).get();
     }
 
     /**
@@ -681,9 +622,7 @@ public class Reflect {
      * @see Object#getClass()
      */
     public Class<?> type() {
-        if (isClass) {
-            return (Class<?>) object;
-        }
+        if (isClass) { return (Class<?>) object; }
         return object.getClass();
     }
 
@@ -722,9 +661,7 @@ public class Reflect {
     private boolean match(final Class<?>[] declaredTypes, final Class<?>[] actualTypes) {
         if (declaredTypes.length == actualTypes.length) {
             for (int i = 0; i < actualTypes.length; i++) {
-                if (!wrapper(declaredTypes[i]).isAssignableFrom(wrapper(actualTypes[i]))) {
-                    return false;
-                }
+                if (!wrapper(declaredTypes[i]).isAssignableFrom(wrapper(actualTypes[i]))) { return false; }
             }
             return true;
         }
@@ -744,16 +681,12 @@ public class Reflect {
         // first priority: find a public method with a "similar" signature in class hierarchy
         // similar interpreted in when primitive argument types are converted to their wrappers
         for (final Method method : type.getMethods()) {
-            if (isSimilarSignature(method, name, types)) {
-                return method;
-            }
+            if (isSimilarSignature(method, name, types)) { return method; }
         }
 
         // second priority: find a non-public method with a "similar" signature on declaring class
         for (final Method method : type.getDeclaredMethods()) {
-            if (isSimilarSignature(method, name, types)) {
-                return method;
-            }
+            if (isSimilarSignature(method, name, types)) { return method; }
         }
 
         throw new NoSuchMethodException("No similar method " + name + " with params " + Arrays.toString(types) + " could be found on type " + type() + ".");

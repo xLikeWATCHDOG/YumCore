@@ -14,5 +14,5 @@ public interface CommandHelpParse {
      *            参数
      * @return 命令帮助
      */
-    public String parse(String str);
+    String parse(String str);
 }

@@ -19,7 +19,7 @@ import pw.yumc.YumCore.kit.PKit;
  * @author 喵♂呜
  */
 public class PacketKit {
-    public static boolean ENABLE = false;;
+    public static boolean ENABLE = false;
     private static ProtocolManager manager;
 
     static {

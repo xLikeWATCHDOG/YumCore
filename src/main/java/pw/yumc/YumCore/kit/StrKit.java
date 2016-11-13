@@ -113,7 +113,7 @@ public class StrKit {
      * @return 字符串
      */
     public static String join(Object[] arr, String split) {
-        StringBuffer str = new StringBuffer();
+        StringBuilder str = new StringBuilder();
         for (Object s : arr) {
             str.append(s.toString());
             str.append(split);
@@ -148,10 +148,7 @@ public class StrKit {
      */
     public static boolean startsWithIgnoreCase(String string, String prefix) throws IllegalArgumentException, NullPointerException {
         Validate.notNull(string, "Cannot check a null string for a match");
-        if (string.length() < prefix.length()) {
-            return false;
-        }
-        return string.regionMatches(true, 0, prefix, 0, prefix.length());
+        return string.length() >= prefix.length() && string.regionMatches(true, 0, prefix, 0, prefix.length());
     }
 
     /**
@@ -201,9 +198,7 @@ public class StrKit {
      *         <code>null</code> if null String input
      */
     public static String substring(String str, int start, int end) {
-        if (str == null) {
-            return null;
-        }
+        if (str == null) { return null; }
 
         // handle negatives
         if (end < 0) {
@@ -219,9 +214,7 @@ public class StrKit {
         }
 
         // if start is greater than end, return ""
-        if (start > end) {
-            return EMPTY;
-        }
+        if (start > end) { return EMPTY; }
 
         if (start < 0) {
             start = 0;

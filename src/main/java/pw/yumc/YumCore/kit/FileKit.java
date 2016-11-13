@@ -22,6 +22,7 @@ public class FileKit {
     public static boolean deleteDir(final CommandSender sender, final File dir) {
         if (dir.isDirectory()) {
             final String[] children = dir.list();
+            if (children == null) { return false; }
             // 递归删除目录中的子目录下
             for (final String element : children) {
                 final File file = new File(dir, element);

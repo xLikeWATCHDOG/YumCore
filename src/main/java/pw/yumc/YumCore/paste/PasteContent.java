@@ -29,9 +29,7 @@ public class PasteContent {
      *             IO异常
      */
     public void addFile(File file) throws IOException {
-        if (file == null) {
-            throw new IllegalArgumentException("文件不得为Null!");
-        }
+        if (file == null) { throw new IllegalArgumentException("文件不得为Null!"); }
         addLines(Files.readAllLines(file.toPath(), Charset.forName("UTF-8")));
     }
 
@@ -78,7 +76,7 @@ public class PasteContent {
     public String toString() {
         StringBuilder text = new StringBuilder();
         for (String str : TEXT) {
-            text.append(str + '\n');
+            text.append(str).append('\n');
         }
         return text.toString();
     }

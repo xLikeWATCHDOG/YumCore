@@ -25,7 +25,6 @@ public class Pastebin {
         paste.addLine("异常提交测试!");
         paste.addThrowable(new Throwable());
         System.out.println(p.post(paste));
-        ;
     }
 
     public String post(PasteContent content) {
@@ -43,25 +42,14 @@ public class Pastebin {
             connection.setInstanceFollowRedirects(false);
             connection.setDoOutput(true);
             OutputStream outputStream = connection.getOutputStream();
-            byte[] outByte = ("api_option=paste&api_dev_key="
-                    + URLEncoder.encode(this.API_KEY, "utf-8")
-                    + "&api_paste_code="
-                    + URLEncoder.encode(content.toString(), "utf-8")
-                    + "&api_paste_private="
-                    + URLEncoder.encode(level.getLevel(), "utf-8")
-                    + "&api_paste_name="
-                    + URLEncoder.encode(name, "utf-8")
-                    + "&api_paste_expire_date="
-                    + URLEncoder.encode("N", "utf-8")
-                    + "&api_paste_format="
-                    + URLEncoder.encode(format.toString(), "utf-8")
-                    + "&api_user_key="
-                    + URLEncoder.encode("", "utf-8")).getBytes();
+            byte[] outByte = ("api_option=paste&api_dev_key=" + URLEncoder.encode(this.API_KEY, "utf-8") + "&api_paste_code=" + URLEncoder.encode(content.toString(), "utf-8") + "&api_paste_private="
+                    + URLEncoder.encode(level.getLevel(), "utf-8") + "&api_paste_name=" + URLEncoder.encode(name, "utf-8") + "&api_paste_expire_date=" + URLEncoder.encode("N", "utf-8")
+                    + "&api_paste_format=" + URLEncoder.encode(format.toString(), "utf-8") + "&api_user_key=" + URLEncoder.encode("", "utf-8")).getBytes();
             outputStream.write(outByte);
             outputStream.flush();
             outputStream.close();
             BufferedReader br = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            StringBuffer request = new StringBuffer();
+            StringBuilder request = new StringBuilder();
             String temp;
             while ((temp = br.readLine()) != null) {
                 request.append(temp);
@@ -85,7 +73,7 @@ public class Pastebin {
 
         int level;
 
-        private Private(int level) {
+        Private(int level) {
             this.level = level;
         }
 

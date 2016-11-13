@@ -14,7 +14,7 @@ public enum PasteFormat {
 
     String format;
 
-    private PasteFormat(String format) {
+    PasteFormat(String format) {
         this.format = format;
     }
 

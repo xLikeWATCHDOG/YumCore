@@ -1,19 +1,3 @@
-/**
- * Copyright (c) 2011-2015, James Zhan 詹波 (j@126.com).
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- * http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package pw.yumc.YumCore.kit;
 
 import java.security.MessageDigest;
@@ -59,15 +43,7 @@ public class HashKit {
         try {
             StringBuilder result = new StringBuilder();
             MessageDigest md = MessageDigest.getInstance(algorithm);
-            byte[] bytes = md.digest(srcStr.getBytes("utf-8"));
-            for (byte b : bytes) {
-                String hex = Integer.toHexString(b & 0xFF);
-                if (hex.length() == 1) {
-                    result.append("0");
-                }
-                result.append(hex);
-            }
-            return result.toString();
+            return merge(result, md.digest(srcStr.getBytes("utf-8"))).toString();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -136,7 +112,10 @@ public class HashKit {
      * @return 字符串
      */
     private static String toHex(byte[] bytes) {
-        StringBuilder result = new StringBuilder();
+        return merge(new StringBuilder(), bytes).toString();
+    }
+
+    private static StringBuilder merge(StringBuilder result, byte[] bytes) {
         for (byte b : bytes) {
             String hex = Integer.toHexString(b & 0xFF);
             if (hex.length() == 1) {
@@ -144,6 +123,6 @@ public class HashKit {
             }
             result.append(hex);
         }
-        return result.toString();
+        return result;
     }
 }

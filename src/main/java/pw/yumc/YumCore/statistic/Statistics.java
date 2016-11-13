@@ -3,11 +3,7 @@
  */
 package pw.yumc.YumCore.statistic;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -75,7 +71,7 @@ public class Statistics {
             Field field = pluginClassLoader.getClass().getDeclaredField("plugin");
             field.setAccessible(true);
             plugin = (JavaPlugin) field.get(pluginClassLoader);
-        } catch (NoSuchMethodException | SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
+        } catch (NoSuchMethodException | SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException ignored) {
         }
     }
 
@@ -115,7 +111,7 @@ public class Statistics {
             }
             config = YamlConfiguration.loadConfiguration(configfile);
             initFile(config);
-        } catch (IOException e) {
+        } catch (IOException ignored) {
         }
         this.guid = config.getString("guid");
         this.debug = config.getBoolean("debug", false);
@@ -133,7 +129,7 @@ public class Statistics {
      * @throws IOException
      */
     public static String postData(String url, String param) throws IOException {
-        PrintWriter out = null;
+        PrintWriter out;
         String result = "";
         URL realUrl = new URL(url);
         // 打开和URL之间的连接
@@ -153,15 +149,13 @@ public class Statistics {
         out.write(param);
         // flush输出流的缓冲
         out.flush();
-        String response = "";
+        String response;
         BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), UTF_8));
         while ((response = reader.readLine()) != null) {
             result += response;
         }
         reader.close();
-        if (out != null) {
-            out.close();
-        }
+        out.close();
         return result;
     }
 
@@ -208,9 +202,7 @@ public class Statistics {
      * @return 是否运行成功.
      */
     public boolean start() {
-        if (task != null || !plugin.isEnabled()) {
-            return true;
-        }
+        if (task != null || !plugin.isEnabled()) { return true; }
         timer = new StatisticsTimer();
         // 开启TPS统计线程
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, timer, 0, 20);
@@ -285,7 +277,7 @@ public class Statistics {
         public double getAverageTPS() {
             double avg = 0.0D;
             for (Double f : history) {
-                avg += f.doubleValue();
+                avg += f;
             }
             return avg / history.size();
         }

@@ -37,7 +37,7 @@ public class ZipKit {
      * @throws IOException
      *             IO异常
      */
-    public static void unzip(File zipFile, File destPath) throws ZipException, IOException {
+    public static void unzip(File zipFile, File destPath) throws IOException {
         unzip(zipFile, destPath, null);
     }
 
@@ -53,7 +53,7 @@ public class ZipKit {
      * @throws IOException
      *             IO异常
      */
-    public static void unzip(File zipFile, File destPath, String ext) throws ZipException, IOException {
+    public static void unzip(File zipFile, File destPath, String ext) throws IOException {
         ZipFile zipObj = new ZipFile(zipFile);
         Enumeration<? extends ZipEntry> e = zipObj.entries();
         while (e.hasMoreElements()) {

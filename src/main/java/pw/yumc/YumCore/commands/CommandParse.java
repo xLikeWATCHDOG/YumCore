@@ -1,19 +1,20 @@
 package pw.yumc.YumCore.commands;
 
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.*;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.commands.annotation.Default;
 import pw.yumc.YumCore.commands.annotation.KeyValue;
 import pw.yumc.YumCore.commands.annotation.Limit;
 import pw.yumc.YumCore.commands.exception.CommandParseException;
-
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.*;
 
 /**
  * 命令参数解析
@@ -271,6 +272,8 @@ public class CommandParse {
     }
 
     public static class PlayerParse extends Parse<Player> {
+        boolean check = false;
+
         public PlayerParse() {
             register(Player.class, this);
         }
@@ -278,8 +281,15 @@ public class CommandParse {
         @Override
         public Player parse(CommandSender sender, String arg) {
             Player p = Bukkit.getPlayerExact(arg);
-            if (attrs.containsKey("check") && p == null) { throw new CommandParseException("玩家 " + arg + "不存在或不在线!"); }
+            if (check && p == null) { throw new CommandParseException("玩家 " + arg + " 不存在或不在线!"); }
             return p;
+        }
+
+        @Override
+        public Parse<Player> parseAnnotation(Annotation[] annotations) {
+            super.parseAnnotation(annotations);
+            check = attrs.containsKey("check");
+            return this;
         }
     }
 
@@ -303,10 +313,11 @@ public class CommandParse {
 
         @Override
         public Parse<String> parseAnnotation(Annotation[] annotations) {
+            super.parseAnnotation(annotations);
             if (attrs.containsKey("option")) {
                 options = Arrays.asList(attrs.get("option").split(","));
             }
-            return super.parseAnnotation(annotations);
+            return this;
         }
     }
 }

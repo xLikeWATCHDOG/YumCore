@@ -1,10 +1,6 @@
 package pw.yumc.YumCore.sql.core;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 import pw.yumc.YumCore.bukkit.Log;
 
@@ -95,8 +91,7 @@ public abstract class DataBaseCore {
     public ResultSet query(String sql) throws SQLException {
         debug(sql);
         Statement st = getStatement();
-        ResultSet result = st.executeQuery(sql);
-        return result;
+        return st.executeQuery(sql);
     }
 
     /**

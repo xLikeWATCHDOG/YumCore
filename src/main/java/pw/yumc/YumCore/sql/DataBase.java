@@ -1,11 +1,6 @@
 package pw.yumc.YumCore.sql;
 
-import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
@@ -253,7 +248,7 @@ public class DataBase {
             while (dbresult.next()) {
                 KeyValue kv = new KeyValue();
                 for (String col : fields.getKeys()) {
-                    kv.add(col, dbresult.getString(col.toString()));
+                    kv.add(col, dbresult.getString(col));
                 }
                 kvlist.add(kv);
             }
@@ -305,7 +300,7 @@ public class DataBase {
             while (dbresult.next()) {
                 KeyValue kv = new KeyValue();
                 for (String col : fields) {
-                    kv.add(col, dbresult.getString(col.toString()));
+                    kv.add(col, dbresult.getString(col));
                 }
                 kvlist.add(kv);
             }
@@ -330,9 +325,7 @@ public class DataBase {
         String sql = "SELECT " + fields + " FROM " + tableName + " WHERE " + selConditions.toWhereString() + " limit 1";
         try {
             ResultSet dbresult = this.dataBaseCore.query(sql);
-            if (dbresult.next()) {
-                return dbresult.getString(fields);
-            }
+            if (dbresult.next()) { return dbresult.getString(fields); }
         } catch (Exception e) {
             sqlerr(sql, e);
         }
@@ -459,7 +452,7 @@ public class DataBase {
         } finally {
             try {
                 con.setAutoCommit(true);
-            } catch (SQLException e) {
+            } catch (SQLException ignored) {
             }
         }
     }

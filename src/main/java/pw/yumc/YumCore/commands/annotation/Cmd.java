@@ -61,7 +61,7 @@ public @interface Cmd {
      * @author 喵♂呜
      * @since 2016年8月26日 下午8:55:15
      */
-    public enum Executor {
+    enum Executor {
         /**
          * 玩家
          */
@@ -92,7 +92,7 @@ public @interface Cmd {
         UNKNOW("未知");
         private String name;
 
-        private Executor(String name) {
+        Executor(String name) {
             this.name = name;
         }
 

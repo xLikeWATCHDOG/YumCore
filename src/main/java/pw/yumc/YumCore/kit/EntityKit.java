@@ -1,6 +1,7 @@
 package pw.yumc.YumCore.kit;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
@@ -101,9 +102,7 @@ public class EntityKit {
     public static Entity getEntityById(int entityId) {
         for (World world : Bukkit.getWorlds()) {
             for (Entity entity : world.getEntities()) {
-                if (entity.getEntityId() == entityId) {
-                    return entity;
-                }
+                if (entity.getEntityId() == entityId) { return entity; }
             }
         }
         return null;
@@ -130,8 +129,8 @@ public class EntityKit {
     public static boolean isInvisible(Entity entity) {
         Object ent = ReflectUtil.getHandle(entity);
         try {
-            return (boolean) ent.getClass().getMethod("isInvisible").invoke(ent);
-        } catch (Exception e) {
+            if (ent != null) { return (boolean) ent.getClass().getMethod("isInvisible").invoke(ent); }
+        } catch (Exception ignored) {
         }
         return false;
     }
@@ -199,20 +198,15 @@ public class EntityKit {
         for (int x = xMin; x <= xMax; x++) {
             for (int z = zMin; z <= zMax; z++) {
                 // Standing on SOMETHING
-                if (entity.getLocation().add(x, -0.5, z).getBlock().getType() != Material.AIR && !entity.getLocation().add(x, -0.5, z).getBlock().isLiquid()) {
-                    return true;
-                }
+                if (entity.getLocation().add(x, -0.5, z).getBlock().getType() != Material.AIR && !entity.getLocation().add(x, -0.5, z).getBlock().isLiquid()) { return true; }
 
                 // Inside a Lillypad
-                if (entity.getLocation().add(x, 0, z).getBlock().getType() == Material.WATER_LILY) {
-                    return true;
-                }
+                if (entity.getLocation().add(x, 0, z).getBlock().getType() == Material.WATER_LILY) { return true; }
 
                 // Fences/Walls
                 Material beneath = entity.getLocation().add(x, -1.5, z).getBlock().getType();
-                if (entity.getLocation().getY() % 0.5 == 0 && (beneath == Material.FENCE || beneath == Material.FENCE_GATE || beneath == Material.NETHER_FENCE || beneath == Material.COBBLE_WALL)) {
-                    return true;
-                }
+                if (entity.getLocation().getY() % 0.5 == 0
+                        && (beneath == Material.FENCE || beneath == Material.FENCE_GATE || beneath == Material.NETHER_FENCE || beneath == Material.COBBLE_WALL)) { return true; }
             }
         }
 
@@ -233,7 +227,7 @@ public class EntityKit {
             if (type == null) {
                 try {
                     type = EntityType.valueOf(str.toUpperCase());
-                } catch (Exception e) {
+                } catch (Exception ignored) {
                 }
             }
         }
@@ -255,9 +249,11 @@ public class EntityKit {
             Object creature = ReflectUtil.getHandle(entity);
             if (_cEntityInsentient.isInstance(creature)) {
                 Object world = ReflectUtil.getHandle(entity.getWorld());
-                Object methodProfiler = world.getClass().getField("methodProfiler").get(world);
-                Object goalSelector = _cPathfinderGoalSelector.getConstructor(methodProfiler.getClass()).newInstance(methodProfiler);
-                _fgoalSelector.set(creature, goalSelector);
+                if (world != null) {
+                    Object methodProfiler = world.getClass().getField("methodProfiler").get(world);
+                    Object goalSelector = _cPathfinderGoalSelector.getConstructor(methodProfiler.getClass()).newInstance(methodProfiler);
+                    _fgoalSelector.set(creature, goalSelector);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -275,8 +271,10 @@ public class EntityKit {
     public static void setInvisible(Entity entity, boolean invisible) {
         Object ent = ReflectUtil.getHandle(entity);
         try {
-            ent.getClass().getMethod("setInvisible", boolean.class).invoke(ent, invisible);
-        } catch (Exception e) {
+            if (ent != null) {
+                ent.getClass().getMethod("setInvisible", boolean.class).invoke(ent, invisible);
+            }
+        } catch (Exception ignored) {
         }
     }
 
@@ -309,15 +307,16 @@ public class EntityKit {
                 if (_mPlayerConnection_Teleport == null) {
                     _mPlayerConnection_Teleport = ReflectUtil.getMethodByNameAndParams(playerConnection.getClass(), "teleport", Location.class);
                 }
-                try {
-                    _mPlayerConnection_Teleport.invoke(playerConnection, to);
-                } catch (Exception ex) {
-                    ex.printStackTrace();
+                if (_mPlayerConnection_Teleport != null) {
+                    try {
+                        _mPlayerConnection_Teleport.invoke(playerConnection, to);
+                    } catch (IllegalAccessException | InvocationTargetException ignored) {
+                    }
                 }
             } else {
                 Object toWorldServer = ReflectUtil.getHandle(to.getWorld());
                 Object server = ReflectUtil.getHandle(Bukkit.getServer());
-                if (_fWorldServer_dimension == null) {
+                if (_fWorldServer_dimension == null && toWorldServer != null) {
                     for (Field field : ReflectUtil.getFieldByType(toWorldServer.getClass(), Integer.TYPE)) {
                         int modifier = field.getModifiers();
                         if (Modifier.isFinal(modifier) && Modifier.isPublic(modifier)) {
@@ -326,7 +325,7 @@ public class EntityKit {
                     }
                 }
                 try {
-                    _mPlayerList_MoveToWorld.invoke(server, ReflectUtil.getHandle(entity), (int) _fWorldServer_dimension.get(toWorldServer), true, to, true);
+                    _mPlayerList_MoveToWorld.invoke(server, ReflectUtil.getHandle(entity), _fWorldServer_dimension.get(toWorldServer), true, to, true);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -371,9 +370,7 @@ public class EntityKit {
      *            当实体在地上的时候，会稍微抬起一些
      */
     public static void velocity(Entity ent, Vector vec, double speed, boolean ySet, double yBase, double yAdd, double yMax, boolean groundBoost) {
-        if ((Double.isNaN(vec.getX())) || (Double.isNaN(vec.getY())) || (Double.isNaN(vec.getZ())) || (vec.length() == 0.0D)) {
-            return;
-        }
+        if ((Double.isNaN(vec.getX())) || (Double.isNaN(vec.getY())) || (Double.isNaN(vec.getZ())) || (vec.length() == 0.0D)) { return; }
 
         if (ySet) {
             vec.setY(yBase);
@@ -396,9 +393,7 @@ public class EntityKit {
     }
 
     public static void walkTo(Entity entity, Location location) {
-        if (entity == null || location == null) {
-            return;
-        }
+        if (entity == null || location == null) { return; }
         Object nmsEntityEntity = ReflectUtil.getHandle(entity);
         if (!_cEntityInsentient.isInstance(nmsEntityEntity)) {
             entity.teleport(location);

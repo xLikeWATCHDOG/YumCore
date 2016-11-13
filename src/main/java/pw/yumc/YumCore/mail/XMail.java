@@ -9,12 +9,7 @@ import javax.activation.DataContentHandler;
 import javax.activation.DataContentHandlerFactory;
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
-import javax.mail.Authenticator;
-import javax.mail.BodyPart;
-import javax.mail.Message;
-import javax.mail.PasswordAuthentication;
-import javax.mail.Session;
-import javax.mail.Transport;
+import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -45,9 +40,7 @@ public class XMail {
             @Override
             public DataContentHandler createDataContentHandler(String type) {
                 DataContentHandler handler = handlers.get(type);
-                if (handler != null) {
-                    return handler;
-                }
+                if (handler != null) { return handler; }
                 System.out.println("*************  Unknown Type: " + type + "  *************");
                 return null;
             }
@@ -66,7 +59,7 @@ public class XMail {
         try {
             DataHandler.setDataContentHandlerFactory(defaultDataContentHandlerFactory);
             return true;
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         return false;
     }
@@ -215,7 +208,7 @@ public class XMail {
             Object object = field.get(null);
             field.set(null, null);
             return object;
-        } catch (Exception e) {
+        } catch (Exception ignored) {
         }
         return null;
     }

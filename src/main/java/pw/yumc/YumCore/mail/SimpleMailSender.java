@@ -70,7 +70,7 @@ public class SimpleMailSender {
      * @throws AddressException
      * @throws MessagingException
      */
-    public void send(SimpleMail mail, String... recipients) throws AddressException, MessagingException {
+    public void send(SimpleMail mail, String... recipients) throws MessagingException {
         // 创建mime类型邮件
         MimeMessage message = new MimeMessage(session);
         // 设置发信人
@@ -112,7 +112,7 @@ public class SimpleMailSender {
      * @throws AddressException
      * @throws MessagingException
      */
-    public void send(String subject, Object content, String... recipients) throws AddressException, MessagingException {
+    public void send(String subject, Object content, String... recipients) throws MessagingException {
         this.send(new SimpleMail(subject, content), recipients);
     }
 

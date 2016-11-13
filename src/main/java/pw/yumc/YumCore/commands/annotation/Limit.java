@@ -17,7 +17,7 @@ public @interface Limit {
     /**
      * @return 最大长度(最大值)
      */
-    int max() default 255;
+    int max() default Integer.MAX_VALUE;
 
     /**
      * @return 最小长度(或最小值)

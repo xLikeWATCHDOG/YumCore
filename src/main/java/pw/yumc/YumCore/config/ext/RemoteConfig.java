@@ -1,7 +1,6 @@
 package pw.yumc.YumCore.config.ext;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import pw.yumc.YumCore.bukkit.Log;
@@ -14,7 +13,7 @@ import pw.yumc.YumCore.config.FileConfig;
  * @author 喵♂呜
  */
 public class RemoteConfig extends FileConfig {
-    public RemoteConfig(String url) throws MalformedURLException, IOException {
+    public RemoteConfig(String url) throws IOException {
         this(new URL(url));
     }
 
@@ -51,10 +50,9 @@ public class RemoteConfig extends FileConfig {
      */
     public static String getYamlTag(String url, String tag, String def) {
         String result = def;
-        try {
-            result = getConfig(url).getString(tag);
-        } catch (NullPointerException e) {
-            // Ignore
+        FileConfig config = getConfig(url);
+        if (config != null) {
+            result = config.getString(tag);
         }
         return result;
     }

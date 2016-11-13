@@ -58,10 +58,8 @@ public class PKit {
         for (StackTraceElement element : stacktrace) {
             try {
                 ClassLoader loader = Class.forName(element.getClassName(), false, PKit.class.getClassLoader()).getClassLoader();
-                if (pluginMap.containsKey(loader)) {
-                    return pluginMap.get(loader);
-                }
-            } catch (ClassNotFoundException ex) {
+                if (pluginMap.containsKey(loader)) { return pluginMap.get(loader); }
+            } catch (ClassNotFoundException ignored) {
             }
         }
         return null;

@@ -107,9 +107,7 @@ public class StickyNotes {
             result = request.toString().trim();
             JSONObject object = (JSONObject) JSONValue.parse(result);
             object = (JSONObject) object.get("result");
-            if (object.containsKey("error")) {
-                return object.get("error").toString();
-            }
+            if (object.containsKey("error")) { return object.get("error").toString(); }
             return String.format(VIEW_URL, object.get("id"), object.get("hash"));
         } catch (Exception e) {
             e.printStackTrace();
@@ -134,7 +132,7 @@ public class StickyNotes {
 
         int expire;
 
-        private Expire(int expire) {
+        Expire(int expire) {
             this.expire = expire;
         }
 

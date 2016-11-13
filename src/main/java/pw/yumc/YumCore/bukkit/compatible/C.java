@@ -163,7 +163,7 @@ public class C {
          *            ActionBar信息
          */
         public static void send(org.bukkit.entity.Player receivingPacket, String msg) {
-            Object packet = null;
+            Object packet;
             try {
                 Object serialized = nmsChatSerializer.getMethod("a", String.class).invoke(null, "{\"text\":\"" + ChatColor.translateAlternateColorCodes('&', JSONObject.escape(msg)) + "\"}");
                 if (!version.contains("1_7")) {
@@ -241,14 +241,14 @@ public class C {
                 } catch (Exception e) {
                     try {
                         gameProfileClass = Class.forName("com.mojang.authlib.GameProfile");
-                    } catch (Exception e1) {
+                    } catch (Exception ignored) {
                     }
                 }
-                gameProfileConstructor = gameProfileClass.getDeclaredConstructor(new Class[] { UUID.class, String.class });
+                gameProfileConstructor = gameProfileClass.getDeclaredConstructor(UUID.class, String.class);
                 gameProfileConstructor.setAccessible(true);
                 Class<? extends Server> craftServer = Bukkit.getServer().getClass();
                 Class<?> craftOfflinePlayer = Class.forName(craftServer.getName().replace("CraftServer", "CraftOfflinePlayer"));
-                craftOfflinePlayerConstructor = craftOfflinePlayer.getDeclaredConstructor(new Class[] { craftServer, gameProfileClass });
+                craftOfflinePlayerConstructor = craftOfflinePlayer.getDeclaredConstructor(craftServer, gameProfileClass);
                 craftOfflinePlayerConstructor.setAccessible(true);
                 // getOfflinePlayer end
             } catch (Exception e) {
@@ -268,8 +268,8 @@ public class C {
          */
         public static OfflinePlayer getOfflinePlayer(String playerName) {
             try {
-                Object gameProfile = gameProfileConstructor.newInstance(new Object[] { UUID.nameUUIDFromBytes(("OfflinePlayer:" + playerName).getBytes(Charsets.UTF_8)), playerName });
-                Object offlinePlayer = craftOfflinePlayerConstructor.newInstance(new Object[] { Bukkit.getServer(), gameProfile });
+                Object gameProfile = gameProfileConstructor.newInstance(UUID.nameUUIDFromBytes(("OfflinePlayer:" + playerName).getBytes(Charsets.UTF_8)), playerName);
+                Object offlinePlayer = craftOfflinePlayerConstructor.newInstance(Bukkit.getServer(), gameProfile);
                 return (OfflinePlayer) offlinePlayer;
             } catch (Exception e) {
                 return Bukkit.getOfflinePlayer(playerName);
@@ -402,7 +402,7 @@ public class C {
                     Object player = getHandle.invoke(receivingPacket);
                     Object connection = playerConnection.get(player);
                     Object[] actions = packetActions.getEnumConstants();
-                    Object packet = null;
+                    Object packet;
                     // Send if set
                     if ((fadeInTime != -1) && (fadeOutTime != -1) && (stayTime != -1)) {
                         packet = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent, Integer.TYPE, Integer.TYPE, Integer.TYPE).newInstance(actions[2],

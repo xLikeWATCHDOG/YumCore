@@ -13,7 +13,6 @@ public class PasteXcode {
         paste.addLine("异常提交测试!");
         paste.addThrowable(new Throwable());
         System.out.println(p.post(paste));
-        ;
     }
 
     public String post(PasteContent content) {

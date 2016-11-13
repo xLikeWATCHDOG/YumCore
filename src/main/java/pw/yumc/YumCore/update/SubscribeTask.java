@@ -176,7 +176,6 @@ public class SubscribeTask implements Runnable {
         File file = null;
         ClassLoader cl = plugin.getClass().getClassLoader();
         if ((cl instanceof URLClassLoader)) {
-            @SuppressWarnings("resource")
             URLClassLoader ucl = (URLClassLoader) cl;
             URL url = ucl.getURLs()[0];
             try {
@@ -203,8 +202,7 @@ public class SubscribeTask implements Runnable {
         int idx = 0;
         int minLength = Math.min(va1.length, va2.length);// 取最小长度值
         int diff = 0;
-        while (idx < minLength
-                && (diff = va1[idx].length() - va2[idx].length()) == 0// 先比较长度
+        while (idx < minLength && (diff = va1[idx].length() - va2[idx].length()) == 0// 先比较长度
                 && (diff = va1[idx].compareTo(va2[idx])) == 0) {// 再比较字符
             ++idx;
         }
@@ -227,15 +225,13 @@ public class SubscribeTask implements Runnable {
                 if (target.exists()) {
                     try {
                         PluginDescriptionFile desc = instance.getPluginLoader().getPluginDescription(target);
-                        if (!needUpdate(result, desc.getVersion().split("-")[0])) {
-                            return;
-                        }
+                        if (!needUpdate(result, desc.getVersion().split("-")[0])) { return; }
                         target.delete();
                     } catch (Exception e) {
                         debug(e);
                     }
                 }
-                String durl = null;
+                String durl;
                 if (isMaven) {
                     durl = String.format(maven, instance.getClass().getPackage().getName().replaceAll("\\.", "/"), result, instance.getName());
                 } else {
