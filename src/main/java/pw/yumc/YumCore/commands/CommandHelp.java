@@ -70,7 +70,7 @@ public class CommandHelp {
      */
     public CommandHelp(CommandInfo defCmd, Collection<? extends CommandInfo> list) {
         this.defCmd = defCmd;
-        cmdlist = new LinkedList<>(list);
+        cmdlist = new LinkedList<CommandInfo>(list);
         Collections.sort(cmdlist, new CommandNameComparator());
         Collections.sort(cmdlist, new CommandComparator());
         HELPPAGECOUNT = (int) Math.ceil((double) cmdlist.size() / LINES_PER_PAGE);
