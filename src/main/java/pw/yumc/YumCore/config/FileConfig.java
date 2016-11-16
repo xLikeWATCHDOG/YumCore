@@ -1,17 +1,16 @@
 package pw.yumc.YumCore.config;
 
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.*;
-
 import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
-
 import pw.yumc.YumCore.bukkit.Log;
+
+import java.io.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * 一个继承于 {@link YamlConfiguration} 的配置文件类
@@ -475,15 +474,16 @@ public class FileConfig extends AbstractConfig {
 
     /**
      * 获取现在时间
-     *
+     * 
+     * @param format
+     *            字符串格式
      * @return yyyy-MM-dd HH:mm:ss
      */
     protected String getStringDate(String format) {
         if (format == null) {
             format = "yyyy-MM-dd HH:mm:ss";
         }
-        Date currentTime = new Date();
-        return new SimpleDateFormat(format).format(currentTime);
+        return new SimpleDateFormat(format).format(new Date());
     }
 
     /**

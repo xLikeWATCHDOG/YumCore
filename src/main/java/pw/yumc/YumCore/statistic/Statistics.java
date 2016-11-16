@@ -3,6 +3,16 @@
  */
 package pw.yumc.YumCore.statistic;
 
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -14,16 +24,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
 
 /**
  * Yum数据中心 数据统计类
@@ -127,6 +127,7 @@ public class Statistics {
      *            请求参数
      * @return 所代表远程资源的响应结果
      * @throws IOException
+     *             IO异常
      */
     public static String postData(String url, String param) throws IOException {
         PrintWriter out;
@@ -165,6 +166,7 @@ public class Statistics {
      * @param config
      *            配置文件
      * @throws IOException
+     *             IO异常
      */
     private static void initFile(YamlConfiguration config) throws IOException {
         if (config.getString("guid") == null) {
@@ -274,6 +276,9 @@ public class Statistics {
         private LinkedList<Double> history = new LinkedList<>();
         private transient long lastPoll = System.nanoTime();
 
+        /**
+         * @return 获得TPS
+         */
         public double getAverageTPS() {
             double avg = 0.0D;
             for (Double f : history) {

@@ -1,14 +1,12 @@
 package pw.yumc.YumCore.bukkit;
 
-import java.io.File;
-import java.lang.reflect.Field;
-import java.util.logging.Logger;
-
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import pw.yumc.YumCore.config.FileConfig;
+import java.io.File;
+import java.lang.reflect.Field;
+import java.util.logging.Logger;
 
 /**
  * 插件Instance获取类
@@ -44,8 +42,6 @@ public class P {
     }
 
     /**
-     * @param FC
-     *            {@link FileConfig}
      * @return 获得插件配置文件
      */
     @SuppressWarnings("unchecked")
@@ -82,8 +78,6 @@ public class P {
     }
 
     /**
-     * @param PI
-     *            插件主类
      * @return 获得插件
      */
     @SuppressWarnings("unchecked")

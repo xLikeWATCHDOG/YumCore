@@ -1,10 +1,8 @@
 package pw.yumc.YumCore.kit;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
-
+import com.comphenix.protocol.utility.MinecraftFields;
+import com.comphenix.protocol.utility.MinecraftReflection;
+import com.comphenix.protocol.wrappers.WrappedDataWatcher;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -13,12 +11,12 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
-
-import com.comphenix.protocol.utility.MinecraftFields;
-import com.comphenix.protocol.utility.MinecraftReflection;
-import com.comphenix.protocol.wrappers.WrappedDataWatcher;
-
 import pw.yumc.YumCore.utils.ReflectUtil;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 public class EntityKit {
 
@@ -296,7 +294,9 @@ public class EntityKit {
      * 静默传送, 不触发事件
      *
      * @param entity
+     *            实体
      * @param to
+     *            地点
      */
     public static void teleportQuietly(Entity entity, Location to) {
         if (!(entity instanceof Player)) {
@@ -337,6 +337,7 @@ public class EntityKit {
      * 让实体升高/降低
      *
      * @param ent
+     *            实体
      * @param speed
      *            速度
      * @param yAdd
@@ -354,6 +355,7 @@ public class EntityKit {
      * 让实体升高/降低
      *
      * @param ent
+     *            实体
      * @param vec
      *            坐标
      * @param speed

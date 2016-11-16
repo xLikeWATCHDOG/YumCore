@@ -1,7 +1,5 @@
 package pw.yumc.YumCore.mail;
 
-import java.util.Properties;
-
 import javax.mail.MessagingException;
 import javax.mail.Session;
 import javax.mail.Transport;
@@ -9,6 +7,7 @@ import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMessage.RecipientType;
+import java.util.Properties;
 
 /**
  * 简单邮件发送器，可单发，群发。
@@ -68,7 +67,9 @@ public class SimpleMailSender {
      * @param recipients
      *            收件人们
      * @throws AddressException
+     *             地址异常
      * @throws MessagingException
+     *             消息异常
      */
     public void send(SimpleMail mail, String... recipients) throws MessagingException {
         // 创建mime类型邮件
@@ -110,7 +111,9 @@ public class SimpleMailSender {
      * @param recipients
      *            收件人邮箱地址
      * @throws AddressException
+     *             地址异常
      * @throws MessagingException
+     *             消息异常
      */
     public void send(String subject, Object content, String... recipients) throws MessagingException {
         this.send(new SimpleMail(subject, content), recipients);

@@ -1,20 +1,5 @@
 package pw.yumc.YumCore.plugin.protocollib;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.entity.Player;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
-import org.bukkit.event.HandlerList;
-
-import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.PacketType.Play.Client;
 import com.comphenix.protocol.PacketType.Play.Server;
 import com.comphenix.protocol.events.PacketAdapter;
@@ -24,8 +9,20 @@ import com.comphenix.protocol.events.PacketListener;
 import com.comphenix.protocol.wrappers.BlockPosition;
 import com.comphenix.protocol.wrappers.WrappedBlockData;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
-
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
+import org.bukkit.event.Event;
+import org.bukkit.event.HandlerList;
 import pw.yumc.YumCore.bukkit.P;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 木牌工具类
@@ -51,6 +48,7 @@ public class SignKit extends ProtocolLibBase {
      * @param lines
      *            木牌内容
      * @throws InvocationTargetException
+     *             调用异常
      */
     public static void open(Player player, String[] lines) throws InvocationTargetException {
         Location loc = player.getLocation();
@@ -173,7 +171,7 @@ public class SignKit extends ProtocolLibBase {
     public static class SignUpdateListen extends PacketAdapter implements PacketListener {
 
         public SignUpdateListen() {
-            super(P.instance, new PacketType[] { Client.UPDATE_SIGN });
+            super(P.instance, Client.UPDATE_SIGN);
         }
 
         @Override
@@ -195,6 +193,13 @@ public class SignKit extends ProtocolLibBase {
             event.setCancelled(sue.isCancelled());
         }
 
+        /**
+         * 去除首尾
+         * 
+         * @param string
+         *            字符串
+         * @return 处理后的字符串
+         */
         private String subString(String string) {
             return string.substring(1, string.length() - 1);
         }

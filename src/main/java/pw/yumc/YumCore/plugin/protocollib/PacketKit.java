@@ -1,16 +1,14 @@
 package pw.yumc.YumCore.plugin.protocollib;
 
-import java.lang.reflect.InvocationTargetException;
-
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
-
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import pw.yumc.YumCore.kit.PKit;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * ProtocolLib发包工具
@@ -37,6 +35,7 @@ public class PacketKit {
      * @param player
      *            玩家
      * @throws InvocationTargetException
+     *             调用异常
      */
     public static void keep_live(final Player player) throws InvocationTargetException {
         if (ENABLE) {
@@ -52,6 +51,7 @@ public class PacketKit {
      * @param packet
      *            数据包
      * @throws InvocationTargetException
+     *             调用异常
      */
     public static void send(final Player player, final PacketContainer packet) throws InvocationTargetException {
         if (ENABLE) {

@@ -84,6 +84,7 @@ public class Reflect {
      *            字段名
      * @return 字段{@link Field}
      * @throws NoSuchFieldException
+     *             没有这样的字段
      */
     public static Field getDeclaredField(Class<?> clazz, final String name) throws NoSuchFieldException {
         Field field = null;
@@ -154,6 +155,10 @@ public class Reflect {
 
     /**
      * Get a wrapper type for a primitive type, or the argument type itself, if it is not a primitive type.
+     * 
+     * @param type
+     *            类
+     * @return 返回封装类
      */
     public static Class<?> wrapper(final Class<?> type) {
         if (type == null) {
@@ -177,14 +182,16 @@ public class Reflect {
                 return Character.class;
             } else if (void.class == type) { return Void.class; }
         }
-
         return type;
     }
 
     /**
-     * Load a class
-     *
+     * @param name
+     *            类名
+     * @return 类
      * @see Class#forName(String)
+     * @throws ReflectException
+     *             反射异常
      */
     private static Class<?> forName(final String name) throws ReflectException {
         try {

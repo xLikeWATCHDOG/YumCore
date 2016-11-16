@@ -1,21 +1,16 @@
 package pw.yumc.YumCore.kit;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
-
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class LogKit implements Runnable {
     private final static Plugin plugin = P.instance;
@@ -71,9 +66,8 @@ public class LogKit implements Runnable {
      * @param s
      *            日志
      */
-    public void logConsole(final String s) {
-        Log.info(s);
-        log(s);
+    public void console(final String s) {
+        sender(Bukkit.getConsoleSender(), s);
     }
 
     /**
@@ -82,19 +76,9 @@ public class LogKit implements Runnable {
      * @param s
      *            日志
      */
-    public void logSender(final CommandSender sender, final String s) {
-        sender.sendMessage(s);
+    public void sender(final CommandSender sender, final String s) {
+        Log.toSender(sender, s);
         log(ChatColor.stripColor(s));
-    }
-
-    /**
-     * 添加日志
-     *
-     * @param s
-     *            日志
-     */
-    public void logSender(final String s) {
-        logSender(Bukkit.getConsoleSender(), s);
     }
 
     @Override

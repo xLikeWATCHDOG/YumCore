@@ -178,6 +178,8 @@ public abstract class AbstractInjectConfig {
      *
      * @param config
      *            配置文件区
+     * @return
+     *         配置文件
      */
     public ConfigurationSection save(ConfigurationSection config) {
         inject(config, true);

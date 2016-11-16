@@ -21,13 +21,15 @@ public class ZipKit {
      *
      * @param name
      *            名称
-     * @return
+     * @return 文件名称
      */
     public static String getRealName(String name) {
         return new File(name).getName();
     }
 
     /**
+     * 解压ZIP文件
+     * 
      * @param zipFile
      *            zip文件
      * @param destPath
@@ -42,6 +44,8 @@ public class ZipKit {
     }
 
     /**
+     * 解压ZIP文件
+     * 
      * @param zipFile
      *            zip文件
      * @param destPath

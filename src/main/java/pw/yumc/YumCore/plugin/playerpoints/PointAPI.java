@@ -20,7 +20,7 @@ public class PointAPI {
     }
 
     /**
-     * @return 获取{@PlayerPointsAPI}
+     * @return 获取{@link PlayerPointsAPI}
      */
     public static PlayerPointsAPI getAPI() {
         return api;
