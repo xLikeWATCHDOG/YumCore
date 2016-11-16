@@ -11,9 +11,7 @@ import pw.yumc.YumCore.commands.annotation.Cmd;
 import pw.yumc.YumCore.commands.annotation.Cmd.Executor;
 import pw.yumc.YumCore.commands.annotation.Help;
 import pw.yumc.YumCore.commands.annotation.Sort;
-import pw.yumc.YumCore.commands.exception.CommandArgumentException;
-import pw.yumc.YumCore.commands.exception.CommandException;
-import pw.yumc.YumCore.commands.exception.CommandParseException;
+import pw.yumc.YumCore.commands.exception.*;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -30,12 +28,7 @@ import java.util.Objects;
  */
 public class CommandInfo {
     public static CommandInfo Unknow = new CommandInfo();
-    private static String onlyExecutor = "§c当前命令仅允许 §b%s §c执行!";
-    private static String losePerm = "§c你需要有 %s 的权限才能执行此命令!";
     private static String argErr = "§c参数错误: §4%s";
-    private static String cmdErr = "§6错误原因: §4命令参数不正确!";
-    private static String cmdUse = "§6使用方法: §e/%s %s %s";
-    private static String cmdDes = "§6命令描述: §3%s";
     private static Help defHelp = new Help() {
         @Override
         public Class<? extends Annotation> annotationType() {
@@ -59,6 +52,7 @@ public class CommandInfo {
     private List<Executor> executors;
     private String executorStr;
     private boolean async;
+    private boolean def;
     private Cmd command;
     private Help help;
     private int sort;
@@ -74,6 +68,7 @@ public class CommandInfo {
         this.command = command;
         this.help = help != null ? help : defHelp;
         this.async = async;
+        this.def = method.getReturnType().equals(boolean.class);
         this.sort = sort;
         this.parse = parse;
     }
@@ -88,6 +83,7 @@ public class CommandInfo {
         this.command = null;
         this.help = null;
         this.async = false;
+        this.def = false;
         this.sort = 0;
         this.parse = null;
     }
@@ -122,24 +118,23 @@ public class CommandInfo {
      */
     public boolean execute(final CommandArgument cmdArgs) {
         if (method == null) { return false; }
-        if (check(cmdArgs)) {
-            Runnable runnable = new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        method.invoke(origin, parse.parse(cmdArgs));
-                    } catch (CommandParseException | CommandArgumentException e) {
-                        Log.toSender(cmdArgs.getSender(), argErr, e.getMessage());
-                    } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                        throw new CommandException(e);
-                    }
+        check(cmdArgs);
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    method.invoke(origin, parse.parse(cmdArgs));
+                } catch (ParseException | ArgumentException e) {
+                    Log.toSender(cmdArgs.getSender(), argErr, e.getMessage());
+                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                    throw new CommandException(e);
                 }
-            };
-            if (async) {
-                Bukkit.getScheduler().runTaskAsynchronously(P.instance, runnable);
-            } else {
-                runnable.run();
             }
+        };
+        if (async) {
+            Bukkit.getScheduler().runTaskAsynchronously(P.instance, runnable);
+        } else {
+            runnable.run();
         }
         return true;
     }
@@ -180,6 +175,20 @@ public class CommandInfo {
     }
 
     /**
+     * @return 是否为默认命令
+     */
+    public boolean isDefault() {
+        return def;
+    }
+
+    /**
+     * @return 允许的命令发送者
+     */
+    public String getExecutorStr() {
+        return executorStr;
+    }
+
+    /**
      * 验证命令是否匹配
      *
      * @param cmd
@@ -203,36 +212,11 @@ public class CommandInfo {
         return Objects.hash(origin, method, name);
     }
 
-    private boolean check(CommandArgument cmdArgs) {
+    private void check(CommandArgument cmdArgs) {
         CommandSender sender = cmdArgs.getSender();
-        return checkSender(sender) && checkArgs(sender, cmdArgs) && checkPerm(sender);
-    }
-
-    private boolean checkArgs(CommandSender sender, CommandArgument cmdArgs) {
-        if (cmdArgs.getArgs().length < command.minimumArguments()) {
-            Log.toSender(sender, cmdErr);
-            Log.toSender(sender, cmdUse, cmdArgs.getAlias(), getName(), help.possibleArguments());
-            Log.toSender(sender, cmdDes, help.value());
-            return false;
-        }
-        return true;
-    }
-
-    private boolean checkPerm(CommandSender sender) {
-        String perm = command.permission();
-        if (!"".equals(perm) && !sender.hasPermission(perm)) {
-            Log.toSender(sender, losePerm, perm);
-            return false;
-        }
-        return true;
-    }
-
-    private boolean checkSender(CommandSender sender) {
-        if (!executors.contains(Executor.ALL) && !executors.contains(Executor.valueOf(sender))) {
-            Log.toSender(sender, onlyExecutor, executorStr);
-            return false;
-        }
-        return true;
+        if (!executors.contains(Executor.ALL) && !executors.contains(Executor.valueOf(sender))) { throw new SenderException(executorStr); }
+        if (!"".equals(command.permission()) && !sender.hasPermission(command.permission())) { throw new PermissionException(command.permission()); }
+        if (cmdArgs.getArgs().length < command.minimumArguments()) { throw new ArgumentException(String.valueOf(command.minimumArguments())); }
     }
 
     private String eS(List<Executor> executors) {

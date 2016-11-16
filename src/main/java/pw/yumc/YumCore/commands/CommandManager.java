@@ -10,10 +10,16 @@ import org.bukkit.util.StringUtil;
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.bukkit.compatible.C;
+import pw.yumc.YumCore.commands.exception.ArgumentException;
+import pw.yumc.YumCore.commands.exception.CommandException;
+import pw.yumc.YumCore.commands.exception.PermissionException;
+import pw.yumc.YumCore.commands.exception.SenderException;
 import pw.yumc.YumCore.commands.info.CommandInfo;
 import pw.yumc.YumCore.commands.info.CommandTabInfo;
-import pw.yumc.YumCore.commands.interfaces.CommandExecutor;
-import pw.yumc.YumCore.commands.interfaces.CommandHelpParse;
+import pw.yumc.YumCore.commands.interfaces.ErrorHanlder;
+import pw.yumc.YumCore.commands.interfaces.Executor;
+import pw.yumc.YumCore.commands.interfaces.HelpGenerator;
+import pw.yumc.YumCore.commands.interfaces.HelpParse;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -30,6 +36,11 @@ import java.util.*;
 public class CommandManager implements TabExecutor {
     private static String argumentTypeError = "注解命令方法 %s 位于 %s 的参数错误 第一个参数应实现 CommandSender 接口!";
     private static String returnTypeError = "注解命令补全 %s 位于 %s 的返回值错误 应实现 List 接口!";
+    private static String onlyExecutor = "§c当前命令仅允许 §b%s §c执行!";
+    private static String losePerm = "§c你需要有 %s 的权限才能执行此命令!";
+    private static String cmdErr = "§6错误原因: §4命令参数不正确!";
+    private static String cmdUse = "§6使用方法: §e/%s %s%s";
+    private static String cmdDes = "§6命令描述: §3%s";
     private static Constructor<PluginCommand> PluginCommandConstructor;
     private static Map<String, Command> knownCommands;
     private static Map<String, Plugin> lookupNames;
@@ -58,6 +69,31 @@ public class CommandManager implements TabExecutor {
     }
 
     /**
+     * 命令帮助
+     */
+    private CommandHelp help;
+    /**
+     * 插件命令
+     */
+    private PluginCommand cmd;
+    /**
+     * 命令错误处理
+     */
+    private ErrorHanlder commandErrorHanlder = new ErrorHanlder() {
+        @Override
+        public void error(CommandException e, CommandSender sender, CommandInfo info, CommandArgument args) {
+            if (e instanceof SenderException) {
+                Log.toSender(sender, onlyExecutor, info.getExecutorStr());
+            } else if (e instanceof PermissionException) {
+                Log.toSender(sender, losePerm, info.getCommand().permission());
+            } else if (e instanceof ArgumentException) {
+                Log.toSender(sender, cmdErr);
+                Log.toSender(sender, cmdUse, args.getAlias(), info.isDefault() ? "" : info.getName() + " ", info.getHelp().possibleArguments());
+                Log.toSender(sender, cmdDes, info.getHelp().value());
+            }
+        }
+    };
+    /**
      * 插件实例类
      */
     private static JavaPlugin plugin = P.instance;
@@ -81,14 +117,6 @@ public class CommandManager implements TabExecutor {
      * 命令名称缓存
      */
     private List<String> cmdNameCache = new ArrayList<>();
-    /**
-     * 命令帮助
-     */
-    private CommandHelp help;
-    /**
-     * 插件命令
-     */
-    private PluginCommand cmd;
 
     /**
      * 命令管理器
@@ -118,7 +146,7 @@ public class CommandManager implements TabExecutor {
      * @param executor
      *            命令执行类
      */
-    public CommandManager(String name, CommandExecutor... executor) {
+    public CommandManager(String name, Executor... executor) {
         this(name);
         register(executor);
     }
@@ -207,11 +235,19 @@ public class CommandManager implements TabExecutor {
         String subcmd = args[0].toLowerCase();
         if (subcmd.equalsIgnoreCase("help")) { return help.send(sender, command, label, args); }
         CommandInfo cmd = getByCache(subcmd);
+        CommandArgument arg;
         if (cmd.equals(CommandInfo.Unknow) && defCmd != null) {
-            return defCmd.execute(new CommandArgument(sender, command, label, args));
+            cmd = defCmd;
+            arg = new CommandArgument(sender, command, label, args);
         } else {
-            return cmd.execute(new CommandArgument(sender, command, label, moveStrings(args, 1)));
+            arg = new CommandArgument(sender, command, label, moveStrings(args, 1));
         }
+        try {
+            return cmd.execute(arg);
+        } catch (CommandException e) {
+            commandErrorHanlder.error(e, sender, cmd, arg);
+        }
+        return false;
     }
 
     @Override
@@ -235,8 +271,8 @@ public class CommandManager implements TabExecutor {
      * @param clazzs
      *            子命令处理类
      */
-    public void register(CommandExecutor... clazzs) {
-        for (CommandExecutor clazz : clazzs) {
+    public CommandManager register(Executor... clazzs) {
+        for (Executor clazz : clazzs) {
             Method[] methods = clazz.getClass().getDeclaredMethods();
             for (Method method : methods) {
                 if (registerCommand(method, clazz)) {
@@ -247,6 +283,7 @@ public class CommandManager implements TabExecutor {
         }
         help = new CommandHelp(defCmd, cmds);
         buildCmdNameCache();
+        return this;
     }
 
     /**
@@ -258,7 +295,7 @@ public class CommandManager implements TabExecutor {
      *            调用对象
      * @return 是否成功
      */
-    private boolean registerCommand(Method method, CommandExecutor clazz) {
+    private boolean registerCommand(Method method, Executor clazz) {
         CommandInfo ci = CommandInfo.parse(method, clazz);
         if (ci != null) {
             Class[] params = method.getParameterTypes();
@@ -289,7 +326,7 @@ public class CommandManager implements TabExecutor {
      *            调用对象
      * @return 是否成功
      */
-    private boolean registerTab(Method method, CommandExecutor clazz) {
+    private boolean registerTab(Method method, Executor clazz) {
         CommandTabInfo ti = CommandTabInfo.parse(method, clazz);
         if (ti != null) {
             if (method.getReturnType().equals(List.class)) {
@@ -302,12 +339,39 @@ public class CommandManager implements TabExecutor {
     }
 
     /**
+     * 设置命令错误处理器
+     * 
+     * @param commandErrorHanlder
+     *            命令错误处理器
+     */
+    public CommandManager setCommandErrorHanlder(ErrorHanlder commandErrorHanlder) {
+        this.commandErrorHanlder = commandErrorHanlder;
+        return this;
+    }
+
+    /**
+     * 设置帮助生成器
+     *
+     * @param helpGenerator
+     *            帮助生成器
+     */
+    public CommandManager setHelpGenerator(HelpGenerator helpGenerator) {
+        help.setHelpGenerator(helpGenerator);
+        return this;
+    }
+
+    /**
      * 设置帮助解析器
      *
      * @param helpParse
      *            帮助解析器
      */
-    public void setHelpParse(CommandHelpParse helpParse) {
-        help.setHelpParse(helpParse);
+    public CommandManager setHelpParse(HelpParse helpParse) {
+        if (help.getHelpGenerator() instanceof CommandHelp.DefaultHelpGenerator) {
+            ((CommandHelp.DefaultHelpGenerator) help.getHelpGenerator()).setHelpParse(helpParse);
+        } else {
+            Log.w("已设置自定义帮助生成器 解析器设置将不会生效!");
+        }
+        return this;
     }
 }

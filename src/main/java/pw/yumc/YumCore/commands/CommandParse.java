@@ -1,20 +1,19 @@
 package pw.yumc.YumCore.commands;
 
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.*;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.commands.annotation.Default;
 import pw.yumc.YumCore.commands.annotation.KeyValue;
 import pw.yumc.YumCore.commands.annotation.Limit;
-import pw.yumc.YumCore.commands.exception.CommandParseException;
+import pw.yumc.YumCore.commands.exception.ParseException;
+
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * 命令参数解析
@@ -47,7 +46,7 @@ public class CommandParse {
             if (clazz.isEnum()) {
                 parse = new EnumParse(clazz);
             }
-            if (parse == null) { throw new CommandParseException(String.format("存在无法解析的参数类型 %s", clazz.getName())); }
+            if (parse == null) { throw new ParseException(String.format("存在无法解析的参数类型 %s", clazz.getName())); }
             this.parse.add(parse.clone().parseAnnotation(annotations));
         }
     }
@@ -92,7 +91,7 @@ public class CommandParse {
                 }
                 pobjs.add(param == null ? null : p.parse(cmdArgs.getSender(), param));
             } catch (Exception e) {
-                throw new CommandParseException(String.format("第 %s 个参数 ", isMain ? 1 : 2 + i) + e.getMessage());
+                throw new ParseException(String.format("第 %s 个参数 ", isMain ? 1 : 2 + i) + e.getMessage());
             }
         }
         Log.d("解析参数: %s => %s", Arrays.toString(args), pobjs);
@@ -110,7 +109,7 @@ public class CommandParse {
             try {
                 return Boolean.parseBoolean(arg);
             } catch (Exception e) {
-                throw new CommandParseException("必须为True或者False!", e);
+                throw new ParseException("必须为True或者False!", e);
             }
         }
     }
@@ -129,7 +128,7 @@ public class CommandParse {
             try {
                 return Enum.valueOf(etype, arg);
             } catch (IllegalArgumentException ex) {
-                throw new CommandParseException(String.format("不是 %s 有效值为 %s", etype.getSimpleName(), Arrays.toString(elist)));
+                throw new ParseException(String.format("不是 %s 有效值为 %s", etype.getSimpleName(), Arrays.toString(elist)));
             }
         }
     }
@@ -140,9 +139,9 @@ public class CommandParse {
         }
 
         @Override
-        public File parse(CommandSender sender, String arg) throws CommandParseException {
+        public File parse(CommandSender sender, String arg) throws ParseException {
             File file = new File(arg);
-            if (attrs.containsKey("check") && !file.exists()) { throw new CommandParseException("文件 " + arg + " 不存在!"); }
+            if (attrs.containsKey("check") && !file.exists()) { throw new ParseException("文件 " + arg + " 不存在!"); }
             return file;
         }
     }
@@ -162,7 +161,7 @@ public class CommandParse {
                 }
                 return result;
             } catch (NumberFormatException e) {
-                throw new CommandParseException("必须为数字!", e);
+                throw new ParseException("必须为数字!", e);
             }
         }
     }
@@ -182,7 +181,7 @@ public class CommandParse {
                 }
                 return result;
             } catch (NumberFormatException e) {
-                throw new CommandParseException("必须为数字!", e);
+                throw new ParseException("必须为数字!", e);
             }
         }
     }
@@ -202,7 +201,7 @@ public class CommandParse {
                 }
                 return result;
             } catch (NumberFormatException e) {
-                throw new CommandParseException("必须为数字!", e);
+                throw new ParseException("必须为数字!", e);
             }
         }
     }
@@ -217,7 +216,7 @@ public class CommandParse {
             try {
                 return Material.valueOf(arg);
             } catch (Exception e) {
-                throw new CommandParseException(String.format("%s 不是一个有效的Material枚举", arg), e);
+                throw new ParseException(String.format("%s 不是一个有效的Material枚举", arg), e);
             }
         }
     }
@@ -241,7 +240,7 @@ public class CommandParse {
             return def;
         }
 
-        public abstract RT parse(CommandSender sender, String arg) throws CommandParseException;
+        public abstract RT parse(CommandSender sender, String arg) throws ParseException;
 
         public Parse<RT> parseAnnotation(Annotation[] annotations) {
             for (Annotation annotation : annotations) {
@@ -259,7 +258,7 @@ public class CommandParse {
         }
 
         public void throwException(String str, Object... objects) {
-            throw new CommandParseException(String.format(str, objects));
+            throw new ParseException(String.format(str, objects));
         }
 
         public void throwRange() {
@@ -267,7 +266,7 @@ public class CommandParse {
         }
 
         public void throwRange(String str) {
-            throw new CommandParseException(String.format(str == null ? "范围必须在 %s 到 %s 之间!" : str, min, max));
+            throw new ParseException(String.format(str == null ? "范围必须在 %s 到 %s 之间!" : str, min, max));
         }
     }
 
@@ -281,7 +280,7 @@ public class CommandParse {
         @Override
         public Player parse(CommandSender sender, String arg) {
             Player p = Bukkit.getPlayerExact(arg);
-            if (check && p == null) { throw new CommandParseException("玩家 " + arg + " 不存在或不在线!"); }
+            if (check && p == null) { throw new ParseException("玩家 " + arg + " 不存在或不在线!"); }
             return p;
         }
 

@@ -2,10 +2,11 @@ package pw.yumc.YumCore.commands;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import pw.yumc.YumCore.bukkit.P;
+import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.commands.annotation.Help;
 import pw.yumc.YumCore.commands.info.CommandInfo;
-import pw.yumc.YumCore.commands.interfaces.CommandHelpParse;
+import pw.yumc.YumCore.commands.interfaces.HelpGenerator;
+import pw.yumc.YumCore.commands.interfaces.HelpParse;
 
 import java.util.*;
 
@@ -16,19 +17,7 @@ import java.util.*;
  * @author 喵♂呜
  */
 public class CommandHelp {
-    /**
-     * 消息配置
-     */
-    private static String prefix = String.format("§6[§b%s§6] ", P.instance.getName());
-    private static String commandNotFound = prefix + "§c当前插件未注册默认命令以及子命令!";
-    private static String pageNotFound = prefix + "§c不存在的帮助页面 §b请输入 /%s help §e1-%s";
-    private static String helpTitle = String.format("§6========= %s §6帮助 §aBy §b喵♂呜 §6=========", prefix);
-    private static String helpBody = "§6/%1$s §a%2$s §e%3$s §6- §b%4$s";
-    private static String helpFooter = "§6查看更多的帮助页面 §b请输入 /%s help §e1-%s";
-    /**
-     * 帮助页面每页行数
-     */
-    private static int LINES_PER_PAGE = 7;
+    private static String commandNotFound = "§c当前插件未注册默认命令以及子命令!";
     /**
      * 默认命令
      */
@@ -38,17 +27,21 @@ public class CommandHelp {
      */
     private List<CommandInfo> cmdlist;
     /**
-     * 命令解析
+     * 帮助页生成
      */
-    private CommandHelpParse helpParse;
-    /**
-     * 帮助页面数量
-     */
-    private int HELPPAGECOUNT;
+    private HelpGenerator helpGenerator = new DefaultHelpGenerator();
     /**
      * 帮助列表缓存
      */
     private Map<String, String[]> cacheHelp = new HashMap<>();
+    /**
+     * 帮助页面每页行数
+     */
+    private static int LINES_PER_PAGE = 7;
+    /**
+     * 帮助页面数量
+     */
+    private int HELPPAGECOUNT;
 
     /**
      * 命令帮助
@@ -70,38 +63,10 @@ public class CommandHelp {
      */
     public CommandHelp(CommandInfo defCmd, Collection<? extends CommandInfo> list) {
         this.defCmd = defCmd;
-        cmdlist = new LinkedList<CommandInfo>(list);
+        cmdlist = new LinkedList<>(list);
         Collections.sort(cmdlist, new CommandNameComparator());
         Collections.sort(cmdlist, new CommandComparator());
         HELPPAGECOUNT = (int) Math.ceil((double) cmdlist.size() / LINES_PER_PAGE);
-    }
-
-    /**
-     * 格式化命令信息
-     *
-     * @param ci
-     *            命令信息
-     * @param label
-     *            命令
-     * @return 格式化后的字串
-     */
-    public String formatCommand(CommandInfo ci, String label) {
-        String aliases = Arrays.toString(ci.getCommand().aliases());
-        String cmd = ci.getName() + (aliases.length() == 2 ? "" : "§7" + aliases);
-        Help help = ci.getHelp();
-        return String.format(helpBody, label, cmd, help.possibleArguments(), formatHelp(help.value()));
-    }
-
-    /**
-     * 解析帮助
-     *
-     * @param value
-     *            参数
-     * @return 解析后的帮助
-     */
-    public String formatHelp(String value) {
-        if (helpParse != null) { return helpParse.parse(value); }
-        return value;
     }
 
     /**
@@ -115,56 +80,63 @@ public class CommandHelp {
      *            标签
      * @param args
      *            参数
+     * @return 是否发送成功
      */
     public boolean send(CommandSender sender, Command command, String label, String[] args) {
         if (this.HELPPAGECOUNT == 0) {
-            sender.sendMessage(commandNotFound);
+            Log.toSender(sender, commandNotFound);
             return true;
         }
         int page = 1;
         try {
             page = Integer.parseInt(args[1]);
             page = page == 0 ? 1 : page;
-        } catch (Exception e) {
-            // Ignore
+        } catch (Exception ignored) {
         }
         String helpkey = label + page;
         if (!cacheHelp.containsKey(helpkey)) {
-            List<String> helpList = new LinkedList<>();
-            if (page > this.HELPPAGECOUNT || page < 1) {
-                // 帮助页面不存在
-                helpList.add(String.format(pageNotFound, label, HELPPAGECOUNT));
+            if (page > HELPPAGECOUNT || page < 1) {
+                // 帮助页面不存在 
+                cacheHelp.put(helpkey, new String[] { helpGenerator.notFound(label, HELPPAGECOUNT) });
             } else {
+                List<String> helpList = new LinkedList<>();
                 // 帮助标题
-                helpList.add(helpTitle);
+                helpList.add(helpGenerator.title());
                 if (page == 1 && defCmd != null) {
-                    helpList.add(formatCommand(defCmd, label));
+                    helpList.add(helpGenerator.body(label, defCmd));
                 }
                 int start = LINES_PER_PAGE * (page - 1);
                 int end = start + LINES_PER_PAGE;
                 for (int i = start; i < end; i++) {
-                    if (this.cmdlist.size() > i) {
+                    if (cmdlist.size() > i) {
                         // 帮助列表
-                        helpList.add(formatCommand(cmdlist.get(i), label));
+                        helpList.add(helpGenerator.body(label, cmdlist.get(i)));
                     }
                 }
                 // 帮助结尾
-                helpList.add(String.format(helpFooter, label, HELPPAGECOUNT));
+                helpList.add(helpGenerator.foot(label, HELPPAGECOUNT));
+                cacheHelp.put(helpkey, helpList.toArray(new String[] {}));
             }
-            cacheHelp.put(helpkey, helpList.toArray(new String[0]));
         }
         sender.sendMessage(cacheHelp.get(helpkey));
         return true;
     }
 
     /**
-     * 设置解析器
-     *
-     * @param helpParse
-     *            帮助解析器
+     * 设置帮助生成器
+     * 
+     * @param helpGenerator
+     *            帮助生成器
      */
-    public void setHelpParse(CommandHelpParse helpParse) {
-        this.helpParse = helpParse;
+    public void setHelpGenerator(HelpGenerator helpGenerator) {
+        this.helpGenerator = helpGenerator;
+    }
+
+    /**
+     * @return 命令帮助生成器
+     */
+    public HelpGenerator getHelpGenerator() {
+        return helpGenerator;
     }
 
     /**
@@ -196,6 +168,65 @@ public class CommandHelp {
             } else {
                 return -1;
             }
+        }
+    }
+
+    static class DefaultHelpGenerator implements HelpGenerator {
+        /**
+         * 消息配置
+         */
+        private static String helpTitle = String.format("§6========= %s §6帮助 §aBy §b喵♂呜 §6=========", Log.getPrefix());
+        private static String helpBody = "§6/%1$s §a%2$s §e%3$s §6- §b%4$s";
+        private static String helpFooter = "§6查看更多的帮助页面 §b请输入 /%s help §e1-%s";
+        private static String pageNotFound = "§c不存在的帮助页面 §b请输入 /%s help §e1-%s";
+        /**
+         * 帮助解析
+         */
+        private HelpParse helpParse;
+
+        @Override
+        public String title() {
+            return helpTitle;
+        }
+
+        @Override
+        public String body(String label, CommandInfo ci) {
+            String aliases = Arrays.toString(ci.getCommand().aliases());
+            String cmd = ci.getName() + (aliases.length() == 2 ? "" : "§7" + aliases);
+            Help help = ci.getHelp();
+            return String.format(helpBody, label, cmd, help.possibleArguments(), parse(help.value()));
+        }
+
+        @Override
+        public String foot(String label, int HELPPAGECOUNT) {
+            return String.format(helpFooter, label, HELPPAGECOUNT);
+        }
+
+        @Override
+        public String notFound(String label, int HELPPAGECOUNT) {
+            return String.format(pageNotFound, label, HELPPAGECOUNT);
+        }
+
+        /**
+         * 解析帮助
+         *
+         * @param value
+         *            参数
+         * @return 解析后的帮助
+         */
+        public String parse(String value) {
+            if (helpParse != null) { return helpParse.parse(value); }
+            return value;
+        }
+
+        /**
+         * 设置解析器
+         *
+         * @param helpParse
+         *            帮助解析器
+         */
+        public void setHelpParse(HelpParse helpParse) {
+            this.helpParse = helpParse;
         }
     }
 }
