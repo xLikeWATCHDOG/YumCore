@@ -1,22 +1,19 @@
 package pw.yumc.YumCore.config.inject;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.HashMap;
-
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
-
 import pw.yumc.YumCore.bukkit.Log;
-import pw.yumc.YumCore.commands.exception.CommandParseException;
 import pw.yumc.YumCore.config.annotation.ConfigNode;
 import pw.yumc.YumCore.config.annotation.Default;
 import pw.yumc.YumCore.config.annotation.Nullable;
 import pw.yumc.YumCore.config.annotation.ReadOnly;
 import pw.yumc.YumCore.config.exception.ConfigParseException;
+
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * 抽象注入配置
@@ -61,7 +58,6 @@ public abstract class AbstractInjectConfig {
      * @param value
      *            字段值
      * @return 转换后的值
-     * @throws ParseException
      * @throws IllegalAccessException
      * @throws IllegalArgumentException
      * @throws InstantiationException
@@ -69,7 +65,7 @@ public abstract class AbstractInjectConfig {
      * @throws NoSuchMethodException
      * @throws SecurityException
      */
-    private Object convertType(Class<?> type, String path, Object value) throws CommandParseException, IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException {
+    private Object convertType(Class<?> type, String path, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException {
         Object result = InjectParse.parse(type, config, path);
         return result == null ? hanldeDefault(type, path, value) : result;
     }
@@ -108,7 +104,7 @@ public abstract class AbstractInjectConfig {
      *            字段
      * @param value
      *            值
-     * @throws ParseException
+     * @throws java.text.ParseException
      * @throws SecurityException
      * @throws NoSuchMethodException
      * @throws InvocationTargetException
