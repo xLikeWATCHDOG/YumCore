@@ -270,6 +270,7 @@ public class CommandManager implements TabExecutor {
      *
      * @param clazzs
      *            子命令处理类
+     * @return {@link CommandManager}
      */
     public CommandManager register(Executor... clazzs) {
         for (Executor clazz : clazzs) {
@@ -343,6 +344,7 @@ public class CommandManager implements TabExecutor {
      * 
      * @param commandErrorHanlder
      *            命令错误处理器
+     * @return {@link CommandManager}
      */
     public CommandManager setCommandErrorHanlder(ErrorHanlder commandErrorHanlder) {
         this.commandErrorHanlder = commandErrorHanlder;
@@ -354,6 +356,7 @@ public class CommandManager implements TabExecutor {
      *
      * @param helpGenerator
      *            帮助生成器
+     * @return {@link CommandManager}
      */
     public CommandManager setHelpGenerator(HelpGenerator helpGenerator) {
         help.setHelpGenerator(helpGenerator);
@@ -365,6 +368,7 @@ public class CommandManager implements TabExecutor {
      *
      * @param helpParse
      *            帮助解析器
+     * @return {@link CommandManager}
      */
     public CommandManager setHelpParse(HelpParse helpParse) {
         if (help.getHelpGenerator() instanceof CommandHelp.DefaultHelpGenerator) {

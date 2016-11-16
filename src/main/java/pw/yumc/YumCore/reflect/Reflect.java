@@ -8,8 +8,8 @@ import java.util.Map;
 /**
  * A wrapper for an {@link Object} or {@link Class} upon which reflective calls can be made.
  * <p>
- * An example of using <code>Reflect</code> is <code>
- *
+ * An example of using <code>Reflect</code> is
+ * 
  * <pre>
  * // Static import all reflection methods to decrease verbosity
  * import static org.joor.Reflect.*;
@@ -21,7 +21,8 @@ import java.util.Map;
  * // Invoke methods using the call() method:
  * .call("toString")
  * // Retrieve the wrapped object
- *
+ * </pre>
+ * 
  * @author Lukas Eder
  */
 public class Reflect {
@@ -274,6 +275,8 @@ public class Reflect {
     /**
      * Create a proxy for the wrapped object allowing to typesafely invoke methods on it using a custom interface
      *
+     * @param <P>
+     *            代理类型
      * @param proxyType
      *            The interface type that is implemented by the proxy
      * @return A proxy for the wrapped object
@@ -557,7 +560,9 @@ public class Reflect {
      * value from an instance member field.
      * <p>
      * If you want to "navigate" to a wrapped version of the field, use {@link #field(String)} instead.
-     *
+     * 
+     * @param <T>
+     *            A convenience generic parameter for automatic unsafe casting
      * @param name
      *            The field name
      * @return The field value
@@ -615,9 +620,6 @@ public class Reflect {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String toString() {
         return object.toString();
@@ -625,7 +627,8 @@ public class Reflect {
 
     /**
      * Get the type of the wrapped object.
-     *
+     * 
+     * @return 类类型
      * @see Object#getClass()
      */
     public Class<?> type() {

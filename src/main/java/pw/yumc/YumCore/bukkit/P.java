@@ -42,6 +42,8 @@ public class P {
     }
 
     /**
+     * @param <FC>
+     *            配置源类型
      * @return 获得插件配置文件
      */
     @SuppressWarnings("unchecked")
@@ -78,6 +80,8 @@ public class P {
     }
 
     /**
+     * @param <PI>
+     *            插件源类型
      * @return 获得插件
      */
     @SuppressWarnings("unchecked")

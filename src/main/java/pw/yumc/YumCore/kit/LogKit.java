@@ -67,16 +67,18 @@ public class LogKit implements Runnable {
      *            日志
      */
     public void console(final String s) {
-        sender(Bukkit.getConsoleSender(), s);
+        send(Bukkit.getConsoleSender(), s);
     }
 
     /**
      * 添加日志
-     *
+     * 
+     * @param sender
+     *            接受者
      * @param s
      *            日志
      */
-    public void sender(final CommandSender sender, final String s) {
+    public void send(final CommandSender sender, final String s) {
         Log.toSender(sender, s);
         log(ChatColor.stripColor(s));
     }

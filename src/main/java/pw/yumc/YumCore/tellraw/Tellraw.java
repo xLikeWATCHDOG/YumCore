@@ -318,10 +318,8 @@ public class Tellraw {
      * <li>消息串的文本.</li>
      * </ol>
      * 这个方法会丢失点击操作和悬浮操作 所以仅用于最后的手段
-     * </p>
      * <p>
      * 颜色和格式可以从返回的字符串中删除 通过{@link ChatColor#stripColor(String)}.
-     * </p>
      *
      * @return 发送给老版本客户端以及控制台。
      */
