@@ -1,5 +1,11 @@
 package pw.yumc.YumCore.commands;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.*;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
@@ -7,6 +13,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.StringUtil;
+
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.bukkit.compatible.C;
@@ -20,12 +27,6 @@ import pw.yumc.YumCore.commands.interfaces.ErrorHanlder;
 import pw.yumc.YumCore.commands.interfaces.Executor;
 import pw.yumc.YumCore.commands.interfaces.HelpGenerator;
 import pw.yumc.YumCore.commands.interfaces.HelpParse;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.*;
 
 /**
  * 命令管理类
@@ -117,6 +118,16 @@ public class CommandManager implements TabExecutor {
      * 命令名称缓存
      */
     private List<String> cmdNameCache = new ArrayList<>();
+
+    /**
+     * 命令管理器 用于主类
+     * 
+     * @param executor
+     *            命令执行类
+     */
+    public CommandManager(Executor... executor) {
+        register(executor);
+    }
 
     /**
      * 命令管理器
