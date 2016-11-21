@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
-import pw.yumc.YumCore.commands.CommandArgument;
 import pw.yumc.YumCore.commands.CommandParse;
 import pw.yumc.YumCore.commands.annotation.Async;
 import pw.yumc.YumCore.commands.annotation.Cmd;
@@ -112,20 +111,24 @@ public class CommandInfo {
     /**
      * 执行命令
      *
-     * @param cmdArgs
-     *            命令参数
+     * @param sender
+     *            命令发送者
+     * @param label
+     *            命令标签
+     * @param args
+     *            参数
      * @return 是否执行成功
      */
-    public boolean execute(final CommandArgument cmdArgs) {
+    public boolean execute(final CommandSender sender, final String label, final String[] args) {
         if (method == null) { return false; }
-        check(cmdArgs);
+        check(sender, label, args);
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
                 try {
-                    method.invoke(origin, parse.parse(cmdArgs));
+                    method.invoke(origin, parse.parse(sender, label, args));
                 } catch (ParseException | ArgumentException e) {
-                    Log.toSender(cmdArgs.getSender(), argErr, e.getMessage());
+                    Log.sender(sender, argErr, e.getMessage());
                 } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                     throw new CommandException(e);
                 }
@@ -158,6 +161,13 @@ public class CommandInfo {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * @return 命令别名
+     */
+    public List<String> getAliases() {
+        return aliases;
     }
 
     /**
@@ -212,11 +222,10 @@ public class CommandInfo {
         return Objects.hash(origin, method, name);
     }
 
-    private void check(CommandArgument cmdArgs) {
-        CommandSender sender = cmdArgs.getSender();
+    private void check(CommandSender sender, String label, String[] args) {
         if (!executors.contains(Executor.ALL) && !executors.contains(Executor.valueOf(sender))) { throw new SenderException(executorStr); }
         if (!"".equals(command.permission()) && !sender.hasPermission(command.permission())) { throw new PermissionException(command.permission()); }
-        if (cmdArgs.getArgs().length < command.minimumArguments()) { throw new ArgumentException(String.valueOf(command.minimumArguments())); }
+        if (args.length < command.minimumArguments()) { throw new ArgumentException(String.valueOf(command.minimumArguments())); }
     }
 
     private String eS(List<Executor> executors) {

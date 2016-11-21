@@ -2,7 +2,6 @@ package pw.yumc.YumCore.commands.info;
 
 import org.bukkit.command.CommandSender;
 import pw.yumc.YumCore.bukkit.P;
-import pw.yumc.YumCore.commands.CommandArgument;
 import pw.yumc.YumCore.commands.annotation.Tab;
 import pw.yumc.YumCore.commands.exception.CommandException;
 
@@ -47,8 +46,6 @@ public class CommandTabInfo {
      *
      * @param sender
      *            发送者
-     * @param command
-     *            命令
      * @param label
      *            命令
      * @param args
@@ -56,10 +53,9 @@ public class CommandTabInfo {
      * @return Tab补全信息
      */
     @SuppressWarnings("unchecked")
-    public List<String> execute(CommandSender sender, org.bukkit.command.Command command, String label, String[] args) {
-        CommandArgument cmdArgs = new CommandArgument(sender, command, label, args);
+    public List<String> execute(CommandSender sender, String label, String[] args) {
         try {
-            return (List<String>) method.invoke(origin, cmdArgs);
+            return (List<String>) method.invoke(origin, sender, label, args);
         } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
             throw new CommandException("调用Tab自动补全发生错误 请反馈给开发者 " + Arrays.toString(P.getDescription().getAuthors().toArray()) + " !", e);
         }

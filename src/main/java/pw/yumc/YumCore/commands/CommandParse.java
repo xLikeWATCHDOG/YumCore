@@ -5,9 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import pw.yumc.YumCore.bukkit.Log;
-import pw.yumc.YumCore.commands.annotation.Default;
-import pw.yumc.YumCore.commands.annotation.KeyValue;
-import pw.yumc.YumCore.commands.annotation.Limit;
+import pw.yumc.YumCore.commands.annotation.Option;
 import pw.yumc.YumCore.commands.exception.ParseException;
 
 import java.io.File;
@@ -47,7 +45,7 @@ public class CommandParse {
                 parse = new EnumParse(clazz);
             }
             if (parse == null) { throw new ParseException(String.format("存在无法解析的参数类型 %s", clazz.getName())); }
-            this.parse.add(parse.clone().parseAnnotation(annotations));
+            this.parse.add(parse.clone().parseAnnotation(annotations).handleAttrs());
         }
     }
 
@@ -77,10 +75,9 @@ public class CommandParse {
         allparses.put(clazz, parse);
     }
 
-    public Object[] parse(CommandArgument cmdArgs) {
-        String args[] = cmdArgs.getArgs();
+    public Object[] parse(CommandSender sender, String label, String[] args) {
         List<Object> pobjs = new LinkedList<>();
-        pobjs.add(cmdArgs.getSender());
+        pobjs.add(sender);
         for (int i = 0; i < parse.size(); i++) {
             try {
                 Parse p = parse.get(i);
@@ -89,7 +86,7 @@ public class CommandParse {
                 if (i + 1 == parse.size() && args.length >= parse.size()) {
                     param = join(Arrays.copyOfRange(args, i, args.length), " ");
                 }
-                pobjs.add(param == null ? null : p.parse(cmdArgs.getSender(), param));
+                pobjs.add(param == null ? null : p.parse(sender, param));
             } catch (Exception e) {
                 throw new ParseException(String.format("第 %s 个参数 ", isMain ? 1 : 2 + i) + e.getMessage());
             }
@@ -244,15 +241,31 @@ public class CommandParse {
 
         public Parse<RT> parseAnnotation(Annotation[] annotations) {
             for (Annotation annotation : annotations) {
-                if (annotation.annotationType() == Default.class) {
-                    def = ((Default) annotation).value();
-                } else if (annotation.annotationType() == Limit.class) {
-                    min = ((Limit) annotation).min();
-                    max = ((Limit) annotation).max();
-                } else if (annotation.annotationType() == KeyValue.class) {
-                    KeyValue kv = (KeyValue) annotation;
-                    attrs.put(kv.key(), kv.value());
+                if (annotation.annotationType() == Option.class) {
+                    String value = ((Option) annotation).value();
+                    for (String str : value.split(" ")) {
+                        if (str.isEmpty()) {
+                            continue;
+                        }
+                        if (str.contains(":")) {
+                            String[] args = str.split(":");
+                            attrs.put(args[0], args[1]);
+                        } else {
+                            attrs.put(str, null);
+                        }
+                    }
                 }
+            }
+            return this;
+        }
+
+        public Parse<RT> handleAttrs() {
+            if (attrs.containsKey("def")) {
+                def = String.valueOf(attrs.get("def"));
+            } else if (attrs.containsKey("min")) {
+                min = Integer.parseInt(String.valueOf(attrs.get("min")));
+            } else if (attrs.containsKey("max")) {
+                max = Integer.parseInt(String.valueOf(attrs.get("max")));
             }
             return this;
         }
@@ -285,8 +298,7 @@ public class CommandParse {
         }
 
         @Override
-        public Parse<Player> parseAnnotation(Annotation[] annotations) {
-            super.parseAnnotation(annotations);
+        public Parse<Player> handleAttrs() {
             check = attrs.containsKey("check");
             return this;
         }
@@ -311,8 +323,7 @@ public class CommandParse {
         }
 
         @Override
-        public Parse<String> parseAnnotation(Annotation[] annotations) {
-            super.parseAnnotation(annotations);
+        public Parse<String> handleAttrs() {
             if (attrs.containsKey("option")) {
                 options = Arrays.asList(attrs.get("option").split(","));
             }

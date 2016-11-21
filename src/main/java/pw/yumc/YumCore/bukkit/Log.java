@@ -243,7 +243,7 @@ public class Log {
      * @param sender 命令发送者
      * @param msg    消息
      */
-    public static void toSender(CommandSender sender, String msg) {
+    public static void sender(CommandSender sender, String msg) {
         sender.sendMessage(prefix + msg);
     }
 
@@ -254,7 +254,7 @@ public class Log {
      * @param msg    消息
      * @param objs   参数
      */
-    public static void toSender(CommandSender sender, String msg, Object... objs) {
+    public static void sender(CommandSender sender, String msg, Object... objs) {
         sender.sendMessage(prefix + String.format(msg, objs));
     }
 
@@ -264,9 +264,9 @@ public class Log {
      * @param sender 命令发送者
      * @param msg    消息
      */
-    public static void toSender(CommandSender sender, String[] msg) {
+    public static void sender(CommandSender sender, String[] msg) {
         for (String str : msg) {
-            toSender(sender, str);
+            sender(sender, str);
         }
     }
 

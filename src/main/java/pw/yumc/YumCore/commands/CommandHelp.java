@@ -84,7 +84,7 @@ public class CommandHelp {
      */
     public boolean send(CommandSender sender, Command command, String label, String[] args) {
         if (this.HELPPAGECOUNT == 0) {
-            Log.toSender(sender, commandNotFound);
+            Log.sender(sender, commandNotFound);
             return true;
         }
         int page = 1;
@@ -175,7 +175,7 @@ public class CommandHelp {
         /**
          * 消息配置
          */
-        private static String helpTitle = String.format("§6========= %s §6帮助 §aBy §b喵♂呜 §6=========", Log.getPrefix());
+        private static String helpTitle = String.format("§6========= %s§6帮助 §aBy §b喵♂呜 §6=========", Log.getPrefix());
         private static String helpBody = "§6/%1$s §a%2$s §e%3$s §6- §b%4$s";
         private static String helpFooter = "§6查看更多的帮助页面 §b请输入 /%s help §e1-%s";
         private static String pageNotFound = "§c不存在的帮助页面 §b请输入 /%s help §e1-%s";

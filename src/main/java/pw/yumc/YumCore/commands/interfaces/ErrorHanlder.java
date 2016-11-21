@@ -1,7 +1,6 @@
 package pw.yumc.YumCore.commands.interfaces;
 
 import org.bukkit.command.CommandSender;
-import pw.yumc.YumCore.commands.CommandArgument;
 import pw.yumc.YumCore.commands.exception.CommandException;
 import pw.yumc.YumCore.commands.info.CommandInfo;
 
@@ -12,5 +11,5 @@ import pw.yumc.YumCore.commands.info.CommandInfo;
  * @author 喵♂呜
  */
 public interface ErrorHanlder {
-    void error(CommandException e, CommandSender sender, CommandInfo info, CommandArgument args);
+    void error(CommandException e, CommandSender sender, CommandInfo info, String label, String[] args);
 }

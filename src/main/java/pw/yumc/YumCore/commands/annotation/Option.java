@@ -6,21 +6,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 自定义参数
+ * 扩展选项注解
  *
- * @since 2016年7月23日 上午9:00:27
+ * @since 2016年7月23日 上午9:00:07
  * @author 喵♂呜
  */
-@Target(ElementType.PARAMETER)
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface KeyValue {
-    /**
-     * @return 键
-     */
-    String key();
-
-    /**
-     * @return 值
-     */
-    String value() default "";
+public @interface Option {
+    String value();
 }

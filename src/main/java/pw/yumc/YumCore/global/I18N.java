@@ -45,7 +45,7 @@ public class I18N {
     }
 
     public static void send(CommandSender sender, String message, String def, Object... objs) {
-        Log.toSender(sender, $(message, def), objs);
+        Log.sender(sender, $(message, def), objs);
     }
 
     /**

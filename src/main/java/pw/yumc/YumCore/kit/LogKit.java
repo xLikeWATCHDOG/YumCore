@@ -79,7 +79,7 @@ public class LogKit implements Runnable {
      *            日志
      */
     public void send(final CommandSender sender, final String s) {
-        Log.toSender(sender, s);
+        Log.sender(sender, s);
         log(ChatColor.stripColor(s));
     }
 

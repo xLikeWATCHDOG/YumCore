@@ -1,15 +1,15 @@
 package pw.yumc.YumCore.config.inject;
 
+import org.bukkit.configuration.ConfigurationSection;
+import pw.yumc.YumCore.config.exception.ConfigParseException;
+
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.bukkit.configuration.ConfigurationSection;
-
-import pw.yumc.YumCore.config.exception.ConfigParseException;
 
 /**
  * 注入配置类解析
@@ -20,7 +20,7 @@ import pw.yumc.YumCore.config.exception.ConfigParseException;
 public class InjectParse {
     private static String DATE_PARSE_ERROR = "配置节点 {0} 日期解析失败 格式应该为: {1} 但输入值为: {2}!";
     private static String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    private static SimpleDateFormat df = new SimpleDateFormat(DATE_FORMAT);
+    private static DateFormat df = new SimpleDateFormat(DATE_FORMAT);
     private static Map<Class, Parse> allparse = new HashMap<>();
 
     static {
@@ -62,6 +62,16 @@ public class InjectParse {
         }
     }
 
+    public static class DateFormatParse implements Parse<DateFormat> {
+        public DateFormatParse() {
+            allparse.put(DateFormat.class, this);
+        }
+
+        @Override
+        public DateFormat parse(ConfigurationSection config, String path) {
+            return new SimpleDateFormat(config.getString(path));
+        }
+    }
     public static class ListParse implements Parse<List> {
         public ListParse() {
             allparse.put(List.class, this);
