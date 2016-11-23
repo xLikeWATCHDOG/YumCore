@@ -1,17 +1,16 @@
 package pw.yumc.YumCore.tellraw;
 
+import org.bukkit.Bukkit;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import pw.yumc.YumCore.bukkit.Log;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
-import org.bukkit.Bukkit;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-
-import pw.yumc.YumCore.bukkit.Log;
 
 /**
  * 物品序列化类
@@ -26,7 +25,7 @@ public abstract class ItemSerialize {
             itemSerialize = new Automatic();
         } catch (ClassNotFoundException | NoSuchMethodException | SecurityException e) {
             itemSerialize = new Manual();
-            Log.debug("初始化自动物品序列化失败!", e);
+            Log.d("初始化自动物品序列化失败!", e);
         }
     }
 

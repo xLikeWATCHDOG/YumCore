@@ -114,7 +114,7 @@ public class Statistics {
         } catch (IOException ignored) {
         }
         this.guid = config.getString("guid");
-        this.debug = config.getBoolean("debug", false);
+        this.debug = config.getBoolean("d", false);
         start();
     }
 
@@ -172,7 +172,7 @@ public class Statistics {
         if (config.getString("guid") == null) {
             config.options().header("YUMC数据中心 http://www.yumc.pw 收集的数据仅用于统计插件使用情况").copyDefaults(true);
             config.set("guid", UUID.randomUUID().toString());
-            config.set("debug", false);
+            config.set("d", false);
             config.save(configfile);
         }
         if (!config.contains("YumAccount")) {

@@ -28,6 +28,10 @@ public class CommandMain implements CommandExecutor {
      * 命令缓存列表
      */
     private Map<String, CommandInfo> cmdCache = new HashMap<>();
+    /**
+     * 命令帮助处理
+     */
+    private CommandHelp help;
 
     /**
      * 主类命令管理类
@@ -53,6 +57,7 @@ public class CommandMain implements CommandExecutor {
                 registerCommand(method, clazz);
             }
         }
+        help = new CommandHelp(cmds);
         return this;
     }
 
@@ -77,7 +82,7 @@ public class CommandMain implements CommandExecutor {
     private void injectPluginCommand(CommandInfo ci) {
         PluginCommand cmd = P.getCommand(ci.getName());
         if (cmd == null) {
-            if ((cmd = CommandKit.create(ci.getName(), P.instance)) == null) { throw new IllegalStateException("未找到命令 必须在plugin.yml先注册 " + ci.getName() + " 命令!"); }
+            if ((cmd = CommandKit.create(ci.getName(), ci.getAliases().toArray(new String[] {}))) == null) { throw new IllegalStateException("未找到命令 必须在plugin.yml先注册 " + ci.getName() + " 命令!"); }
         }
         cmd.setAliases(ci.getAliases());
         cmd.setExecutor(this);
@@ -105,6 +110,10 @@ public class CommandMain implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (args.length > 1 && args[0].equalsIgnoreCase("help")) {
+            help.send(sender, label, args);
+            return true;
+        }
         CommandInfo manager = getByCache(label);
         return manager != null && manager.execute(sender, label, args);
     }

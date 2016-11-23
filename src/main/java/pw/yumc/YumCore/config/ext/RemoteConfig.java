@@ -1,10 +1,10 @@
 package pw.yumc.YumCore.config.ext;
 
-import java.io.IOException;
-import java.net.URL;
-
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.config.FileConfig;
+
+import java.io.IOException;
+import java.net.URL;
 
 /**
  * 远程配置文件类
@@ -32,7 +32,7 @@ public class RemoteConfig extends FileConfig {
         try {
             return new RemoteConfig(url);
         } catch (IOException e) {
-            Log.debug("获取远程配置文件失败!", e);
+            Log.d("获取远程配置文件失败!", e);
             return null;
         }
     }

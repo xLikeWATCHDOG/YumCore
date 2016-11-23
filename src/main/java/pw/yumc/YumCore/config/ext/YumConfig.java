@@ -1,10 +1,10 @@
 package pw.yumc.YumCore.config.ext;
 
-import java.io.File;
-import java.io.IOException;
-
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.config.FileConfig;
+
+import java.io.File;
+import java.io.IOException;
 
 public class YumConfig {
     protected static String REMOTEFILECENTER = "http://data.yumc.pw/config/";
@@ -40,7 +40,7 @@ public class YumConfig {
         try {
             config = new RemoteConfig(REMOTEFILECENTER + url);
         } catch (IOException e) {
-            Log.debug(e);
+            Log.d(e);
         }
         Log.info(String.format(config == null ? createError : fromYumc, url));
         return config;

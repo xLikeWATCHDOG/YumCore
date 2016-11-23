@@ -42,22 +42,64 @@ public class CommandKit {
             knownCommands = (Map<String, Command>) knownCommandsField.get(commandMap);
 
             PluginCommandConstructor = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
+            PluginCommandConstructor.setAccessible(true);
         } catch (NoSuchMethodException | SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException e) {
             Log.d("初始化命令管理器失败!");
-            Log.debug(e);
+            Log.d(e);
         }
     }
 
+    /**
+     * 创建命令
+     * 
+     * @param name
+     *            命令名称
+     * @return {@link PluginCommand}
+     */
     public static PluginCommand create(String name) {
-        return create(name, P.instance);
+        return create(P.instance, name);
     }
 
-    public static PluginCommand create(String name, JavaPlugin plugin) {
+    /**
+     * 创建命令
+     *
+     * @param name
+     *            命令名称
+     * @param aliases
+     *            别名
+     * @return {@link PluginCommand}
+     */
+    public static PluginCommand create(String name, String... aliases) {
+        return create(P.instance, name, aliases);
+    }
+
+    /**
+     * 创建命令
+     * 
+     * @param plugin
+     *            插件
+     * @param name
+     *            命令名称
+     * @param aliases
+     *            别名
+     * @return
+     */
+    public static PluginCommand create(JavaPlugin plugin, String name, String... aliases) {
         try {
-            knownCommands.put(name, PluginCommandConstructor.newInstance(name, plugin));
-            lookupNames.put(name, plugin);
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ignored) {
+            Command cmd = PluginCommandConstructor.newInstance(name, plugin);
+            registerCommand(plugin, name, cmd);
+            for (String alias : aliases) {
+                registerCommand(plugin, alias, cmd);
+            }
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            Log.d(e);
         }
         return plugin.getCommand(name);
+    }
+
+    public static void registerCommand(Plugin plugin, String name, Command cmd) {
+        knownCommands.put(name, cmd);
+        knownCommands.put(plugin.getName().toLowerCase() + ":" + name, cmd);
+        lookupNames.put(name, plugin);
     }
 }

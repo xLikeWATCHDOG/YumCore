@@ -429,7 +429,7 @@ public class FileConfig extends AbstractConfig {
             Log.warning(String.format(CONFIG_BACKUP, filename, newCfgName));
         } catch (IOException e) {
             Log.warning(String.format(CONFIG_BACKUP_ERROR, filename, e.getMessage()));
-            Log.debug(oldcfg.getConfigName(), e);
+            Log.d(oldcfg.getConfigName(), e);
         }
     }
 

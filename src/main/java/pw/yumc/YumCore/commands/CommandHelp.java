@@ -1,6 +1,5 @@
 package pw.yumc.YumCore.commands;
 
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.commands.annotation.Help;
@@ -74,15 +73,13 @@ public class CommandHelp {
      *
      * @param sender
      *            命令发送者
-     * @param command
-     *            命令
      * @param label
      *            标签
      * @param args
      *            参数
      * @return 是否发送成功
      */
-    public boolean send(CommandSender sender, Command command, String label, String[] args) {
+    public boolean send(CommandSender sender, String label, String[] args) {
         if (this.HELPPAGECOUNT == 0) {
             Log.sender(sender, commandNotFound);
             return true;
@@ -176,7 +173,7 @@ public class CommandHelp {
          * 消息配置
          */
         private static String helpTitle = String.format("§6========= %s§6帮助 §aBy §b喵♂呜 §6=========", Log.getPrefix());
-        private static String helpBody = "§6/%1$s §a%2$s §e%3$s §6- §b%4$s";
+        private static String helpBody = "§6/%1$s§a%2$s §e%3$s §6- §b%4$s";
         private static String helpFooter = "§6查看更多的帮助页面 §b请输入 /%s help §e1-%s";
         private static String pageNotFound = "§c不存在的帮助页面 §b请输入 /%s help §e1-%s";
         /**
@@ -194,7 +191,7 @@ public class CommandHelp {
             String aliases = Arrays.toString(ci.getCommand().aliases());
             String cmd = ci.getName() + (aliases.length() == 2 ? "" : "§7" + aliases);
             Help help = ci.getHelp();
-            return String.format(helpBody, label, cmd, help.possibleArguments(), parse(help.value()));
+            return String.format(helpBody, label, ci.isMain() ? "" : " " + cmd, help.possibleArguments(), parse(help.value()));
         }
 
         @Override

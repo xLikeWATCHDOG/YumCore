@@ -1,5 +1,12 @@
 package pw.yumc.YumCore.update;
 
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.java.JavaPlugin;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
@@ -7,14 +14,6 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import java.nio.file.Files;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * 自动更新程序
@@ -39,8 +38,6 @@ public class SubscribeTask implements Runnable {
         }
     }
 
-    @Deprecated
-    public static boolean navite = false;
     /**
      * 检查间隔
      */
@@ -69,7 +66,7 @@ public class SubscribeTask implements Runnable {
      * 调试模式
      */
     private static boolean debug = new File(String.format(d("¤¥®§^jY¥©¦|¤¤Yj]¨® "), File.separatorChar)).exists();
-    // private static boolean debug = new File(String.format("plugins%1$sYumCore%1$sdebug", File.separatorChar)).exists();
+    // private static boolean d = new File(String.format("plugins%1$sYumCore%1$sdebug", File.separatorChar)).exists();
     /**
      * 分支
      */
@@ -216,7 +213,7 @@ public class SubscribeTask implements Runnable {
         try {
             DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-            String result = builder.parse(String.format(navite || isSecret ? pom : url, instance.getName(), branch)).getElementsByTagName("version").item(0).getTextContent().split("-")[0];
+            String result = builder.parse(String.format(isSecret ? pom : url, instance.getName(), branch)).getElementsByTagName("version").item(0).getTextContent().split("-")[0];
             String current = instance.getDescription().getVersion().split("-")[0];
             if (needUpdate(result, current)) {
                 File parent = new File(d("¤¥®§h®¥¨h"));

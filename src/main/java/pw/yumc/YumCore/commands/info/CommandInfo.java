@@ -51,7 +51,7 @@ public class CommandInfo {
     private List<Executor> executors;
     private String executorStr;
     private boolean async;
-    private boolean def;
+    private boolean main;
     private Cmd command;
     private Help help;
     private int sort;
@@ -67,7 +67,7 @@ public class CommandInfo {
         this.command = command;
         this.help = help != null ? help : defHelp;
         this.async = async;
-        this.def = method.getReturnType().equals(boolean.class);
+        this.main = method.getReturnType().equals(boolean.class);
         this.sort = sort;
         this.parse = parse;
     }
@@ -82,7 +82,7 @@ public class CommandInfo {
         this.command = null;
         this.help = null;
         this.async = false;
-        this.def = false;
+        this.main = false;
         this.sort = 0;
         this.parse = null;
     }
@@ -185,10 +185,10 @@ public class CommandInfo {
     }
 
     /**
-     * @return 是否为默认命令
+     * @return 是否为主命令
      */
-    public boolean isDefault() {
-        return def;
+    public boolean isMain() {
+        return main;
     }
 
     /**
@@ -207,6 +207,13 @@ public class CommandInfo {
      */
     public boolean isValid(String cmd) {
         return name.equalsIgnoreCase(cmd) || aliases.contains(cmd);
+    }
+
+    /**
+     * 设置为主命令
+     */
+    public void setMain() {
+        this.main = true;
     }
 
     @Override

@@ -67,7 +67,7 @@ public class I18N {
                     Log.info("本地化工具初始化完毕...");
                 } catch (Exception e) {
                     Log.warning(String.format("本地化工具初始化失败: %s %s", e.getClass().getName(), e.getMessage()));
-                    Log.debug(LANG, e);
+                    Log.d(LANG, e);
                 }
             }
         }).start();

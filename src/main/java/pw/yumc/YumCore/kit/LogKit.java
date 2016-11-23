@@ -28,10 +28,10 @@ public class LogKit implements Runnable {
             this.ps = new PrintStream(fos, true, "UTF-8");
             Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this, 0, 100);
         } catch (final FileNotFoundException e) {
-            Log.debug(e);
+            Log.d(e);
             Log.w("日志文件未找到 %s !", e.getMessage());
         } catch (final IOException e) {
-            Log.debug(e);
+            Log.d(e);
             Log.w("无法创建日志文件 %s !", e.getMessage());
         }
 

@@ -201,7 +201,7 @@ public abstract class AbstractInjectConfig {
             }
         } catch (IllegalArgumentException | IllegalAccessException e) {
             Log.w(INJECT_ERROR, e.getClass().getName(), e.getMessage());
-            Log.debug(e);
+            Log.d(e);
         }
     }
 
@@ -230,12 +230,12 @@ public abstract class AbstractInjectConfig {
             hanldeValue(path, field, value);
         } catch (IllegalArgumentException ex) {
             Log.w(INJECT_TYPE_ERROR, path, field.getType().getName(), value != null ? value.getClass().getName() : "空指针");
-            Log.debug(ex);
+            Log.d(ex);
         } catch (ConfigParseException e) {
             Log.w(e.getMessage());
         } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | SecurityException | IllegalAccessException ex) {
             Log.w(INJECT_ERROR, ex.getClass().getName(), ex.getMessage());
-            Log.debug(ex);
+            Log.d(ex);
         }
     }
 }

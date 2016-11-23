@@ -1,22 +1,16 @@
 package pw.yumc.YumCore.bukkit.compatible;
 
+import com.google.common.base.Charsets;
+import org.bukkit.*;
+import org.json.simple.JSONObject;
+import pw.yumc.YumCore.bukkit.Log;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Server;
-import org.bukkit.World;
-import org.json.simple.JSONObject;
-
-import com.google.common.base.Charsets;
-
-import pw.yumc.YumCore.bukkit.Log;
 
 /**
  * Bukkit兼容类
@@ -53,7 +47,7 @@ public class C {
             sendPacket = typePlayerConnection.getMethod("sendPacket", Class.forName(a("Packet")));
         } catch (Exception e) {
             Log.warning(C.class.getSimpleName() + " 兼容性工具初始化失败 可能造成部分功能不可用!");
-            Log.debug(e);
+            Log.d(e);
         }
     }
 
@@ -175,7 +169,7 @@ public class C {
                 Object connection = playerConnection.get(player);
                 sendPacket.invoke(connection, packet);
             } catch (Exception ex) {
-                Log.debug("ActionBar发包错误 " + version, ex);
+                Log.d("ActionBar发包错误 " + version, ex);
             }
         }
 
@@ -252,7 +246,7 @@ public class C {
                 craftOfflinePlayerConstructor.setAccessible(true);
                 // getOfflinePlayer end
             } catch (Exception e) {
-                Log.debug(e);
+                Log.d(e);
             }
         }
 
@@ -423,7 +417,7 @@ public class C {
                         sendPacket.invoke(connection, packet);
                     }
                 } catch (Exception e) {
-                    Log.debug(e);
+                    Log.d(e);
                 }
             }
         }

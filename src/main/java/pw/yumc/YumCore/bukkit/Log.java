@@ -108,7 +108,7 @@ public class Log {
      * @param msg 消息
      * @param e   异常
      */
-    public static void debug(String msg, Throwable e) {
+    public static void d(String msg, Throwable e) {
         if (debug) {
             logger.info("[DEBUG] " + msg);
             e.printStackTrace();
@@ -120,7 +120,7 @@ public class Log {
      *
      * @param e 异常
      */
-    public static void debug(Throwable e) {
+    public static void d(Throwable e) {
         if (debug) {
             e.printStackTrace();
         }

@@ -25,7 +25,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 
 /**
- * 命令管理类
+ * 子命令管理类
  *
  * @author 喵♂呜
  * @since 2016年7月23日 上午9:06:03
@@ -59,7 +59,7 @@ public class CommandSub implements TabExecutor {
                 Log.sender(sender, losePerm, info.getCommand().permission());
             } else if (e instanceof ArgumentException) {
                 Log.sender(sender, cmdErr);
-                Log.sender(sender, cmdUse, label, info.isDefault() ? "" : info.getName() + " ", info.getHelp().possibleArguments());
+                Log.sender(sender, cmdUse, label, info.isMain() ? "" : info.getName() + " ", info.getHelp().possibleArguments());
                 Log.sender(sender, cmdDes, info.getHelp().value());
             }
         }
@@ -90,16 +90,6 @@ public class CommandSub implements TabExecutor {
     private List<String> cmdNameCache = new ArrayList<>();
 
     /**
-     * 命令管理器 用于主类
-     * 
-     * @param executor
-     *            命令执行类
-     */
-    public CommandSub(Executor... executor) {
-        register(executor);
-    }
-
-    /**
      * 命令管理器
      *
      * @param name
@@ -108,7 +98,7 @@ public class CommandSub implements TabExecutor {
     public CommandSub(String name) {
         cmd = plugin.getCommand(name);
         if (cmd == null) {
-            if ((cmd = CommandKit.create(name, plugin)) == null) { throw new IllegalStateException("未找到命令 必须在plugin.yml先注册 " + name + " 命令!"); }
+            if ((cmd = CommandKit.create(name)) == null) { throw new IllegalStateException("未找到命令 必须在plugin.yml先注册 " + name + " 命令!"); }
         }
         cmd.setExecutor(this);
         cmd.setTabCompleter(this);
@@ -192,13 +182,11 @@ public class CommandSub implements TabExecutor {
      *
      * @param args
      *            原数组
-     * @param start
-     *            数组开始位置
      * @return 转移后的数组字符串
      */
-    private String[] moveStrings(String[] args, int start) {
-        String[] ret = new String[args.length - start];
-        System.arraycopy(args, start, ret, 0, ret.length);
+    private String[] moveStrings(String[] args) {
+        String[] ret = new String[args.length - 1];
+        System.arraycopy(args, 1, ret, 0, ret.length);
         return ret;
     }
 
@@ -206,16 +194,16 @@ public class CommandSub implements TabExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
             if (defCmd != null) { return defCmd.execute(sender, label, args); }
-            return help.send(sender, command, label, args);
+            return help.send(sender, label, args);
         }
         String subcmd = args[0].toLowerCase();
-        if (subcmd.equalsIgnoreCase("help")) { return help.send(sender, command, label, args); }
+        if (subcmd.equalsIgnoreCase("help")) { return help.send(sender, label, args); }
         CommandInfo cmd = getByCache(subcmd);
         String[] subargs = args;
         if (cmd.equals(CommandInfo.Unknow) && defCmd != null) {
             cmd = defCmd;
         } else {
-            subargs = moveStrings(args, 1);
+            subargs = moveStrings(args);
         }
         try {
             return cmd.execute(sender, label, subargs);
@@ -275,7 +263,7 @@ public class CommandSub implements TabExecutor {
         CommandInfo ci = CommandInfo.parse(method, clazz);
         if (ci != null) {
             Class[] params = method.getParameterTypes();
-            Log.d("命令 %s 参数类型: %s", ci.getName(), Arrays.toString(params));
+            Log.d("注册命令 %s 参数类型: %s", ci.getName(), Arrays.toString(params));
             try {
                 Class<? extends CommandSender> sender = params[0];
                 // 用于消除unuse警告

@@ -27,6 +27,7 @@ public class InjectParse {
         new ListParse();
         new MapParse();
         new DateParse();
+        new DateFormatParse();
     }
 
     public static Object parse(Class clazz, ConfigurationSection config, String path) {

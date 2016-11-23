@@ -1,15 +1,14 @@
 package pw.yumc.YumCore.global;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.SpawnEgg;
-
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.config.FileConfig;
 import pw.yumc.YumCore.config.ext.YumConfig;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 本地化工具类
@@ -133,7 +132,7 @@ public class L10N {
                     Log.info("本地化工具初始化完毕...");
                 } catch (Exception e) {
                     Log.warning(String.format("本地化工具初始化失败: %s %s", e.getClass().getName(), e.getMessage()));
-                    Log.debug(CONFIG_NAME, e);
+                    Log.d(CONFIG_NAME, e);
                 }
             }
         }).start();
