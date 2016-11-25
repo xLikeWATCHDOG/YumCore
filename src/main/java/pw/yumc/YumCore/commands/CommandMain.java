@@ -106,7 +106,7 @@ public class CommandMain implements CommandExecutor {
                 if (cmdinfo.isValid(cmd)) {
                     Log.d("匹配命令: %s => %s 已缓存...", cmd, cmdinfo);
                     cmdCache.put(cmd, cmdinfo);
-                    break;
+                    return cmdinfo;
                 }
             }
             cmdCache.put(cmd, null);
