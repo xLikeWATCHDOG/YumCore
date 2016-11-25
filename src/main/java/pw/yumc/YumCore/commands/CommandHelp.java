@@ -87,7 +87,7 @@ public class CommandHelp {
         int page = 1;
         try {
             page = Integer.parseInt(args[1]);
-            page = page == 0 ? 1 : page;
+            page = page < 1 ? 1 : page;
         } catch (Exception ignored) {
         }
         String helpkey = label + page;

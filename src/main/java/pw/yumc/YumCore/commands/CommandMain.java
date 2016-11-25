@@ -6,8 +6,10 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
+import pw.yumc.YumCore.commands.annotation.Help;
 import pw.yumc.YumCore.commands.info.CommandInfo;
 import pw.yumc.YumCore.commands.interfaces.Executor;
+import pw.yumc.YumCore.commands.interfaces.HelpGenerator;
 
 import java.lang.reflect.Method;
 import java.util.*;
@@ -32,6 +34,10 @@ public class CommandMain implements CommandExecutor {
      * 命令帮助处理
      */
     private CommandHelp help;
+    /**
+     * 帮助页生成
+     */
+    private HelpGenerator helpGenerator = new MainHelpGenerator();
 
     /**
      * 主类命令管理类
@@ -58,6 +64,7 @@ public class CommandMain implements CommandExecutor {
             }
         }
         help = new CommandHelp(cmds);
+        help.setHelpGenerator(helpGenerator);
         return this;
     }
 
@@ -70,7 +77,6 @@ public class CommandMain implements CommandExecutor {
             try {
                 Class<? extends CommandSender> sender = params[0];
                 cmds.add(ci);
-                cmdCache.put(ci.getName(), ci);
                 return true;
             } catch (ArrayIndexOutOfBoundsException | ClassCastException ignored) {
             }
@@ -84,7 +90,6 @@ public class CommandMain implements CommandExecutor {
         if (cmd == null) {
             if ((cmd = CommandKit.create(ci.getName(), ci.getAliases().toArray(new String[] {}))) == null) { throw new IllegalStateException("未找到命令 必须在plugin.yml先注册 " + ci.getName() + " 命令!"); }
         }
-        cmd.setAliases(ci.getAliases());
         cmd.setExecutor(this);
     }
 
@@ -99,6 +104,7 @@ public class CommandMain implements CommandExecutor {
         if (!cmdCache.containsKey(cmd)) {
             for (CommandInfo cmdinfo : cmds) {
                 if (cmdinfo.isValid(cmd)) {
+                    Log.d("匹配命令: %s => %s 已缓存...", cmd, cmdinfo);
                     cmdCache.put(cmd, cmdinfo);
                     break;
                 }
@@ -110,11 +116,24 @@ public class CommandMain implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        if (args.length > 1 && args[0].equalsIgnoreCase("help")) {
+        Log.d("执行者: %s 触发主命令: %s 参数: %s", sender.getName(), label, Arrays.toString(args));
+        if (args.length > 0 && args[0].equalsIgnoreCase("?")) {
             help.send(sender, label, args);
             return true;
         }
         CommandInfo manager = getByCache(label);
         return manager != null && manager.execute(sender, label, args);
+    }
+
+    private class MainHelpGenerator extends CommandHelp.DefaultHelpGenerator {
+        private String helpBody = "§6/%1$s §e%2$s §6- §b%3$s";
+
+        @Override
+        public String body(String label, CommandInfo ci) {
+            String aliases = Arrays.toString(ci.getCommand().aliases());
+            String cmd = ci.getName() + (aliases.length() == 2 ? "" : "§7" + aliases);
+            Help help = ci.getHelp();
+            return String.format(helpBody, cmd, help.possibleArguments(), parse(help.value()));
+        }
     }
 }
