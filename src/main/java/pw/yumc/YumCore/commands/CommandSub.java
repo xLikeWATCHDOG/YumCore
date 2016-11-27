@@ -10,10 +10,7 @@ import org.bukkit.util.StringUtil;
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.bukkit.compatible.C;
-import pw.yumc.YumCore.commands.exception.ArgumentException;
 import pw.yumc.YumCore.commands.exception.CommandException;
-import pw.yumc.YumCore.commands.exception.PermissionException;
-import pw.yumc.YumCore.commands.exception.SenderException;
 import pw.yumc.YumCore.commands.info.CommandInfo;
 import pw.yumc.YumCore.commands.info.CommandTabInfo;
 import pw.yumc.YumCore.commands.interfaces.ErrorHanlder;
@@ -33,11 +30,6 @@ import java.util.*;
 public class CommandSub implements TabExecutor {
     private static String argumentTypeError = "注解命令方法 %s 位于 %s 的参数错误 第一个参数应实现 CommandSender 接口!";
     private static String returnTypeError = "注解命令补全 %s 位于 %s 的返回值错误 应实现 List 接口!";
-    private static String onlyExecutor = "§c当前命令仅允许 §b%s §c执行!";
-    private static String losePerm = "§c你需要有 %s 的权限才能执行此命令!";
-    private static String cmdErr = "§6错误原因: §4命令参数不正确!";
-    private static String cmdUse = "§6使用方法: §e/%s %s%s";
-    private static String cmdDes = "§6命令描述: §3%s";
 
     /**
      * 命令帮助
@@ -50,20 +42,7 @@ public class CommandSub implements TabExecutor {
     /**
      * 命令错误处理
      */
-    private ErrorHanlder commandErrorHanlder = new ErrorHanlder() {
-        @Override
-        public void error(CommandException e, CommandSender sender, CommandInfo info, String label, String[] args) {
-            if (e instanceof SenderException) {
-                Log.sender(sender, onlyExecutor, info.getExecutorStr());
-            } else if (e instanceof PermissionException) {
-                Log.sender(sender, losePerm, info.getCommand().permission());
-            } else if (e instanceof ArgumentException) {
-                Log.sender(sender, cmdErr);
-                Log.sender(sender, cmdUse, label, info.isMain() ? "" : info.getName() + " ", info.getHelp().possibleArguments());
-                Log.sender(sender, cmdDes, info.getHelp().value());
-            }
-        }
-    };
+    private ErrorHanlder commandErrorHanlder = new CommandError();
     /**
      * 插件实例类
      */
