@@ -1,17 +1,18 @@
 package pw.yumc.YumCore.tellraw;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.bukkit.compatible.C;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * TellRaw简易处理类
@@ -19,11 +20,9 @@ import java.util.List;
  * @since 2016年8月10日 下午7:10:08
  * @author 喵♂呜
  */
-public class Tellraw {
-    static boolean isPaper = Bukkit.getVersion().contains("Paper");
+public class Tellraw implements Cloneable {
+    static boolean isPaper = Bukkit.getVersion().contains("Paper") || Bukkit.getVersion().contains("Torch");
     private List<MessagePart> messageParts = new ArrayList<>();
-    private String json = null;
-    private String oldjson = null;
 
     public Tellraw(String text) {
         messageParts.add(new MessagePart(text));
@@ -305,6 +304,16 @@ public class Tellraw {
         msg.append("]");
         Log.debug(msg.toString());
         return msg.toString();
+    }
+
+    public Tellraw setMessageParts(List<MessagePart> messageParts) {
+        this.messageParts = new ArrayList<>(messageParts);
+        return this;
+    }
+
+    @Override
+    public Tellraw clone() throws CloneNotSupportedException {
+        return ((Tellraw) super.clone()).setMessageParts(messageParts);
     }
 
     /**
