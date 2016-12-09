@@ -9,6 +9,10 @@ import com.google.common.net.HostAndPort;
  */
 public class MailAPI {
 
+    public static void main(String[] args) {
+        send(HostAndPort.fromParts("smtp.exmail.qq.com", 465), "root@yumc.pw", "admin@yumc.pw", "Java邮件测试", "邮件测试", "root@yumc.pw", "Email2Send");
+    }
+
     /**
      * 快速发信
      *
