@@ -1,19 +1,20 @@
 package pw.yumc.YumCore.config.inject;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.ConfigurationSection;
+
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.config.annotation.ConfigNode;
 import pw.yumc.YumCore.config.annotation.Default;
 import pw.yumc.YumCore.config.annotation.Nullable;
 import pw.yumc.YumCore.config.annotation.ReadOnly;
 import pw.yumc.YumCore.config.exception.ConfigParseException;
-
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.HashMap;
 
 /**
  * 抽象注入配置
@@ -156,7 +157,8 @@ public abstract class AbstractInjectConfig {
         }
         this.config = config;
         for (Field field : getClass().getDeclaredFields()) {
-            if (Modifier.isTransient(field.getModifiers()) || field.getType().isPrimitive()) {
+            // 忽略瞬态字段 忽略基础字段 忽略内联字段
+            if (Modifier.isTransient(field.getModifiers()) || field.getType().isPrimitive() || field.getName().startsWith("this$")) {
                 continue;
             }
             ConfigNode node = field.getAnnotation(ConfigNode.class);
