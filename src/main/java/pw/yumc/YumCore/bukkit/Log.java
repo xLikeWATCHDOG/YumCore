@@ -1,13 +1,13 @@
 package pw.yumc.YumCore.bukkit;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.command.CommandSender;
-
 import java.io.File;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 
 /**
  * 插件日志输出类
@@ -16,7 +16,8 @@ import java.util.logging.Logger;
  * @since 2016年7月23日 上午9:11:01
  */
 public class Log {
-    private static boolean debug = new File(String.format("plugins%1$sYumCore%1$sdebug", File.separatorChar)).exists();
+    private static boolean globalDebug = new File(String.format("plugins%1$sYumCore%1$sdebug", File.separatorChar)).exists();
+    private static boolean debug = globalDebug || P.getDescription().getVersion().contains("DEV");
     private static Logger logger = P.instance.getLogger();
     private static CommandSender console = Bukkit.getConsoleSender();
     private static String prefix = String.format("§6[§b%s§6]§r ", P.instance.getName());
