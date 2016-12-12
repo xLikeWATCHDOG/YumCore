@@ -1,5 +1,8 @@
 package pw.yumc.YumCore.commands;
 
+import java.lang.reflect.Method;
+import java.util.*;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
@@ -7,6 +10,7 @@ import org.bukkit.command.TabExecutor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.StringUtil;
+
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.bukkit.compatible.C;
@@ -17,9 +21,6 @@ import pw.yumc.YumCore.commands.interfaces.ErrorHanlder;
 import pw.yumc.YumCore.commands.interfaces.Executor;
 import pw.yumc.YumCore.commands.interfaces.HelpGenerator;
 import pw.yumc.YumCore.commands.interfaces.HelpParse;
-
-import java.lang.reflect.Method;
-import java.util.*;
 
 /**
  * 子命令管理类
@@ -79,6 +80,7 @@ public class CommandSub implements TabExecutor {
         if (cmd == null) {
             if ((cmd = CommandKit.create(name)) == null) { throw new IllegalStateException("未找到命令 必须在plugin.yml先注册 " + name + " 命令!"); }
         }
+        Log.d("初始化命令: %s", name);
         cmd.setExecutor(this);
         cmd.setTabCompleter(this);
     }
@@ -216,6 +218,7 @@ public class CommandSub implements TabExecutor {
      */
     public CommandSub register(Executor... clazzs) {
         for (Executor clazz : clazzs) {
+            Log.d("解析执行类: %s", clazz.getClass().getName());
             Method[] methods = clazz.getClass().getDeclaredMethods();
             for (Method method : methods) {
                 if (registerCommand(method, clazz)) {
@@ -242,7 +245,7 @@ public class CommandSub implements TabExecutor {
         CommandInfo ci = CommandInfo.parse(method, clazz);
         if (ci != null) {
             Class[] params = method.getParameterTypes();
-            Log.d("注册命令 %s 参数类型: %s", ci.getName(), Arrays.toString(params));
+            Log.d("注册子命令: %s 参数类型: %s", ci.getName(), Arrays.toString(params));
             try {
                 Class<? extends CommandSender> sender = params[0];
                 // 用于消除unuse警告
@@ -273,6 +276,7 @@ public class CommandSub implements TabExecutor {
         CommandTabInfo ti = CommandTabInfo.parse(method, clazz);
         if (ti != null) {
             if (method.getReturnType().equals(List.class)) {
+                Log.d("注册命令补全: %s ", method.getName());
                 tabs.add(ti);
                 return true;
             }
