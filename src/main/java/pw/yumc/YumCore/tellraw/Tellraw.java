@@ -22,6 +22,17 @@ import pw.yumc.YumCore.bukkit.compatible.C;
 public class Tellraw implements Cloneable {
     private List<MessagePart> messageParts = new ArrayList<>();
 
+    static {
+        if (Bukkit.getVersion().contains("Paper") || Bukkit.getVersion().contains("Torch")) {
+            Log.console("§c========== §4警 告 §c==========");
+            Log.console("§a 当前服务器为 §6Paper §a或 §6Torch ");
+            Log.console("§c 异步命令会刷报错 §b不影响使用");
+            Log.console("§d 如果介意请使用原版 Spigot");
+            Log.console("§e YUMC构建站: http://ci.yumc.pw/job/Spigot/");
+            Log.console("§c===========================");
+        }
+    }
+
     public Tellraw(String text) {
         messageParts.add(new MessagePart(text));
     }
