@@ -1,16 +1,17 @@
 package pw.yumc.YumCore.tellraw;
 
-import org.bukkit.Bukkit;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import pw.yumc.YumCore.bukkit.Log;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import org.bukkit.Bukkit;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+
+import pw.yumc.YumCore.bukkit.Log;
 
 /**
  * 物品序列化类
@@ -23,7 +24,7 @@ public abstract class ItemSerialize {
     static {
         try {
             itemSerialize = new Automatic();
-        } catch (ClassNotFoundException | NoSuchMethodException | SecurityException e) {
+        } catch (IllegalStateException e) {
             itemSerialize = new Manual();
             Log.d("初始化自动物品序列化失败!", e);
         }
@@ -31,7 +32,7 @@ public abstract class ItemSerialize {
 
     public static String $(ItemStack item) {
         String result = itemSerialize.parse(item);
-        Log.d("%s物品序列化结果: %s", itemSerialize.getName(), result);
+        Log.d("%s 物品序列化结果: %s", itemSerialize.getName(), result);
         return result;
     }
 
@@ -40,28 +41,38 @@ public abstract class ItemSerialize {
     public abstract String parse(ItemStack item);
 
     static class Automatic extends ItemSerialize {
-        Method asNMSCopyMethod;
-        Method nmsSaveNBTMethod;
-        Class<?> nmsNBTTagCompound;
-        String ver = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
+        private static boolean inited = false;
+        private static Method asNMSCopyMethod;
+        private static Method nmsSaveNBTMethod;
+        private static Class<?> nmsNBTTagCompound;
+        private static String ver = Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
 
-        public Automatic() throws ClassNotFoundException, NoSuchMethodException, SecurityException {
-            Class<?> cis = getOBCClass("inventory.CraftItemStack");
-            asNMSCopyMethod = cis.getMethod("asNMSCopy", ItemStack.class);
-            Class<?> nmsItemStack = asNMSCopyMethod.getReturnType();
-            for (Method method : nmsItemStack.getMethods()) {
-                Class<?> rt = method.getReturnType();
-                if (method.getParameterTypes().length == 0 && "NBTTagCompound".equals(rt.getSimpleName())) {
-                    nmsNBTTagCompound = rt;
+        static {
+            try {
+                Class<?> cis = getOBCClass("inventory.CraftItemStack");
+                asNMSCopyMethod = cis.getMethod("asNMSCopy", ItemStack.class);
+                Class<?> nmsItemStack = asNMSCopyMethod.getReturnType();
+                for (Method method : nmsItemStack.getMethods()) {
+                    Class<?> rt = method.getReturnType();
+                    if (method.getParameterTypes().length == 0 && "NBTTagCompound".equals(rt.getSimpleName())) {
+                        nmsNBTTagCompound = rt;
+                    }
                 }
-            }
-            for (Method method : nmsItemStack.getMethods()) {
-                Class<?>[] paras = method.getParameterTypes();
-                Class<?> rt = method.getReturnType();
-                if (paras.length == 1 && "NBTTagCompound".equals(paras[0].getSimpleName()) && "NBTTagCompound".equals(rt.getSimpleName())) {
-                    nmsSaveNBTMethod = method;
+                for (Method method : nmsItemStack.getMethods()) {
+                    Class<?>[] paras = method.getParameterTypes();
+                    Class<?> rt = method.getReturnType();
+                    if (paras.length == 1 && "NBTTagCompound".equals(paras[0].getSimpleName()) && "NBTTagCompound".equals(rt.getSimpleName())) {
+                        nmsSaveNBTMethod = method;
+                    }
                 }
+                inited = true;
+            } catch (ClassNotFoundException | NoSuchMethodException e) {
+                e.printStackTrace();
             }
+        }
+
+        public Automatic() {
+            if (!inited) { throw new IllegalStateException("无法初始化自动处理类!"); }
         }
 
         @Override
@@ -69,7 +80,7 @@ public abstract class ItemSerialize {
             return "Automatic";
         }
 
-        public Class getOBCClass(String cname) throws ClassNotFoundException {
+        private static Class getOBCClass(String cname) throws ClassNotFoundException {
             return Class.forName("org.bukkit.craftbukkit." + ver + "." + cname);
         }
 

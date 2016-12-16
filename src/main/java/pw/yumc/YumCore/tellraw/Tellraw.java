@@ -11,7 +11,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import pw.yumc.YumCore.bukkit.Log;
-import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.bukkit.compatible.C;
 
 /**
@@ -21,7 +20,6 @@ import pw.yumc.YumCore.bukkit.compatible.C;
  * @author 喵♂呜
  */
 public class Tellraw implements Cloneable {
-    static boolean isPaper = Bukkit.getVersion().contains("Paper") || Bukkit.getVersion().contains("Torch");
     private List<MessagePart> messageParts = new ArrayList<>();
 
     public Tellraw(String text) {
@@ -163,16 +161,7 @@ public class Tellraw implements Cloneable {
     public void send(final CommandSender sender) {
         final String json = toJsonString();
         if (sender instanceof Player && json.getBytes().length < 32000) {
-            if (isPaper && !Bukkit.isPrimaryThread()) {
-                Bukkit.getScheduler().runTask(P.instance, new Runnable() {
-                    @Override
-                    public void run() {
-                        Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName() + " " + json);
-                    }
-                });
-            } else {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName() + " " + json);
-            }
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName() + " " + json);
         } else {
             sender.sendMessage(toOldMessageFormat());
         }
