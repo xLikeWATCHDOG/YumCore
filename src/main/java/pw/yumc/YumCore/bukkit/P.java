@@ -1,12 +1,14 @@
 package pw.yumc.YumCore.bukkit;
 
+import java.io.File;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.logging.Logger;
+
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
-
-import java.io.File;
-import java.lang.reflect.Field;
-import java.util.logging.Logger;
 
 /**
  * 插件Instance获取类
@@ -19,6 +21,10 @@ public class P {
      * 插件实例
      */
     public static JavaPlugin instance;
+    /**
+     * 插件配置方法
+     */
+    public static Method getInjectConfigMethod;
 
     static {
         Object pluginClassLoader = P.class.getClassLoader();
@@ -27,6 +33,11 @@ public class P {
             field.setAccessible(true);
             instance = (JavaPlugin) field.get(pluginClassLoader);
         } catch (Exception e) {
+            e.printStackTrace();
+        }
+        try {
+            getInjectConfigMethod = instance.getClass().getMethod("get" + instance.getName() + "Config");
+        } catch (NoSuchMethodException e) {
             e.printStackTrace();
         }
     }
@@ -49,6 +60,20 @@ public class P {
     @SuppressWarnings("unchecked")
     public static <FC> FC getConfig() {
         return (FC) instance.getConfig();
+    }
+
+    /**
+     * @param <FC>
+     *            注入配置源类型
+     * @return 获得插件注入配置
+     */
+    @SuppressWarnings("unchecked")
+    public static <FC> FC getInjectConfig() {
+        try {
+            return (FC) getInjectConfigMethod.invoke(instance);
+        } catch (IllegalAccessException | InvocationTargetException ignored) {
+        }
+        return getConfig();
     }
 
     /**
