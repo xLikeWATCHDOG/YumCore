@@ -1,5 +1,10 @@
 package pw.yumc.YumCore.commands;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.util.Map;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.PluginCommand;
@@ -7,13 +12,9 @@ import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
+
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Map;
 
 /**
  * 命令工具类
@@ -98,6 +99,7 @@ public class CommandKit {
     }
 
     public static void registerCommand(Plugin plugin, String name, Command cmd) {
+        if (name.isEmpty()) { return; }
         knownCommands.put(name, cmd);
         knownCommands.put(plugin.getName().toLowerCase() + ":" + name, cmd);
         lookupNames.put(name, plugin);
