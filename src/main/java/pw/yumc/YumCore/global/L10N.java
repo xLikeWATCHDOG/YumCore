@@ -1,14 +1,15 @@
 package pw.yumc.YumCore.global;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.SpawnEgg;
+
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.config.FileConfig;
 import pw.yumc.YumCore.config.ext.YumConfig;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 本地化工具类
@@ -120,11 +121,11 @@ public class L10N {
             public void run() {
                 try {
                     Map<String, String> local = YumConfig.getLocal(CONFIG_NAME).getContentMap();
-                    Map<String, String> remote = YumConfig.getRemote(CONFIG_NAME).getContentMap();
                     if (local != null) {
                         Log.info("本地汉化文件词条数量: " + local.size());
                         content.putAll(local);
                     }
+                    Map<String, String> remote = YumConfig.getRemote(CONFIG_NAME).getContentMap();
                     if (remote != null) {
                         Log.info("远程汉化文件词条数量: " + remote.size());
                         content.putAll(remote);
