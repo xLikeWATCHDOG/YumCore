@@ -39,10 +39,7 @@ public class L {
      */
     public static Location deserialize(Map<String, Object> args) {
         World world = Bukkit.getWorld((String) args.get("world"));
-        if (world == null) {
-            throw new IllegalArgumentException("unknown world");
-        }
-
+        if (world == null) { return null; }
         return new Location(world, NumberConversions.toDouble(args.get("x")), NumberConversions.toDouble(args.get("y")), NumberConversions.toDouble(args.get("z")), NumberConversions
                 .toFloat(args.get("yaw")), NumberConversions.toFloat(args.get("pitch")));
     }
