@@ -33,12 +33,12 @@ public class P {
             field.setAccessible(true);
             instance = (JavaPlugin) field.get(pluginClassLoader);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.d(e);
         }
         try {
             getInjectConfigMethod = instance.getClass().getMethod("get" + instance.getName() + "Config");
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            Log.d(e);
         }
     }
 
@@ -57,7 +57,6 @@ public class P {
      *            配置源类型
      * @return 获得插件配置文件
      */
-    @SuppressWarnings("unchecked")
     public static <FC> FC getConfig() {
         return (FC) instance.getConfig();
     }
@@ -67,7 +66,6 @@ public class P {
      *            注入配置源类型
      * @return 获得插件注入配置
      */
-    @SuppressWarnings("unchecked")
     public static <FC> FC getInjectConfig() {
         try {
             return (FC) getInjectConfigMethod.invoke(instance);
@@ -109,7 +107,6 @@ public class P {
      *            插件源类型
      * @return 获得插件
      */
-    @SuppressWarnings("unchecked")
     public static <PI> PI getPlugin() {
         return (PI) instance;
     }
