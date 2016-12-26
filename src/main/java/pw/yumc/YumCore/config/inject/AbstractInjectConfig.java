@@ -121,6 +121,9 @@ public abstract class AbstractInjectConfig {
         if (type.equals(String.class)) {
             value = ChatColor.translateAlternateColorCodes('&', String.valueOf(value));
         }
+        if (value != null && !type.isAssignableFrom(value.getClass())) {
+            Log.w("字段 %s 默认类型为 %s 但解析后为 %s 可能存在转换错误!", field.getName(), type.getName(), value.getClass().getName());
+        }
         field.set(this, value);
         Log.d("设置字段 %s 为 %s ", field.getName(), value);
     }

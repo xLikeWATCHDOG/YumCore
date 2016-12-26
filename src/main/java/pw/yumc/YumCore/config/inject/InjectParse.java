@@ -1,8 +1,5 @@
 package pw.yumc.YumCore.config.inject;
 
-import org.bukkit.configuration.ConfigurationSection;
-import pw.yumc.YumCore.config.exception.ConfigParseException;
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -10,6 +7,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import org.bukkit.configuration.ConfigurationSection;
+
+import pw.yumc.YumCore.config.exception.ConfigParseException;
 
 /**
  * 注入配置类解析
@@ -66,6 +67,7 @@ public class InjectParse {
     public static class DateFormatParse implements Parse<DateFormat> {
         public DateFormatParse() {
             allparse.put(DateFormat.class, this);
+            allparse.put(SimpleDateFormat.class, this);
         }
 
         @Override
