@@ -1,7 +1,14 @@
 package pw.yumc.YumCore.commands;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -276,7 +283,7 @@ public class CommandSub implements TabExecutor {
         CommandTabInfo ti = CommandTabInfo.parse(method, clazz);
         if (ti != null) {
             if (method.getReturnType().equals(List.class)) {
-                Log.d("注册命令补全: %s ", method.getName());
+                Log.d("注册子命令补全: %s ", method.getName());
                 tabs.add(ti);
                 return true;
             }

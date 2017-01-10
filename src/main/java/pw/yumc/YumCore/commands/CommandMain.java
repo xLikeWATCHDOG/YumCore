@@ -1,9 +1,17 @@
 package pw.yumc.YumCore.commands;
 
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
+
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.commands.annotation.Help;
@@ -12,9 +20,6 @@ import pw.yumc.YumCore.commands.info.CommandInfo;
 import pw.yumc.YumCore.commands.interfaces.ErrorHanlder;
 import pw.yumc.YumCore.commands.interfaces.Executor;
 import pw.yumc.YumCore.commands.interfaces.HelpGenerator;
-
-import java.lang.reflect.Method;
-import java.util.*;
 
 /**
  * 主类命令管理
@@ -79,7 +84,7 @@ public class CommandMain implements CommandExecutor {
         if (ci != null) {
             injectPluginCommand(ci);
             Class[] params = method.getParameterTypes();
-            Log.d("命令 %s 参数类型: %s", ci.getName(), Arrays.toString(params));
+            Log.d("注册主命令 %s 参数类型: %s", ci.getName(), Arrays.toString(params));
             try {
                 Class<? extends CommandSender> sender = params[0];
                 cmds.add(ci);
