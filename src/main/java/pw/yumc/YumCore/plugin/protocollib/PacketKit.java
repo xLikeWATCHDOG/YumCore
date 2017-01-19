@@ -1,14 +1,16 @@
 package pw.yumc.YumCore.plugin.protocollib;
 
+import java.lang.reflect.InvocationTargetException;
+
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
+
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
 import com.comphenix.protocol.events.PacketContainer;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import pw.yumc.YumCore.kit.PKit;
 
-import java.lang.reflect.InvocationTargetException;
+import pw.yumc.YumCore.bukkit.Log;
 
 /**
  * ProtocolLib发包工具
@@ -22,7 +24,7 @@ public class PacketKit {
 
     static {
         if (!Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")) {
-            PKit.disable("未找到 ProtocolLib 插件 部分功能不可用...");
+            Log.w("未找到 ProtocolLib 插件 部分功能不可用...");
         } else {
             ENABLE = true;
             manager = ProtocolLibrary.getProtocolManager();
