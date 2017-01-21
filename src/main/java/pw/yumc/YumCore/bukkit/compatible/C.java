@@ -1,16 +1,23 @@
 package pw.yumc.YumCore.bukkit.compatible;
 
-import com.google.common.base.Charsets;
-import org.bukkit.*;
-import org.json.simple.JSONObject;
-import pw.yumc.YumCore.bukkit.Log;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
+
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.OfflinePlayer;
+import org.bukkit.Server;
+import org.bukkit.World;
+import org.json.simple.JSONObject;
+
+import com.google.common.base.Charsets;
+
+import pw.yumc.YumCore.bukkit.Log;
+import pw.yumc.YumCore.bukkit.P;
 
 /**
  * Bukkit兼容类
@@ -22,31 +29,34 @@ public class C {
     private static Class<?> nmsChatSerializer;
     private static Class<?> nmsIChatBaseComponent;
     private static Class<?> packetType;
-    private static Class<?> packetActions;
-    private static Class<?> packetTitle;
 
+    private static Method chatSerializer;
     private static Method getHandle;
 
     private static String version;
+    private static boolean newversion;
+
     private static Field playerConnection;
     private static Method sendPacket;
+
+    public static boolean init;
     static {
         try {
             version = getNMSVersion();
-            boolean newversion = Integer.parseInt(version.split("_")[1]) > 7;
+            newversion = Integer.parseInt(version.split("_")[1]) > 7;
             nmsChatSerializer = Class.forName(a(newversion ? "IChatBaseComponent$ChatSerializer" : "ChatSerializer"));
+            chatSerializer = nmsChatSerializer.getMethod("a", String.class);
             nmsIChatBaseComponent = Class.forName(a("IChatBaseComponent"));
             packetType = Class.forName(a("PacketPlayOutChat"));
-            packetActions = Class.forName(a(newversion ? "PacketPlayOutTitle$EnumTitleAction" : "EnumTitleAction"));
-            packetTitle = Class.forName(a("PacketPlayOutTitle"));
             Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
             Class<?> typeNMSPlayer = Class.forName(a("EntityPlayer"));
             Class<?> typePlayerConnection = Class.forName(a("PlayerConnection"));
             getHandle = typeCraftPlayer.getMethod("getHandle");
             playerConnection = typeNMSPlayer.getField("playerConnection");
             sendPacket = typePlayerConnection.getMethod("sendPacket", Class.forName(a("Packet")));
+            init = true;
         } catch (Exception e) {
-            Log.warning(C.class.getSimpleName() + " 兼容性工具初始化失败 可能造成部分功能不可用!");
+            Log.warning("C 兼容性工具初始化失败 可能造成部分功能不可用!");
             Log.d(e);
         }
     }
@@ -69,6 +79,33 @@ public class C {
      */
     public static String getNMSVersion() {
         return Bukkit.getServer().getClass().getPackage().getName().replace(".", ",").split(",")[3];
+    }
+
+    /**
+     * 给玩家发送Json消息
+     *
+     * @param receivingPacket
+     *            接受信息的玩家
+     * @param json
+     *            Json信息
+     * @param type
+     *            类型(0=>消息 2=>ActionBar)
+     */
+    public static void sendJson(org.bukkit.entity.Player receivingPacket, String json, int type) {
+        Object packet;
+        try {
+            Object serialized = nmsChatSerializer.getMethod("a", String.class).invoke(null, json);
+            if (!version.contains("1_7")) {
+                packet = packetType.getConstructor(nmsIChatBaseComponent, byte.class).newInstance(serialized, (byte) type);
+            } else {
+                packet = packetType.getConstructor(nmsIChatBaseComponent, int.class).newInstance(serialized, type);
+            }
+            Object player = getHandle.invoke(receivingPacket);
+            Object connection = playerConnection.get(player);
+            sendPacket.invoke(connection, packet);
+        } catch (Exception ex) {
+            Log.d("Json发包错误 " + version, ex);
+        }
     }
 
     public static class ActionBar {
@@ -96,7 +133,7 @@ public class C {
          *            需要显示的时间
          */
         public static void broadcast(final String message, final int times) {
-            new Thread(new Runnable() {
+            Bukkit.getScheduler().runTaskAsynchronously(P.instance, new Runnable() {
                 @Override
                 public void run() {
                     int time = times;
@@ -106,13 +143,12 @@ public class C {
                         }
                         try {
                             Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            // Ignore
+                        } catch (InterruptedException ignored) {
                         }
                         time--;
                     } while (time > 0);
                 }
-            }).start();
+            });
         }
 
         /**
@@ -126,7 +162,7 @@ public class C {
          *            需要显示的时间
          */
         public static void broadcast(final World world, final String message, final int times) {
-            new Thread(new Runnable() {
+            Bukkit.getScheduler().runTaskAsynchronously(P.instance, new Runnable() {
                 @Override
                 public void run() {
                     int time = times;
@@ -138,14 +174,13 @@ public class C {
                         }
                         try {
                             Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            // Ignore
+                        } catch (InterruptedException ignored) {
                         }
                         time--;
                     } while (time > 0);
 
                 }
-            }).start();
+            });
         }
 
         /**
@@ -157,20 +192,7 @@ public class C {
          *            ActionBar信息
          */
         public static void send(org.bukkit.entity.Player receivingPacket, String msg) {
-            Object packet;
-            try {
-                Object serialized = nmsChatSerializer.getMethod("a", String.class).invoke(null, "{\"text\":\"" + ChatColor.translateAlternateColorCodes('&', JSONObject.escape(msg)) + "\"}");
-                if (!version.contains("1_7")) {
-                    packet = packetType.getConstructor(nmsIChatBaseComponent, byte.class).newInstance(serialized, (byte) 2);
-                } else {
-                    packet = packetType.getConstructor(nmsIChatBaseComponent, int.class).newInstance(serialized, 2);
-                }
-                Object player = getHandle.invoke(receivingPacket);
-                Object connection = playerConnection.get(player);
-                sendPacket.invoke(connection, packet);
-            } catch (Exception ex) {
-                Log.d("ActionBar发包错误 " + version, ex);
-            }
+            sendJson(receivingPacket, "{\"text\":\"" + ChatColor.translateAlternateColorCodes('&', JSONObject.escape(msg)) + "\"}", 2);
         }
 
         /**
@@ -184,7 +206,7 @@ public class C {
          *            需要显示的时间
          */
         public static void send(final org.bukkit.entity.Player receivingPacket, final String msg, final int times) {
-            new Thread(new Runnable() {
+            Bukkit.getScheduler().runTaskAsynchronously(P.instance, new Runnable() {
                 @Override
                 public void run() {
                     int time = times;
@@ -192,13 +214,12 @@ public class C {
                         send(receivingPacket, msg);
                         try {
                             Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            // Ignore
+                        } catch (InterruptedException ignored) {
                         }
                         time--;
                     } while (time > 0);
                 }
-            }).start();
+            });
         }
     }
 
@@ -226,7 +247,7 @@ public class C {
                 }
                 // getOnlinePlayers end
             } catch (Exception e) {
-                Log.warning(Player.class.getSimpleName() + "兼容性工具初始化失败 可能造成部分功能不可用!");
+                Log.warning("Player 兼容性工具初始化失败 可能造成部分功能不可用!");
             }
             try {
                 // getOfflinePlayer start
@@ -285,6 +306,21 @@ public class C {
     }
 
     public static class Title {
+        private static Class<?> packetActions;
+        private static Class<?> packetTitle;
+        private static Constructor<?> packetTitleSendConstructor;
+        private static Constructor<?> packetTitleSetTimeConstructor;
+        static {
+            try {
+                packetActions = Class.forName(a(newversion ? "PacketPlayOutTitle$EnumTitleAction" : "EnumTitleAction"));
+                packetTitle = Class.forName(a("PacketPlayOutTitle"));
+                packetTitleSendConstructor = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent);
+                packetTitleSetTimeConstructor = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent, Integer.TYPE, Integer.TYPE, Integer.TYPE);
+            } catch (Exception ignore) {
+                Log.warning("Title 兼容性工具初始化失败 可能造成部分功能不可用!");
+            }
+        }
+
         private Title() {
         }
 
@@ -353,7 +389,7 @@ public class C {
             Object player = getHandle.invoke(recoverPlayer);
             Object connection = playerConnection.get(player);
             Object[] actions = packetActions.getEnumConstants();
-            Object packet = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent).newInstance(actions[4], null);
+            Object packet = packetTitleSendConstructor.newInstance(actions[4], null);
             sendPacket.invoke(connection, packet);
         }
 
@@ -399,21 +435,17 @@ public class C {
                     Object packet;
                     // Send if set
                     if ((fadeInTime != -1) && (fadeOutTime != -1) && (stayTime != -1)) {
-                        packet = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent, Integer.TYPE, Integer.TYPE, Integer.TYPE).newInstance(actions[2],
-                                null,
-                                fadeInTime * 20,
-                                stayTime * 20,
-                                fadeOutTime * 20);
+                        packet = packetTitleSendConstructor.newInstance(actions[2], null, fadeInTime * 20, stayTime * 20, fadeOutTime * 20);
                         sendPacket.invoke(connection, packet);
                     }
                     // Send title
-                    Object serialized = nmsChatSerializer.getMethod("a", String.class).invoke(null, "{\"text\":\"" + ChatColor.translateAlternateColorCodes('&', title) + "\"}");
-                    packet = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent).newInstance(actions[0], serialized);
+                    Object serialized = chatSerializer.invoke(null, "{\"text\":\"" + ChatColor.translateAlternateColorCodes('&', title) + "\"}");
+                    packet = packetTitleSendConstructor.newInstance(actions[0], serialized);
                     sendPacket.invoke(connection, packet);
                     if (!"".equals(subtitle)) {
                         // Send subtitle if present
-                        serialized = nmsChatSerializer.getMethod("a", String.class).invoke(null, "{\"text\":\"" + ChatColor.translateAlternateColorCodes('&', subtitle) + "\"}");
-                        packet = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent).newInstance(actions[1], serialized);
+                        serialized = chatSerializer.invoke(null, "{\"text\":\"" + ChatColor.translateAlternateColorCodes('&', subtitle) + "\"}");
+                        packet = packetTitleSendConstructor.newInstance(actions[1], serialized);
                         sendPacket.invoke(connection, packet);
                     }
                 } catch (Exception e) {

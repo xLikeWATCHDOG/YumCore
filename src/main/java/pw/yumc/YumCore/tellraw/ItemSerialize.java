@@ -20,7 +20,7 @@ import pw.yumc.YumCore.bukkit.Log;
  * @author 喵♂呜
  */
 public abstract class ItemSerialize {
-    static ItemSerialize itemSerialize = new Manual();
+    static ItemSerialize itemSerialize;
     static {
         try {
             itemSerialize = new Automatic();

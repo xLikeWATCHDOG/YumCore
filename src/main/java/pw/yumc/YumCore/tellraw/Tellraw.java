@@ -21,15 +21,18 @@ import pw.yumc.YumCore.bukkit.compatible.C;
  */
 public class Tellraw implements Cloneable {
     private List<MessagePart> messageParts = new ArrayList<>();
+    private String cache;
 
     static {
         if (Bukkit.getVersion().contains("Paper") || Bukkit.getVersion().contains("Torch")) {
-            Log.console("§c========== §4警 告 §c==========");
-            Log.console("§a 当前服务器为 §6Paper §a或 §6Torch ");
-            Log.console("§c 异步命令会刷报错 §b不影响使用");
-            Log.console("§d 如果介意请使用原版 Spigot");
-            Log.console("§e YUMC构建站: http://ci.yumc.pw/job/Spigot/");
-            Log.console("§c===========================");
+            if (!C.init) {
+                Log.console("§c========== §4警 告 §c==========");
+                Log.console("§a 当前服务器为 §6Paper §a或 §6Torch ");
+                Log.console("§c 异步命令会刷报错 §b不影响使用");
+                Log.console("§d 如果介意请使用原版 Spigot");
+                Log.console("§e YUMC构建站: http://ci.yumc.pw/job/Spigot/");
+                Log.console("§c===========================");
+            }
         }
     }
 
@@ -172,7 +175,11 @@ public class Tellraw implements Cloneable {
     public void send(final CommandSender sender) {
         final String json = toJsonString();
         if (sender instanceof Player && json.getBytes().length < 32000) {
-            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName() + " " + json);
+            if (C.init) {
+                C.sendJson((Player) sender, json, 0);
+            } else {
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName() + " " + json);
+            }
         } else {
             sender.sendMessage(toOldMessageFormat());
         }
@@ -231,7 +238,7 @@ public class Tellraw implements Cloneable {
      * @param name
      *            物品名称
      * @param item
-     *            {@link ItemStack}
+     *            {@link ItemStack};
      * @return {@link Tellraw}
      */
     public Tellraw then(String name, ItemStack item) {
@@ -295,15 +302,18 @@ public class Tellraw implements Cloneable {
      * @return Json串
      */
     public String toJsonString() {
-        StringBuilder msg = new StringBuilder();
-        msg.append("[\"\"");
-        for (MessagePart messagePart : messageParts) {
-            msg.append(",");
-            messagePart.writeJson(msg);
+        if (cache == null) {
+            StringBuilder msg = new StringBuilder();
+            msg.append("[\"\"");
+            for (MessagePart messagePart : messageParts) {
+                msg.append(",");
+                messagePart.writeJson(msg);
+            }
+            msg.append("]");
+            cache = msg.toString();
+            Log.d(cache);
         }
-        msg.append("]");
-        Log.debug(msg.toString());
-        return msg.toString();
+        return cache;
     }
 
     public Tellraw setMessageParts(List<MessagePart> messageParts) {
@@ -395,6 +405,7 @@ public class Tellraw implements Cloneable {
         } else {
             messageParts.add(part);
         }
+        cache = null;
         return this;
     }
 }
