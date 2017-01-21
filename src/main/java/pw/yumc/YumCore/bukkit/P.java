@@ -1,9 +1,14 @@
 package pw.yumc.YumCore.bukkit;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 import java.util.logging.Logger;
 
 import org.bukkit.command.PluginCommand;
@@ -118,4 +123,33 @@ public class P {
         return instance.isEnabled();
     }
 
+    /**
+     * 保存文件
+     *
+     * @param dirs
+     *            目录
+     */
+    public static void saveFile(final String... dirs) {
+        try {
+            final URL url = instance.getClass().getClassLoader().getResource("plugin.yml");
+            if (url == null) { return; }
+            final String upath = url.getFile().substring(url.getFile().indexOf("/") + 1);
+            final String jarPath = upath.substring(0, upath.indexOf('!'));
+            JarFile jar = new JarFile(jarPath);
+            final Enumeration<JarEntry> jes = jar.entries();
+            for (JarEntry je = jes.nextElement(); jes.hasMoreElements();) {
+                if (!je.isDirectory()) {
+                    for (final String dir : dirs) {
+                        if (je.getName().startsWith(dir)) {
+                            if (!new File(getDataFolder(), je.getName()).exists()) {
+                                instance.saveResource(je.getName(), false);
+                            }
+                        }
+                    }
+                }
+            }
+            jar.close();
+        } catch (IOException ignored) {
+        }
+    }
 }
