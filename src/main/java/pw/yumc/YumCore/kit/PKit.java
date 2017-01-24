@@ -33,7 +33,7 @@ public class PKit {
      *            关闭提示
      */
     public static void disable(String msg) {
-        Log.warning(msg);
+        Log.w(msg);
         disable();
     }
 

@@ -265,7 +265,7 @@ public class CommandSub implements TabExecutor {
                 return true;
             } catch (ArrayIndexOutOfBoundsException | ClassCastException ignored) {
             }
-            Log.warning(String.format(argumentTypeError, method.getName(), clazz.getClass().getName()));
+            Log.w(argumentTypeError, method.getName(), clazz.getClass().getName());
         }
         return false;
     }
@@ -287,7 +287,7 @@ public class CommandSub implements TabExecutor {
                 tabs.add(ti);
                 return true;
             }
-            Log.warning(String.format(returnTypeError, method.getName(), clazz.getClass().getName()));
+            Log.w(returnTypeError, method.getName(), clazz.getClass().getName());
         }
         return false;
     }

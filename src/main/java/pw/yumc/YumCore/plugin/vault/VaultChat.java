@@ -22,7 +22,7 @@ public class VaultChat extends VaultBase {
         if (rsp == null || (chat = rsp.getProvider()) == null) {
             PKit.disable("已加载 Vault 但是未找到聊天相关插件 停止加载...");
         } else {
-            Log.info("发现 Vault 使用聊天管理系统 " + chat.getName());
+            Log.i("发现 Vault 使用聊天管理系统 " + chat.getName());
         }
     }
 

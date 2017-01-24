@@ -144,7 +144,7 @@ public abstract class DataBaseCore {
      *            警告消息
      */
     public void warn(String warn) {
-        Log.warning(warn);
+        Log.w(warn);
     }
 
     /**

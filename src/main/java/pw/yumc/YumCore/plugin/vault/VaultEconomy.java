@@ -1,10 +1,11 @@
 package pw.yumc.YumCore.plugin.vault;
 
-import net.milkbowl.vault.economy.Economy;
-import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.RegisteredServiceProvider;
+
+import net.milkbowl.vault.economy.Economy;
+import net.milkbowl.vault.economy.EconomyResponse;
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.kit.PKit;
 
@@ -22,7 +23,7 @@ public class VaultEconomy extends VaultBase {
         if (rsp == null || (economy = rsp.getProvider()) == null) {
             PKit.disable("已加载 Vault 但是未找到经济相关插件 停止加载...");
         } else {
-            Log.info("发现 Vault 使用经济管理系统 " + economy.getName());
+            Log.i("发现 Vault 使用经济管理系统 " + economy.getName());
         }
     }
 

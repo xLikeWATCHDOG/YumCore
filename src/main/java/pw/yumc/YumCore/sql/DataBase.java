@@ -82,7 +82,7 @@ public class DataBase {
         try {
             String src = this.dataBaseCore.getConnection().getMetaData().getURL();
             String des = db.getConnection().getMetaData().getURL();
-            Log.info("开始从源 " + src + " 复制数据到 " + des + " ...");
+            Log.i("开始从源 " + src + " 复制数据到 " + des + " ...");
             ResultSet rs = this.dataBaseCore.getConnection().getMetaData().getTables(null, null, "%", null);
             List<String> tables = new LinkedList<>();
             while (rs.next()) {
@@ -93,11 +93,11 @@ public class DataBase {
             int s = 0;
             long start = System.currentTimeMillis();
             for (String table : tables) {
-                Log.info("开始复制源数据库中的表 " + table + " ...");
+                Log.i("开始复制源数据库中的表 " + table + " ...");
                 if (table.toLowerCase().startsWith("sqlite_autoindex_")) {
                     continue;
                 }
-                Log.info("清空目标数据库中的表 " + table + " ...");
+                Log.i("清空目标数据库中的表 " + table + " ...");
                 db.execute("DELETE FROM " + table);
                 rs = this.dataBaseCore.query("SELECT * FROM " + table);
                 int n = 0;
@@ -487,7 +487,7 @@ public class DataBase {
     }
 
     private void info(String info) {
-        Log.info(info);
+        Log.i(info);
     }
 
     public static class DataBaseParse implements Parse<DataBase> {

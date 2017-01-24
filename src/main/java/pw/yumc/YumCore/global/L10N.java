@@ -24,7 +24,7 @@ public class L10N {
 
     static {
         content = new HashMap<>();
-        Log.info("异步初始化本地化工具...");
+        Log.i("异步初始化本地化工具...");
         load();
     }
 
@@ -68,7 +68,7 @@ public class L10N {
      * 重载LocalUtil
      */
     public static void reload() {
-        Log.info("异步重载本地化工具...");
+        Log.i("异步重载本地化工具...");
         content.clear();
         load();
     }
@@ -116,23 +116,22 @@ public class L10N {
      */
     private static void load() {
         new Thread(new Runnable() {
-            @SuppressWarnings("unchecked")
             @Override
             public void run() {
                 try {
                     Map<String, String> local = YumConfig.getLocal(CONFIG_NAME).getContentMap();
                     if (local != null) {
-                        Log.info("本地汉化文件词条数量: " + local.size());
+                        Log.i("本地汉化文件词条数量: " + local.size());
                         content.putAll(local);
                     }
                     Map<String, String> remote = YumConfig.getRemote(CONFIG_NAME).getContentMap();
                     if (remote != null) {
-                        Log.info("远程汉化文件词条数量: " + remote.size());
+                        Log.i("远程汉化文件词条数量: " + remote.size());
                         content.putAll(remote);
                     }
-                    Log.info("本地化工具初始化完毕...");
+                    Log.i("本地化工具初始化完毕...");
                 } catch (Exception e) {
-                    Log.warning(String.format("本地化工具初始化失败: %s %s", e.getClass().getName(), e.getMessage()));
+                    Log.w("本地化工具初始化失败: %s %s", e.getClass().getName(), e.getMessage());
                     Log.d(CONFIG_NAME, e);
                 }
             }

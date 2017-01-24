@@ -22,7 +22,7 @@ public class VaultPermission extends VaultBase {
         if (rsp == null || (permission = rsp.getProvider()) == null) {
             PKit.disable("已加载 Vault 但是未找到权限相关插件 停止加载...");
         } else {
-            Log.info("发现 Vault 使用权限管理系统 " + permission.getName());
+            Log.i("发现 Vault 使用权限管理系统 " + permission.getName());
         }
     }
 

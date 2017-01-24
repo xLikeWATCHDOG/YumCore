@@ -374,7 +374,7 @@ public class FileConfig extends AbstractConfig {
             this.save(file);
             return true;
         } catch (IOException e) {
-            Log.warning(String.format(CONFIG_SAVE_ERROR, file.getName()));
+            Log.w(CONFIG_SAVE_ERROR, file.getName());
             e.printStackTrace();
             return false;
         }
@@ -414,12 +414,12 @@ public class FileConfig extends AbstractConfig {
                 } else {
                     plugin.saveResource(filename, true);
                 }
-                Log.warning(String.format(CONFIG_BACKUP_AND_RESET, filename, errFileName));
+                Log.w(CONFIG_BACKUP_AND_RESET, filename, errFileName);
             } catch (IOException | IllegalArgumentException e) {
                 throw new IllegalArgumentException(e);
             }
         } else {
-            Log.warning(String.format(CONFIG_NOT_FOUND_IN_JAR, file != null ? file.getName() : ""));
+            Log.w(CONFIG_NOT_FOUND_IN_JAR, file != null ? file.getName() : "");
         }
     }
 
@@ -435,9 +435,9 @@ public class FileConfig extends AbstractConfig {
             String newCfgName = this.getBakName(filename);
             File newcfg = new File(file.getParent(), newCfgName);
             oldcfg.save(newcfg);
-            Log.warning(String.format(CONFIG_BACKUP, filename, newCfgName));
+            Log.w(CONFIG_BACKUP, filename, newCfgName);
         } catch (IOException e) {
-            Log.warning(String.format(CONFIG_BACKUP_ERROR, filename, e.getMessage()));
+            Log.w(CONFIG_BACKUP_ERROR, filename, e.getMessage());
             Log.d(oldcfg.getConfigName(), e);
         }
     }
@@ -469,7 +469,7 @@ public class FileConfig extends AbstractConfig {
                 }
             }
         } catch (IOException e) {
-            Log.warning(String.format(CONFIG_CREATE_ERROR, filename));
+            Log.w(CONFIG_CREATE_ERROR, filename);
         }
     }
 
@@ -543,12 +543,12 @@ public class FileConfig extends AbstractConfig {
             this.load(new InputStreamReader(stream, UTF_8));
         } catch (InvalidConfigurationException | IllegalArgumentException ex) {
             if (file == null) { throw new IllegalArgumentException(ex); }
-            Log.warning(String.format(CONFIG_FORMAT_ERROR, file.getName()));
-            Log.warning(ex.getMessage());
+            Log.w(CONFIG_FORMAT_ERROR, file.getName());
+            Log.w(ex.getMessage());
             saveFromJar();
         } catch (IOException ex) {
             if (file == null) { throw new IllegalStateException(ex); }
-            Log.warning(String.format(CONFIG_READ_ERROR, file.getName()));
+            Log.w(CONFIG_READ_ERROR, file.getName());
         }
         return this;
     }
@@ -595,12 +595,12 @@ public class FileConfig extends AbstractConfig {
         String newver = newCfg.getString(VERSION);
         String oldver = oldCfg.getString(VERSION);
         Set<String> oldConfigKeys = oldCfg.getKeys(true);
-        Log.warning(String.format(CONFIG_UPDATE_WARN, filename, oldver, newver));
+        Log.w(CONFIG_UPDATE_WARN, filename, oldver, newver);
         // 保留版本字段 不更新
         oldConfigKeys.remove(VERSION);
         // 强制更新 去除新版本存在的字段
         if (force) {
-            Log.warning(String.format(CONFIG_OVERRIDE, filename));
+            Log.w(CONFIG_OVERRIDE, filename);
             oldConfigKeys.removeAll(newCfg.getKeys(true));
         }
         // 复制旧的数据
@@ -616,7 +616,7 @@ public class FileConfig extends AbstractConfig {
                 newCfg.set(string, var);
             }
         }
-        Log.info(String.format(CONFIG_UPDATED, filename, newver));
+        Log.i(CONFIG_UPDATED, filename, newver);
         return newCfg;
     }
 }

@@ -56,7 +56,7 @@ public class C {
             sendPacket = typePlayerConnection.getMethod("sendPacket", Class.forName(a("Packet")));
             init = true;
         } catch (Exception e) {
-            Log.warning("C 兼容性工具初始化失败 可能造成部分功能不可用!");
+            Log.w("C 兼容性工具初始化失败 可能造成部分功能不可用!");
             Log.d(e);
         }
     }
@@ -247,7 +247,7 @@ public class C {
                 }
                 // getOnlinePlayers end
             } catch (Exception e) {
-                Log.warning("Player 兼容性工具初始化失败 可能造成部分功能不可用!");
+                Log.w("Player 兼容性工具初始化失败 可能造成部分功能不可用!");
             }
             try {
                 // getOfflinePlayer start
@@ -317,7 +317,7 @@ public class C {
                 packetTitleSendConstructor = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent);
                 packetTitleSetTimeConstructor = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent, Integer.TYPE, Integer.TYPE, Integer.TYPE);
             } catch (Exception ignore) {
-                Log.warning("Title 兼容性工具初始化失败 可能造成部分功能不可用!");
+                Log.w("Title 兼容性工具初始化失败 可能造成部分功能不可用!");
             }
         }
 

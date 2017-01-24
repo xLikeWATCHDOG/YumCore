@@ -91,7 +91,7 @@ public class CommandMain implements CommandExecutor {
                 return true;
             } catch (ArrayIndexOutOfBoundsException | ClassCastException ignored) {
             }
-            Log.warning(String.format(argumentTypeError, method.getName(), clazz.getClass().getName()));
+            Log.w(argumentTypeError, method.getName(), clazz.getClass().getName());
         }
         return false;
     }
