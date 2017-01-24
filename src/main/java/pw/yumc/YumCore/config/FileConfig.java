@@ -1,16 +1,26 @@
 package pw.yumc.YumCore.config;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.lang.Validate;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.MemorySection;
 import org.bukkit.configuration.file.YamlConfiguration;
-import pw.yumc.YumCore.bukkit.Log;
 
-import java.io.*;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import pw.yumc.YumCore.bukkit.Log;
 
 /**
  * 一个继承于 {@link YamlConfiguration} 的配置文件类
@@ -20,7 +30,6 @@ import java.util.*;
  * @version 1.0
  * @since 2015年11月7日 下午2:36:07
  */
-@SuppressWarnings({ "unchecked" })
 public class FileConfig extends AbstractConfig {
     protected static String VERSION = "Version";
 
@@ -277,7 +286,7 @@ public class FileConfig extends AbstractConfig {
             commentConfig = new CommentConfig();
             commentConfig.loadFromString(contents);
         } catch (Exception e) {
-            Log.debug(CONFIG_READ_COMMENT_ERROR);
+            Log.d(CONFIG_READ_COMMENT_ERROR);
             commentConfig = null;
         }
         super.loadFromString(contents);
@@ -516,7 +525,7 @@ public class FileConfig extends AbstractConfig {
         try {
             init(new FileInputStream(file));
         } catch (FileNotFoundException e) {
-            Log.debug(String.format(CONFIG_NOT_FOUND, file.toPath()));
+            Log.d(CONFIG_NOT_FOUND, file.toPath());
         }
         return this;
     }
@@ -603,7 +612,7 @@ public class FileConfig extends AbstractConfig {
                 if (newVer != null && !newVer.getClass().equals(var.getClass())) {
                     Log.w("警告! 旧数据类型与新配置类型不匹配!");
                 }
-                Log.debug(String.format(CONFIG_UPDATE_VALUE, string, var));
+                Log.d(CONFIG_UPDATE_VALUE, string, var);
                 newCfg.set(string, var);
             }
         }

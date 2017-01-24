@@ -1,7 +1,19 @@
 package pw.yumc.YumCore.sql;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.plugin.Plugin;
+
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.config.inject.InjectParse;
@@ -10,12 +22,6 @@ import pw.yumc.YumCore.sql.core.DataBaseCore;
 import pw.yumc.YumCore.sql.core.KeyValue;
 import pw.yumc.YumCore.sql.core.MySQLCore;
 import pw.yumc.YumCore.sql.core.SQLiteCore;
-
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
 
 /**
  * 数据库管理类
@@ -467,7 +473,7 @@ public class DataBase {
     public void sqlerr(String sql, Exception e) {
         info("数据库操作出错: " + e.getMessage());
         info("SQL查询语句: " + sql);
-        Log.debug(this.getClass().getName());
+        Log.d(this.getClass().getName());
         Log.d(e);
     }
 

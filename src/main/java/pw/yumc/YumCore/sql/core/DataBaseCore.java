@@ -1,6 +1,10 @@
 package pw.yumc.YumCore.sql.core;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 import pw.yumc.YumCore.bukkit.Log;
 
@@ -150,7 +154,7 @@ public abstract class DataBaseCore {
      *            SQL语句
      */
     private void debug(String sql) {
-        Log.debug("[SQL] " + sql);
+        Log.d("[SQL] " + sql);
     }
 
     /**
