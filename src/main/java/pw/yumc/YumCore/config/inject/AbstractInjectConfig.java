@@ -26,7 +26,7 @@ public abstract class AbstractInjectConfig {
     private static String INJECT_TYPE_ERROR = "配置节点 %s 数据类型不匹配 应该为: %s 但实际为: %s!";
     private static String INJECT_ERROR = "自动注入配置失败 可能造成插件运行错误 %s: %s!";
     private static String PATH_NOT_FOUND = "配置节点 %s 丢失 将使用默认值!";
-    private ConfigurationSection config;
+    protected ConfigurationSection config;
 
     /**
      * 添加默认值
@@ -242,5 +242,9 @@ public abstract class AbstractInjectConfig {
             Log.w(INJECT_ERROR, ex.getClass().getName(), ex.getMessage());
             Log.d(ex);
         }
+    }
+
+    public ConfigurationSection getConfig() {
+        return config;
     }
 }

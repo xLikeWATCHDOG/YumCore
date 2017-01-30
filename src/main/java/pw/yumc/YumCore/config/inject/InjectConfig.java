@@ -1,8 +1,8 @@
 package pw.yumc.YumCore.config.inject;
 
-import pw.yumc.YumCore.config.FileConfig;
-
 import java.io.File;
+
+import pw.yumc.YumCore.config.FileConfig;
 
 /**
  * 配置自动载入类
@@ -11,8 +11,6 @@ import java.io.File;
  * @author 喵♂呜
  */
 public abstract class InjectConfig extends AbstractInjectConfig {
-    protected FileConfig config;
-
     public InjectConfig() {
         this(new FileConfig());
     }
@@ -22,7 +20,6 @@ public abstract class InjectConfig extends AbstractInjectConfig {
     }
 
     public InjectConfig(FileConfig config) {
-        this.config = config;
         inject(config);
     }
 
@@ -36,14 +33,14 @@ public abstract class InjectConfig extends AbstractInjectConfig {
      * @return 配置文件
      */
     public FileConfig getConfig() {
-        return config;
+        return (FileConfig) config;
     }
 
     /**
      * 重载配置文件
      */
     public void reload() {
-        config.reload();
+        getConfig().reload();
         inject(config);
     }
 
@@ -52,6 +49,6 @@ public abstract class InjectConfig extends AbstractInjectConfig {
      */
     public void save() {
         save(config);
-        config.save();
+        getConfig().save();
     }
 }
