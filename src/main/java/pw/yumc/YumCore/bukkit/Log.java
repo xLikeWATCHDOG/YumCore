@@ -302,4 +302,11 @@ public class Log {
     public static void w(String string, Object... objects) {
         logger.warning(String.format(string, objects));
     }
+
+    /**
+     * @return 是否为全局调试模式
+     */
+    public static boolean isGlobalDebug() {
+        return globalDebug;
+    }
 }
