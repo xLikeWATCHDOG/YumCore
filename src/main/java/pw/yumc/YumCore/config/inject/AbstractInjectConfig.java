@@ -1,5 +1,6 @@
 package pw.yumc.YumCore.config.inject;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -90,7 +91,11 @@ public abstract class AbstractInjectConfig {
      */
     private Object hanldeDefault(Class<?> field, String path, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException {
         if (InjectConfigurationSection.class.isAssignableFrom(field)) {
-            if (config.isConfigurationSection(path)) { return field.getConstructor(ConfigurationSection.class).newInstance(config.getConfigurationSection(path)); }
+            if (config.isConfigurationSection(path)) {
+                Constructor<?> constructor = field.getDeclaredConstructor(ConfigurationSection.class);
+                constructor.setAccessible(true);
+                return constructor.newInstance(config.getConfigurationSection(path));
+            }
             Log.w(INJECT_TYPE_ERROR, path, ConfigurationSection.class.getName(), value.getClass().getName());
         }
         return value;
