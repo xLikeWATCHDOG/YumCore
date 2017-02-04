@@ -3,6 +3,7 @@ package pw.yumc.YumCore.config.inject;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +33,14 @@ public class InjectParse {
     }
 
     public static Object parse(Class clazz, ConfigurationSection config, String path) {
+        if (clazz.isEnum()) {
+            String value = config.getString(path);
+            try {
+                return Enum.valueOf(clazz, value);
+            } catch (IllegalArgumentException ex) {
+                throw new ConfigParseException(String.format("%s 不是 %s 有效值为 %s", value, clazz.getSimpleName(), Arrays.toString(clazz.getEnumConstants())));
+            }
+        }
         return allparse.containsKey(clazz) ? allparse.get(clazz).parse(config, path) : null;
     }
 
@@ -75,6 +84,7 @@ public class InjectParse {
             return new SimpleDateFormat(config.getString(path));
         }
     }
+
     public static class ListParse implements Parse<List> {
         public ListParse() {
             allparse.put(List.class, this);
