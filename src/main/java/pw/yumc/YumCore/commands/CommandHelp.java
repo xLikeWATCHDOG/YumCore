@@ -1,13 +1,20 @@
 package pw.yumc.YumCore.commands;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.bukkit.command.CommandSender;
+
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.commands.annotation.Help;
 import pw.yumc.YumCore.commands.info.CommandInfo;
 import pw.yumc.YumCore.commands.interfaces.HelpGenerator;
 import pw.yumc.YumCore.commands.interfaces.HelpParse;
-
-import java.util.*;
 
 /**
  * 命令帮助生成类
@@ -63,8 +70,8 @@ public class CommandHelp {
     public CommandHelp(CommandInfo defCmd, Collection<? extends CommandInfo> list) {
         this.defCmd = defCmd;
         cmdlist = new LinkedList<>(list);
-        Collections.sort(cmdlist, new CommandNameComparator());
-        Collections.sort(cmdlist, new CommandComparator());
+        cmdlist.sort(new CommandNameComparator());
+        cmdlist.sort(new CommandComparator());
         HELPPAGECOUNT = (int) Math.ceil((double) cmdlist.size() / LINES_PER_PAGE);
     }
 

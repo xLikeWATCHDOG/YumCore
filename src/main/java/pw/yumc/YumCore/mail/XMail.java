@@ -9,7 +9,12 @@ import javax.activation.DataContentHandler;
 import javax.activation.DataContentHandlerFactory;
 import javax.activation.DataHandler;
 import javax.activation.FileDataSource;
-import javax.mail.*;
+import javax.mail.Authenticator;
+import javax.mail.BodyPart;
+import javax.mail.Message;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
@@ -36,14 +41,11 @@ public class XMail {
         handlers.put("message/rfc822", new com.sun.mail.handlers.message_rfc822());
         handlers.put("image/gif", new com.sun.mail.handlers.image_gif());
         handlers.put("image/jpeg", new com.sun.mail.handlers.image_jpeg());
-        defaultDataContentHandlerFactory = new DataContentHandlerFactory() {
-            @Override
-            public DataContentHandler createDataContentHandler(String type) {
-                DataContentHandler handler = handlers.get(type);
-                if (handler != null) { return handler; }
-                System.out.println("*************  Unknown Type: " + type + "  *************");
-                return null;
-            }
+        defaultDataContentHandlerFactory = type -> {
+            DataContentHandler handler = handlers.get(type);
+            if (handler != null) { return handler; }
+            System.out.println("*************  Unknown Type: " + type + "  *************");
+            return null;
         };
     }
 

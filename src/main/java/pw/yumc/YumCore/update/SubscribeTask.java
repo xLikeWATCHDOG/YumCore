@@ -135,12 +135,7 @@ public class SubscribeTask implements Runnable, Listener {
     public void onJoin(PlayerJoinEvent e) {
         final Player player = e.getPlayer();
         if (player.isOp() && updateFile.isUpdated()) {
-            Bukkit.getScheduler().runTaskLater(instance, new Runnable() {
-                @Override
-                public void run() {
-                    versionInfo.notify(player);
-                }
-            }, 10);
+            Bukkit.getScheduler().runTaskLater(instance, () -> versionInfo.notify(player), 10);
         }
     }
 

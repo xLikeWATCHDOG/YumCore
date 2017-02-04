@@ -43,7 +43,7 @@ public class P {
         try {
             getInjectConfigMethod = instance.getClass().getMethod("get" + instance.getName() + "Config");
         } catch (NoSuchMethodException e) {
-            Log.d(e);
+            Log.d("配置方法 get%sConfig 未找到 将返回getConfig 调用结果!", instance.getName());
         }
     }
 
@@ -141,9 +141,7 @@ public class P {
                 if (!je.isDirectory()) {
                     for (final String dir : dirs) {
                         if (je.getName().startsWith(dir)) {
-                            if (!new File(getDataFolder(), je.getName()).exists()) {
-                                instance.saveResource(je.getName(), false);
-                            }
+                            instance.saveResource(je.getName(), false);
                         }
                     }
                 }

@@ -263,29 +263,6 @@ public class DataBase {
         return kvlist;
     }
 
-    // @SuppressWarnings("unchecked")
-    // public <M> List<M> dbSelect( Class<? extends Model<?>> model, KeyValue selCondition) {
-    // List<M> modellist = new ArrayList<>();
-    // String sql = "SELECT " + toKeys(model) + " FROM `" + model.getAnnotation(Entity.class).name() + "`" + (selCondition == null ? "" : " WHERE " + selCondition.toWhereString());
-    // try {
-    // ResultSet dbresult = this.dataBaseCore.execute(sql);
-    // while (dbresult.next()) {
-    // M m = (M) model.newInstance();
-    // Field[] fields = model.getDeclaredFields();
-    // for ( Field col : fields) {
-    // col.set(m, dbresult.getObject(col.getName()));
-    // }
-    // modellist.add(m);
-    // }
-    // } catch ( InstantiationException e) {
-    // info("模型类实例化失败!");
-    // e.printStackTrace();
-    // } catch ( Exception e) {
-    // sqlerr(sql, e);
-    // }
-    // return modellist;
-    // }
-
     /**
      * 对数据库表进行选择操作！
      *
@@ -500,16 +477,4 @@ public class DataBase {
             return DataBase.create(P.instance, config.getConfigurationSection(path));
         }
     }
-
-    // private String toKeys( Class<? extends Model<?>> model) {
-    // Field[] fields = model.getDeclaredFields();
-    // StringBuilder sb = new StringBuilder();
-    // for ( Field next : fields) {
-    // sb.append("`");
-    // sb.append(next.getName());
-    // sb.append("`, ");
-    // }
-    // return sb.toString().substring(0, sb.length() - 2);
-    // }
-
 }

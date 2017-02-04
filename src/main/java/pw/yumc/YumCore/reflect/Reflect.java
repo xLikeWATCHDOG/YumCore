@@ -1,6 +1,12 @@
 package pw.yumc.YumCore.reflect;
 
-import java.lang.reflect.*;
+import java.lang.reflect.AccessibleObject;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -283,34 +289,31 @@ public class Reflect {
      */
     public <P> P as(final Class<P> proxyType) {
         final boolean isMap = (object instanceof Map);
-        final InvocationHandler handler = new InvocationHandler() {
-            @Override
-            public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
-                final String name = method.getName();
+        final InvocationHandler handler = (proxy, method, args) -> {
+            final String name = method.getName();
 
-                // Actual method name matches always come first
-                try {
-                    return on(object).call(name, args).get();
-                }
+            // Actual method name matches always come first
+            try {
+                return on(object).call(name, args).get();
+            }
 
-                // [#14] Simulate POJO behaviour on wrapped map objects
-                catch (final ReflectException e) {
-                    if (isMap) {
-                        final Map<String, Object> map = (Map<String, Object>) object;
-                        final int length = (args == null ? 0 : args.length);
+            // [#14] Simulate POJO behaviour on wrapped map objects
+            catch (final ReflectException e) {
+                if (isMap) {
+                    final Map<String, Object> map = (Map<String, Object>) object;
+                    final int length = (args == null ? 0 : args.length);
 
-                        if (length == 0 && name.startsWith("get")) {
-                            return map.get(property(name.substring(3)));
-                        } else if (length == 0 && name.startsWith("is")) {
-                            return map.get(property(name.substring(2)));
-                        } else if (length == 1 && name.startsWith("set")) {
-                            map.put(property(name.substring(3)), args[0]);
-                            return null;
-                        }
+                    if (length == 0 && name.startsWith("get")) {
+                        return map.get(property(name.substring(3)));
+                    } else if (length == 0 && name.startsWith("is")) {
+                        return map.get(property(name.substring(2)));
+                    } else if (length == 1 && name.startsWith("set")) {
+                        map.put(property(name.substring(3)), args[0]);
+                        return null;
                     }
-
-                    throw e;
                 }
+
+                throw e;
             }
         };
 

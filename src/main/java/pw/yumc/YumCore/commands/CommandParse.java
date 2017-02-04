@@ -1,17 +1,22 @@
 package pw.yumc.YumCore.commands;
 
+import java.io.File;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.commands.annotation.Option;
 import pw.yumc.YumCore.commands.exception.ParseException;
-
-import java.io.File;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.*;
 
 /**
  * 命令参数解析
@@ -275,11 +280,11 @@ public class CommandParse {
         }
 
         public void throwRange() {
-            throwRange(null);
+            throwRange("");
         }
 
         public void throwRange(String str) {
-            throw new ParseException(String.format(str == null ? "范围必须在 %s 到 %s 之间!" : str, min, max));
+            throw new ParseException(String.format(str.isEmpty() ? "范围必须在 %s 到 %s 之间!" : str, min, max));
         }
     }
 

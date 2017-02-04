@@ -3,17 +3,11 @@
  */
 package pw.yumc.YumCore.statistic;
 
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -24,6 +18,16 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.UUID;
+
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 /**
  * Yum数据中心 数据统计类
@@ -209,15 +213,12 @@ public class Statistics {
         // 开启TPS统计线程
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, timer, 0, 20);
         // 开启发送数据线程
-        task = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    postPlugin();
-                } catch (Throwable e) {
-                    if (debug) {
-                        e.printStackTrace();
-                    }
+        task = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, () -> {
+            try {
+                postPlugin();
+            } catch (Throwable e) {
+                if (debug) {
+                    e.printStackTrace();
                 }
             }
         }, 50, 25 * 1200);

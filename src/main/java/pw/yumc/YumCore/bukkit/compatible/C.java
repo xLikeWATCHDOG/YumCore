@@ -12,6 +12,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.scheduler.BukkitRunnable;
 import org.json.simple.JSONObject;
 
 import com.google.common.base.Charsets;
@@ -133,22 +134,18 @@ public class C {
          *            需要显示的时间
          */
         public static void broadcast(final String message, final int times) {
-            Bukkit.getScheduler().runTaskAsynchronously(P.instance, new Runnable() {
+            new BukkitRunnable() {
+                int time = times;
+
                 @Override
                 public void run() {
-                    int time = times;
-                    do {
-                        for (org.bukkit.entity.Player player : C.Player.getOnlinePlayers()) {
-                            send(player, message);
-                        }
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException ignored) {
-                        }
-                        time--;
-                    } while (time > 0);
+                    C.Player.getOnlinePlayers().forEach(player -> send(player, message));
+                    time--;
+                    if (time <= 0) {
+                        cancel();
+                    }
                 }
-            });
+            }.runTaskTimerAsynchronously(P.instance, 0, 20);
         }
 
         /**
@@ -162,25 +159,18 @@ public class C {
          *            需要显示的时间
          */
         public static void broadcast(final World world, final String message, final int times) {
-            Bukkit.getScheduler().runTaskAsynchronously(P.instance, new Runnable() {
+            new BukkitRunnable() {
+                int time = times;
+
                 @Override
                 public void run() {
-                    int time = times;
-                    do {
-                        for (org.bukkit.entity.Player player : C.Player.getOnlinePlayers()) {
-                            if (player.getWorld().getName().equalsIgnoreCase(world.getName())) {
-                                send(player, message);
-                            }
-                        }
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException ignored) {
-                        }
-                        time--;
-                    } while (time > 0);
-
+                    C.Player.getOnlinePlayers().stream().filter(player -> player.getWorld().getName().equalsIgnoreCase(world.getName())).forEach(player -> send(player, message));
+                    time--;
+                    if (time <= 0) {
+                        cancel();
+                    }
                 }
-            });
+            }.runTaskTimerAsynchronously(P.instance, 0, 20);
         }
 
         /**
@@ -206,20 +196,18 @@ public class C {
          *            需要显示的时间
          */
         public static void send(final org.bukkit.entity.Player receivingPacket, final String msg, final int times) {
-            Bukkit.getScheduler().runTaskAsynchronously(P.instance, new Runnable() {
+            new BukkitRunnable() {
+                int time = times;
+
                 @Override
                 public void run() {
-                    int time = times;
-                    do {
-                        send(receivingPacket, msg);
-                        try {
-                            Thread.sleep(1000);
-                        } catch (InterruptedException ignored) {
-                        }
-                        time--;
-                    } while (time > 0);
+                    send(receivingPacket, msg);
+                    time--;
+                    if (time <= 0) {
+                        cancel();
+                    }
                 }
-            });
+            }.runTaskTimerAsynchronously(P.instance, 0, 20);
         }
     }
 
@@ -369,11 +357,7 @@ public class C {
          *            子标题
          */
         public static void broadcast(World world, String title, String subtitle) {
-            for (org.bukkit.entity.Player player : Player.getOnlinePlayers()) {
-                if (player.getWorld().getName().equalsIgnoreCase(world.getName())) {
-                    send(player, title, subtitle);
-                }
-            }
+            C.Player.getOnlinePlayers().stream().filter(player -> player.getWorld().getName().equalsIgnoreCase(world.getName())).forEach(player -> send(player, title, subtitle));
         }
 
         /**

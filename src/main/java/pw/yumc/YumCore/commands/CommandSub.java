@@ -3,7 +3,6 @@ package pw.yumc.YumCore.commands;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -110,10 +109,10 @@ public class CommandSub implements TabExecutor {
      */
     private void buildCmdNameCache() {
         cmdNameCache.clear();
-        for (CommandInfo cmd : cmds) {
+        cmds.forEach(cmd -> {
             cmdNameCache.add(cmd.getName());
             cmdNameCache.addAll(Arrays.asList(cmd.getCommand().aliases()));
-        }
+        });
         cmdNameCache.add("help");
     }
 
@@ -156,12 +155,8 @@ public class CommandSub implements TabExecutor {
         String lastWord = args[args.length - 1];
         Player senderPlayer = sender instanceof Player ? (Player) sender : null;
         List<String> matchedPlayers = new ArrayList<>();
-        for (Player player : C.Player.getOnlinePlayers()) {
-            String name = player.getName();
-            if ((senderPlayer == null || senderPlayer.canSee(player)) && StringUtil.startsWithIgnoreCase(name, lastWord)) {
-                matchedPlayers.add(name);
-            }
-        }
+        C.Player.getOnlinePlayers().stream().filter(player -> (senderPlayer == null || senderPlayer.canSee(player)) && StringUtil.startsWithIgnoreCase(player.getName(), lastWord)).forEach(
+                player -> matchedPlayers.add(player.getName()));
         return matchedPlayers;
     }
 
@@ -208,11 +203,9 @@ public class CommandSub implements TabExecutor {
         if (args.length == 1) {
             StringUtil.copyPartialMatches(token, cmdNameCache, completions);
         }
-        for (CommandTabInfo tab : tabs) {
-            StringUtil.copyPartialMatches(token, tab.execute(sender, token, args), completions);
-        }
+        tabs.forEach(tab -> StringUtil.copyPartialMatches(token, tab.execute(sender, token, args), completions));
         StringUtil.copyPartialMatches(token, getPlayerTabComplete(sender, command, alias, args), completions);
-        Collections.sort(completions, String.CASE_INSENSITIVE_ORDER);
+        completions.sort(String.CASE_INSENSITIVE_ORDER);
         return completions;
     }
 

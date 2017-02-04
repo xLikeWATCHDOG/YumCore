@@ -1,6 +1,7 @@
 package pw.yumc.YumCore.bukkit;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -276,9 +277,7 @@ public class Log {
      *            消息
      */
     public static void sender(CommandSender sender, String[] msg) {
-        for (String str : msg) {
-            sender(sender, str);
-        }
+        Arrays.stream(msg).forEach(str -> sender(sender, str));
     }
 
     /**

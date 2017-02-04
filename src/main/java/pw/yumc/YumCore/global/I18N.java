@@ -53,23 +53,20 @@ public class I18N {
      * 载入数据
      */
     private static void load() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Map<String, String> local = YumConfig.getLocal(LANG).getContentMap();
-                    Map<String, String> remote = YumConfig.getRemote(LANG).getContentMap();
-                    if (local != null) {
-                        content.putAll(local);
-                    }
-                    if (remote != null) {
-                        content.putAll(remote);
-                    }
-                    Log.i("本地化工具初始化完毕...");
-                } catch (Exception e) {
-                    Log.w("本地化工具初始化失败: %s %s", e.getClass().getName(), e.getMessage());
-                    Log.d(LANG, e);
+        new Thread(() -> {
+            try {
+                Map<String, String> local = YumConfig.getLocal(LANG).getContentMap();
+                Map<String, String> remote = YumConfig.getRemote(LANG).getContentMap();
+                if (local != null) {
+                    content.putAll(local);
                 }
+                if (remote != null) {
+                    content.putAll(remote);
+                }
+                Log.i("本地化工具初始化完毕...");
+            } catch (Exception e) {
+                Log.w("本地化工具初始化失败: %s %s", e.getClass().getName(), e.getMessage());
+                Log.d(LANG, e);
             }
         }).start();
     }

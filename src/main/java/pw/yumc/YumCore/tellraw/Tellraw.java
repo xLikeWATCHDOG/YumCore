@@ -268,9 +268,7 @@ public class Tellraw implements Cloneable {
     public Tellraw tip(List<String> texts) {
         if (texts.isEmpty()) { return this; }
         StringBuilder text = new StringBuilder();
-        for (String t : texts) {
-            text.append(t).append("\n");
-        }
+        texts.forEach(t -> text.append(t).append("\n"));
         return tip(text.toString().substring(0, text.length() - 1));
     }
 
@@ -344,9 +342,7 @@ public class Tellraw implements Cloneable {
      */
     public String toOldMessageFormat() {
         StringBuilder result = new StringBuilder();
-        for (MessagePart part : messageParts) {
-            result.append(part.text);
-        }
+        messageParts.forEach(part -> result.append(part.text));
         return result.toString();
     }
 

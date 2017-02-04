@@ -115,25 +115,22 @@ public class L10N {
      * 载入数据
      */
     private static void load() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Map<String, String> local = YumConfig.getLocal(CONFIG_NAME).getContentMap();
-                    if (local != null) {
-                        Log.i("本地汉化文件词条数量: " + local.size());
-                        content.putAll(local);
-                    }
-                    Map<String, String> remote = YumConfig.getRemote(CONFIG_NAME).getContentMap();
-                    if (remote != null) {
-                        Log.i("远程汉化文件词条数量: " + remote.size());
-                        content.putAll(remote);
-                    }
-                    Log.i("本地化工具初始化完毕...");
-                } catch (Exception e) {
-                    Log.w("本地化工具初始化失败: %s %s", e.getClass().getName(), e.getMessage());
-                    Log.d(CONFIG_NAME, e);
+        new Thread(() -> {
+            try {
+                Map<String, String> local = YumConfig.getLocal(CONFIG_NAME).getContentMap();
+                if (local != null) {
+                    Log.i("本地汉化文件词条数量: " + local.size());
+                    content.putAll(local);
                 }
+                Map<String, String> remote = YumConfig.getRemote(CONFIG_NAME).getContentMap();
+                if (remote != null) {
+                    Log.i("远程汉化文件词条数量: " + remote.size());
+                    content.putAll(remote);
+                }
+                Log.i("本地化工具初始化完毕...");
+            } catch (Exception e) {
+                Log.w("本地化工具初始化失败: %s %s", e.getClass().getName(), e.getMessage());
+                Log.d(CONFIG_NAME, e);
             }
         }).start();
     }

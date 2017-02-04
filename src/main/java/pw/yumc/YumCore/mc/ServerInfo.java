@@ -55,8 +55,7 @@ public class ServerInfo {
      * @return 是否获取成功
      */
     public boolean fetchData() {
-        try {
-            Socket socket = new Socket();
+        try (Socket socket = new Socket()) {
             OutputStream outputStream;
             DataOutputStream dataOutputStream;
             InputStream inputStream;

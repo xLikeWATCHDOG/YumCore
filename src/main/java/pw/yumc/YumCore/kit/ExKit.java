@@ -14,7 +14,7 @@ public class ExKit {
      *            异常
      */
     public static void throwException(final Throwable exception) {
-        ExKit.<RuntimeException> throwExceptionT(exception);
+        ExKit.throwExceptionT(exception);
     }
 
     /**
@@ -29,6 +29,6 @@ public class ExKit {
      */
     @SuppressWarnings("unchecked")
     private static <T extends Throwable> void throwExceptionT(final Throwable exception) throws T {
-        throw (T) exception;
+        if (exception != null) { throw (T) exception; }
     }
 }

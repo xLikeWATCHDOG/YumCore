@@ -1,7 +1,15 @@
 package pw.yumc.YumCore.commands.info;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.commands.CommandParse;
@@ -10,14 +18,11 @@ import pw.yumc.YumCore.commands.annotation.Cmd;
 import pw.yumc.YumCore.commands.annotation.Cmd.Executor;
 import pw.yumc.YumCore.commands.annotation.Help;
 import pw.yumc.YumCore.commands.annotation.Sort;
-import pw.yumc.YumCore.commands.exception.*;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import pw.yumc.YumCore.commands.exception.ArgumentException;
+import pw.yumc.YumCore.commands.exception.CommandException;
+import pw.yumc.YumCore.commands.exception.ParseException;
+import pw.yumc.YumCore.commands.exception.PermissionException;
+import pw.yumc.YumCore.commands.exception.SenderException;
 
 /**
  * 命令信息存储类
@@ -122,16 +127,13 @@ public class CommandInfo {
     public boolean execute(final CommandSender sender, final String label, final String[] args) {
         if (method == null) { return false; }
         check(sender, label, args);
-        Runnable runnable = new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    method.invoke(origin, parse.parse(sender, label, args));
-                } catch (ParseException | ArgumentException e) {
-                    Log.sender(sender, argErr, e.getMessage());
-                } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                    throw new CommandException(e);
-                }
+        Runnable runnable = () -> {
+            try {
+                method.invoke(origin, parse.parse(sender, label, args));
+            } catch (ParseException | ArgumentException e) {
+                Log.sender(sender, argErr, e.getMessage());
+            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+                throw new CommandException(e);
             }
         };
         if (async) {

@@ -54,7 +54,7 @@ public class KeyValue {
      * @return 所有的键
      */
     public String[] getKeys() {
-        return this.keyvalues.keySet().toArray(new String[0]);
+        return this.keyvalues.keySet().toArray(new String[] {});
     }
 
     /**
@@ -79,7 +79,7 @@ public class KeyValue {
         for (Entry<Object, Object> next : this.keyvalues.entrySet()) {
             keys.add(next.getValue());
         }
-        return keys.toArray(new Object[0]);
+        return keys.toArray(new Object[keys.size()]);
     }
 
     /**
