@@ -19,7 +19,6 @@ import pw.yumc.YumCore.commands.annotation.Cmd.Executor;
 import pw.yumc.YumCore.commands.annotation.Help;
 import pw.yumc.YumCore.commands.annotation.Sort;
 import pw.yumc.YumCore.commands.exception.ArgumentException;
-import pw.yumc.YumCore.commands.exception.CommandException;
 import pw.yumc.YumCore.commands.exception.ParseException;
 import pw.yumc.YumCore.commands.exception.PermissionException;
 import pw.yumc.YumCore.commands.exception.SenderException;
@@ -133,7 +132,7 @@ public class CommandInfo {
             } catch (ParseException | ArgumentException e) {
                 Log.sender(sender, argErr, e.getMessage());
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-                throw new CommandException(e);
+                throw new RuntimeException(e);
             }
         };
         if (async) {

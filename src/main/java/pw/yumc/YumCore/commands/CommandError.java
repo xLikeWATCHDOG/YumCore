@@ -1,6 +1,7 @@
 package pw.yumc.YumCore.commands;
 
 import org.bukkit.command.CommandSender;
+
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.commands.exception.ArgumentException;
 import pw.yumc.YumCore.commands.exception.CommandException;
@@ -10,6 +11,8 @@ import pw.yumc.YumCore.commands.info.CommandInfo;
 import pw.yumc.YumCore.commands.interfaces.ErrorHanlder;
 
 /**
+ * 命令错误处理
+ * 
  * @author 喵♂呜
  * @since 2016/11/27 0027
  */
