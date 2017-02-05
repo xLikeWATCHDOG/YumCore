@@ -419,7 +419,7 @@ public class C {
                     Object packet;
                     // Send if set
                     if ((fadeInTime != -1) && (fadeOutTime != -1) && (stayTime != -1)) {
-                        packet = packetTitleSendConstructor.newInstance(actions[2], null, fadeInTime * 20, stayTime * 20, fadeOutTime * 20);
+                        packet = packetTitleSetTimeConstructor.newInstance(actions[2], null, fadeInTime * 20, stayTime * 20, fadeOutTime * 20);
                         sendPacket.invoke(connection, packet);
                     }
                     // Send title
