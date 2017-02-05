@@ -139,7 +139,7 @@ public class P {
             jar.stream().forEach(je -> {
                 if (!je.isDirectory()) {
                     for (final String dir : dirs) {
-                        if (je.getName().startsWith(dir)) {
+                        if (je.getName().startsWith(dir) && !new File(getDataFolder(), je.getName()).exists()) {
                             instance.saveResource(je.getName(), false);
                         }
                     }
