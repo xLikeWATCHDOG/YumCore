@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.bukkit.ChatColor;
@@ -67,32 +68,21 @@ public abstract class AbstractInjectConfig {
      * @throws NoSuchMethodException
      * @throws SecurityException
      */
-    private Object convertType(Class<?> type, String path, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException {
-        Object result = InjectParse.parse(type, config, path);
-        return result == null ? hanldeDefault(type, path, value) : result;
-    }
-
-    /**
-     * 默认类型处理流程
-     *
-     * @param path
-     *            路径
-     * @param field
-     *            字段
-     * @param value
-     *            值
-     * @return 解析后的Value
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InstantiationException
-     * @throws InvocationTargetException
-     * @throws NoSuchMethodException
-     * @throws SecurityException
-     */
-    private Object hanldeDefault(Class<?> field, String path, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException {
-        if (InjectConfigurationSection.class.isAssignableFrom(field)) {
+    private Object convertType(Class type, String path, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException {
+        switch (type.getName()) {
+        case "java.lang.Integer":
+            return Integer.valueOf(value.toString());
+        }
+        if (type.isEnum()) {
+            try {
+                return Enum.valueOf(type, value.toString());
+            } catch (IllegalArgumentException | NullPointerException ex) {
+                throw new ConfigParseException(String.format("值 %s 无效! %s 有效值为 %s", value, type.getSimpleName(), Arrays.toString(type.getEnumConstants())));
+            }
+        }
+        if (InjectConfigurationSection.class.isAssignableFrom(type)) {
             if (config.isConfigurationSection(path)) {
-                Constructor<?> constructor = field.getDeclaredConstructor(ConfigurationSection.class);
+                Constructor<?> constructor = type.getDeclaredConstructor(ConfigurationSection.class);
                 constructor.setAccessible(true);
                 return constructor.newInstance(config.getConfigurationSection(path));
             }
@@ -118,8 +108,8 @@ public abstract class AbstractInjectConfig {
      * @throws IllegalArgumentException
      * @throws IllegalAccessException
      */
-    private void hanldeValue(String path, Field field, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException, ConfigParseException {
-        Class<?> type = field.getType();
+    private void hanldeValue(Field field, String path, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException, ConfigParseException {
+        Class type = field.getType();
         if (!type.equals(value.getClass())) {
             value = convertType(type, path, value);
         }
@@ -134,7 +124,7 @@ public abstract class AbstractInjectConfig {
     }
 
     /**
-     * 配置注入后的初始化操作(对象初始化也要在此处)
+     * 配置注入后的初始化操作(非注入对象初始化也要在此处)
      */
     protected void init() {
     }
@@ -224,7 +214,7 @@ public abstract class AbstractInjectConfig {
      *            字段
      */
     protected void setField(String path, Field field) {
-        Object value = config.get(path);
+        Object value = InjectParse.parse(field.getType(), config, path);
         try {
             Default def = field.getAnnotation(Default.class);
             if (value == null && def != null) {
@@ -237,7 +227,7 @@ public abstract class AbstractInjectConfig {
                 }
                 return;
             }
-            hanldeValue(path, field, value);
+            hanldeValue(field, path, value);
         } catch (IllegalArgumentException ex) {
             Log.w(INJECT_TYPE_ERROR, path, field.getType().getName(), value != null ? value.getClass().getName() : "空指针");
             Log.d(ex);
