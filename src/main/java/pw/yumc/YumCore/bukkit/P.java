@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.util.jar.JarFile;
 import java.util.logging.Logger;
 
@@ -128,10 +129,22 @@ public class P {
      *            目录
      */
     public static void saveFile(final String... dirs) {
+        saveFile(false, dirs);
+    }
+
+    /**
+     * 保存文件
+     * 
+     * @param replace
+     *            是否替换
+     * @param dirs
+     *            目录
+     */
+    public static void saveFile(boolean replace, final String... dirs) {
         URL url = instance.getClass().getClassLoader().getResource("plugin.yml");
         if (url == null) { return; }
         String upath = url.getFile().substring(url.getFile().indexOf("/") + 1);
-        String jarPath = upath.substring(0, upath.indexOf('!'));
+        String jarPath = URLDecoder.decode(upath.substring(0, upath.indexOf('!')));
         if (!new File(jarPath).exists()) {
             jarPath = "/" + jarPath;
         }
@@ -139,8 +152,15 @@ public class P {
             jar.stream().forEach(je -> {
                 if (!je.isDirectory()) {
                     for (final String dir : dirs) {
-                        if (je.getName().startsWith(dir) && !new File(getDataFolder(), je.getName()).exists()) {
-                            instance.saveResource(je.getName(), false);
+                        if (je.getName().startsWith(dir)) {
+                            if (!replace) {
+                                // 不替换 并且文件不存在
+                                if (!new File(getDataFolder(), je.getName()).exists()) {
+                                    instance.saveResource(je.getName(), false);
+                                }
+                            } else {
+                                instance.saveResource(je.getName(), true);
+                            }
                         }
                     }
                 }
