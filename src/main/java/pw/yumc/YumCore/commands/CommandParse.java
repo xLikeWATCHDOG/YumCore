@@ -2,6 +2,7 @@ package pw.yumc.YumCore.commands;
 
 import java.io.File;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,7 +11,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -29,12 +29,7 @@ public class CommandParse {
     private boolean isMain;
     private List<Parse> parse = new LinkedList<>();
     static {
-        new BooleanParse();
         new FileParse();
-        new IntegerParse();
-        new DoubleParse();
-        new LongParse();
-        new MaterialParse();
         new PlayerParse();
         new StringParse();
     }
@@ -46,8 +41,9 @@ public class CommandParse {
             Class clazz = classes[i];
             Annotation[] annotations = annons[i];
             Parse parse = allparses.get(clazz);
-            if (clazz.isEnum()) {
-                parse = new EnumParse(clazz);
+            try {
+                parse = new ValueOfParse(clazz, clazz.getDeclaredMethod("valueOf", String.class));
+            } catch (NoSuchMethodException ignored) {
             }
             if (parse == null) { throw new ParseException(String.format("存在无法解析的参数类型 %s", clazz.getName())); }
             this.parse.add(parse.clone().parseAnnotation(annotations).handleAttrs());
@@ -93,134 +89,11 @@ public class CommandParse {
                 }
                 pobjs.add(param == null ? null : p.parse(sender, param));
             } catch (Exception e) {
-                throw new ParseException(String.format("第 %s 个参数 ", isMain ? 1 : 2 + i) + e.getMessage());
+                throw new ParseException(String.format("第 %s 个参数 %s", isMain ? 1 : 2 + i, e.getMessage()));
             }
         }
         Log.d("解析参数: %s => %s", Arrays.toString(args), pobjs);
         return pobjs.toArray();
-    }
-
-    public static class BooleanParse extends Parse<Boolean> {
-        public BooleanParse() {
-            register(Boolean.class, this);
-            register(boolean.class, this);
-        }
-
-        @Override
-        public Boolean parse(CommandSender sender, String arg) {
-            try {
-                return Boolean.parseBoolean(arg);
-            } catch (Exception e) {
-                throw new ParseException("必须为True或者False!", e);
-            }
-        }
-    }
-
-    public static class EnumParse extends Parse<Enum> {
-        Enum[] elist;
-        Class<Enum> etype;
-
-        public EnumParse(Class<Enum> etype) {
-            this.etype = etype;
-            this.elist = etype.getEnumConstants();
-        }
-
-        @Override
-        public Enum parse(CommandSender sender, String arg) {
-            try {
-                return Enum.valueOf(etype, arg);
-            } catch (IllegalArgumentException ex) {
-                throw new ParseException(String.format("不是 %s 有效值为 %s", etype.getSimpleName(), Arrays.toString(elist)));
-            }
-        }
-    }
-
-    public static class FileParse extends Parse<File> {
-        public FileParse() {
-            register(File.class, this);
-        }
-
-        @Override
-        public File parse(CommandSender sender, String arg) throws ParseException {
-            File file = new File(arg);
-            if (attrs.containsKey("check") && !file.exists()) { throw new ParseException("文件 " + arg + " 不存在!"); }
-            return file;
-        }
-    }
-
-    public static class IntegerParse extends Parse<Integer> {
-        public IntegerParse() {
-            register(Integer.class, this);
-            register(int.class, this);
-        }
-
-        @Override
-        public Integer parse(CommandSender sender, String arg) {
-            try {
-                int result = Integer.parseInt(arg);
-                if (min > result || result > max) {
-                    throwRange();
-                }
-                return result;
-            } catch (NumberFormatException e) {
-                throw new ParseException("必须为数字!", e);
-            }
-        }
-    }
-
-    public static class DoubleParse extends Parse<Double> {
-        public DoubleParse() {
-            register(Double.class, this);
-            register(double.class, this);
-        }
-
-        @Override
-        public Double parse(CommandSender sender, String arg) {
-            try {
-                double result = Double.parseDouble(arg);
-                if (min > result || result > max) {
-                    throwRange();
-                }
-                return result;
-            } catch (NumberFormatException e) {
-                throw new ParseException("必须为数字!", e);
-            }
-        }
-    }
-
-    public static class LongParse extends Parse<Long> {
-        public LongParse() {
-            register(Long.class, this);
-            register(long.class, this);
-        }
-
-        @Override
-        public Long parse(CommandSender sender, String arg) {
-            try {
-                long result = Long.parseLong(arg);
-                if (min > result || result > max) {
-                    throwRange();
-                }
-                return result;
-            } catch (NumberFormatException e) {
-                throw new ParseException("必须为数字!", e);
-            }
-        }
-    }
-
-    public static class MaterialParse extends Parse<Material> {
-        public MaterialParse() {
-            register(Material.class, this);
-        }
-
-        @Override
-        public Material parse(CommandSender sender, String arg) {
-            try {
-                return Material.valueOf(arg);
-            } catch (Exception e) {
-                throw new ParseException(String.format("%s 不是一个有效的Material枚举", arg), e);
-            }
-        }
     }
 
     public static abstract class Parse<RT> implements Cloneable {
@@ -275,16 +148,68 @@ public class CommandParse {
             return this;
         }
 
-        public void throwException(String str, Object... objects) {
+        public <T> T throwException(String str, Object... objects) {
             throw new ParseException(String.format(str, objects));
         }
 
-        public void throwRange() {
-            throwRange("");
+        public <T> T throwRange() {
+            return throwRange("");
         }
 
-        public void throwRange(String str) {
-            throw new ParseException(String.format(str.isEmpty() ? "范围必须在 %s 到 %s 之间!" : str, min, max));
+        public <T> T throwRange(String str) {
+            return throwException(str.isEmpty() ? "范围必须在 %s 到 %s 之间!" : str, min, max);
+        }
+    }
+
+    public static class ValueOfParse extends Parse<Object> {
+        private Class etype;
+        private Enum[] elist;
+        private Method method;
+        private Method checker;
+
+        public ValueOfParse(Class etype, Method method) {
+            this.etype = etype;
+            try {
+                checker = etype.getDeclaredMethod("doubleValue");
+            } catch (NoSuchMethodException ignored) {
+            }
+            this.method = method;
+            if (etype.isEnum()) {
+                this.elist = ((Class<Enum>) etype).getEnumConstants();
+            }
+        }
+
+        @Override
+        public Object parse(CommandSender sender, String arg) {
+            try {
+                Object result = method.invoke(null, arg);
+                if (checker != null) {
+                    double num = (double) checker.invoke(result);
+                    if (min > num || num > max) {
+                        throwRange();
+                    }
+                }
+                return result;
+            } catch (IllegalArgumentException | InvocationTargetException | IllegalAccessException ex) {
+                if (etype.isEnum() && elist.length < 21) {
+                    return throwException("%s 不是 %s 有效值为 %s", arg, etype.getSimpleName(), Arrays.toString(elist));
+                } else {
+                    return throwException("%s 不是一个有效的 %s", arg, etype.getSimpleName());
+                }
+            }
+        }
+    }
+
+    public static class FileParse extends Parse<File> {
+        public FileParse() {
+            register(File.class, this);
+        }
+
+        @Override
+        public File parse(CommandSender sender, String arg) throws ParseException {
+            File file = new File(arg);
+            if (attrs.containsKey("check") && !file.exists()) { throw new ParseException("文件 " + arg + " 不存在!"); }
+            return file;
         }
     }
 
@@ -298,7 +223,7 @@ public class CommandParse {
         @Override
         public Player parse(CommandSender sender, String arg) {
             Player p = Bukkit.getPlayerExact(arg);
-            if (check && p == null) { throw new ParseException("玩家 " + arg + " 不存在或不在线!"); }
+            if (check && p == null) { return throwException("玩家 %s 不存在或不在线!", arg); }
             return p;
         }
 
@@ -318,12 +243,8 @@ public class CommandParse {
 
         @Override
         public String parse(CommandSender sender, String arg) {
-            if (min > arg.length() || arg.length() > max) {
-                throwRange("长度必须在 %s 和 %s 之间!");
-            }
-            if (options != null && !options.contains(arg)) {
-                throwException("参数 %s 不是一个有效的选项 有效值为 %s", arg, options);
-            }
+            if (min > arg.length() || arg.length() > max) { return throwRange("长度必须在 %s 和 %s 之间!"); }
+            if (options != null && !options.contains(arg)) { return throwException("参数 %s 不是一个有效的选项 有效值为 %s", arg, options); }
             return arg;
         }
 
