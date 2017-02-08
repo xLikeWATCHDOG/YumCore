@@ -10,12 +10,15 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 
+import pw.yumc.YumCore.annotation.NotProguard;
+
 /**
  * 插件日志输出类
  *
  * @author 喵♂呜
  * @since 2016年7月23日 上午9:11:01
  */
+@NotProguard
 public class Log {
     private static boolean globalDebug = new File(String.format("plugins%1$sYumCore%1$sdebug", File.separatorChar)).exists();
     private static boolean debug = globalDebug || P.getDescription().getVersion().contains("DEV");
