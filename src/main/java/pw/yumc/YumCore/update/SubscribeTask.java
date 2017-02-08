@@ -283,6 +283,8 @@ public class SubscribeTask implements Runnable, Listener {
             String result = def;
             try {
                 result = document.getElementsByTagName(tag).item(0).getTextContent();
+            } catch (NullPointerException ignored) {
+                Log.d("当前插件不存在标签 %s 使用默认值 %s !", tag, def);
             } catch (Exception e) {
                 Log.d(e);
             }
