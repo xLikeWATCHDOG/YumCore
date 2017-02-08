@@ -5,7 +5,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 
 import org.bukkit.ChatColor;
@@ -68,17 +67,10 @@ public abstract class AbstractInjectConfig {
      * @throws NoSuchMethodException
      * @throws SecurityException
      */
-    private Object convertType(Class type, String path, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException {
-        switch (type.getName()) {
-        case "java.lang.Integer":
-            return Integer.valueOf(value.toString());
-        }
-        if (type.isEnum()) {
-            try {
-                return Enum.valueOf(type, value.toString());
-            } catch (IllegalArgumentException | NullPointerException ex) {
-                throw new ConfigParseException(String.format("值 %s 无效! %s 有效值为 %s", value, type.getSimpleName(), Arrays.toString(type.getEnumConstants())));
-            }
+    private Object convertType(Class type, String path, Object value) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        try {
+            return type.getDeclaredMethod("valueOf", String.class).invoke(null, value);
+        } catch (NoSuchMethodException | IllegalArgumentException ignored) {
         }
         if (InjectConfigurationSection.class.isAssignableFrom(type)) {
             if (config.isConfigurationSection(path)) {
