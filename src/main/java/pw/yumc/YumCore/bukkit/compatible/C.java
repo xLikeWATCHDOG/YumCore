@@ -90,7 +90,9 @@ public class C {
      * @param json
      *            Json信息
      * @param type
-     *            类型(0=>消息 2=>ActionBar)
+     *            类型
+     *            0. 消息
+     *            2. ActionBar
      */
     public static void sendJson(org.bukkit.entity.Player receivingPacket, String json, int type) {
         Object packet;

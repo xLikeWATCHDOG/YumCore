@@ -83,7 +83,7 @@ public class CommandKit {
      *            命令名称
      * @param aliases
      *            别名
-     * @return
+     * @return {@link PluginCommand}
      */
     public static PluginCommand create(JavaPlugin plugin, String name, String... aliases) {
         try {

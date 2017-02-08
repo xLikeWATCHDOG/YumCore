@@ -550,6 +550,7 @@ public class Reflect {
      *
      * @param <T>
      *            A convenience generic parameter for automatic unsafe casting
+     * @return cast Type Object
      */
     public <T> T get() {
         return (T) object;
