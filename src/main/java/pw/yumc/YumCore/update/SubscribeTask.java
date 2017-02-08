@@ -8,6 +8,9 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -297,8 +300,12 @@ public class SubscribeTask implements Runnable, Listener {
          * @return 插件更新记录
          */
         public String[] getUpdateChanges() {
-            final String des = getPluginInfo("update.changes", "无版本更新信息...");
-            return ChatColor.translateAlternateColorCodes('&', des).replaceAll("\n", "").replaceAll("\u0009", "").split(";");
+            final String des = getPluginInfo("update.changes", null);
+            if (des == null) { return new String[] {}; }
+            String[] temp = ChatColor.translateAlternateColorCodes('&', des).replaceAll("\n", "").replaceAll("\u0009", "").split(";");
+            List<String> ltemp = new ArrayList<>();
+            Arrays.stream(temp).forEach(s -> ltemp.add(s.trim()));
+            return ltemp.toArray(new String[] {});
         }
 
         /**
