@@ -200,7 +200,7 @@ public class SubscribeTask implements Runnable, Listener {
         }
     }
 
-    static class UpdateFile {
+    public static class UpdateFile {
         public File parent;
         public File target;
         public File temp;
@@ -247,7 +247,7 @@ public class SubscribeTask implements Runnable, Listener {
         }
     }
 
-    static class VersionInfo {
+    public static class VersionInfo {
         /**
          * 直链POM
          */
