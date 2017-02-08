@@ -103,6 +103,7 @@ public class CommandInfo {
     public static CommandInfo parse(Method method, Object origin) {
         Cmd command = method.getAnnotation(Cmd.class);
         if (command != null) {
+            method.setAccessible(true);
             Help help = method.getAnnotation(Help.class);
             Async async = method.getAnnotation(Async.class);
             Sort sort = method.getAnnotation(Sort.class);
