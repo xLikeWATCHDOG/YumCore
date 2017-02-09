@@ -17,6 +17,7 @@ import org.json.simple.JSONObject;
 
 import com.google.common.base.Charsets;
 
+import pw.yumc.YumCore.annotation.NotProguard;
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 
@@ -121,6 +122,7 @@ public class C {
          * @param message
          *            需要发送的消息
          */
+        @NotProguard
         public static void broadcast(String message) {
             for (org.bukkit.entity.Player player : C.Player.getOnlinePlayers()) {
                 send(player, message);
@@ -135,6 +137,7 @@ public class C {
          * @param times
          *            需要显示的时间
          */
+        @NotProguard
         public static void broadcast(final String message, final int times) {
             new BukkitRunnable() {
                 int time = times;
@@ -160,6 +163,7 @@ public class C {
          * @param times
          *            需要显示的时间
          */
+        @NotProguard
         public static void broadcast(final World world, final String message, final int times) {
             new BukkitRunnable() {
                 int time = times;
@@ -183,6 +187,7 @@ public class C {
          * @param msg
          *            ActionBar信息
          */
+        @NotProguard
         public static void send(org.bukkit.entity.Player receivingPacket, String msg) {
             sendJson(receivingPacket, "{\"text\":\"" + ChatColor.translateAlternateColorCodes('&', JSONObject.escape(msg)) + "\"}", 2);
         }
@@ -197,6 +202,7 @@ public class C {
          * @param times
          *            需要显示的时间
          */
+        @NotProguard
         public static void send(final org.bukkit.entity.Player receivingPacket, final String msg, final int times) {
             new BukkitRunnable() {
                 int time = times;
@@ -271,6 +277,7 @@ public class C {
          *            玩家名称
          * @return {@link OfflinePlayer}
          */
+        @NotProguard
         public static OfflinePlayer getOfflinePlayer(String playerName) {
             try {
                 Object gameProfile = gameProfileConstructor.newInstance(UUID.nameUUIDFromBytes(("OfflinePlayer:" + playerName).getBytes(Charsets.UTF_8)), playerName);
@@ -286,6 +293,7 @@ public class C {
          *
          * @return 在线玩家
          */
+        @NotProguard
         public static Collection<? extends org.bukkit.entity.Player> getOnlinePlayers() {
             try {
                 return Arrays.asList((org.bukkit.entity.Player[]) getOnlinePlayers.invoke(null));
@@ -322,6 +330,7 @@ public class C {
          * @param subtitle
          *            子标题
          */
+        @NotProguard
         public static void broadcast(String title, String subtitle) {
             for (org.bukkit.entity.Player player : Player.getOnlinePlayers()) {
                 send(player, title, subtitle);
@@ -342,6 +351,7 @@ public class C {
          * @param fadeOutTime
          *            淡出时间
          */
+        @NotProguard
         public static void broadcast(String title, String subtitle, int fadeInTime, int stayTime, int fadeOutTime) {
             for (org.bukkit.entity.Player player : Player.getOnlinePlayers()) {
                 send(player, title, subtitle, fadeInTime, stayTime, fadeOutTime);
@@ -358,6 +368,7 @@ public class C {
          * @param subtitle
          *            子标题
          */
+        @NotProguard
         public static void broadcast(World world, String title, String subtitle) {
             C.Player.getOnlinePlayers().stream().filter(player -> player.getWorld().getName().equalsIgnoreCase(world.getName())).forEach(player -> send(player, title, subtitle));
         }
@@ -370,6 +381,7 @@ public class C {
          * @throws Exception
          *             异常
          */
+        @NotProguard
         public static void reset(org.bukkit.entity.Player recoverPlayer) throws Exception {
             // Send timings first
             Object player = getHandle.invoke(recoverPlayer);
@@ -389,6 +401,7 @@ public class C {
          * @param subtitle
          *            子标题
          */
+        @NotProguard
         public static void send(org.bukkit.entity.Player receivingPacket, String title, String subtitle) {
             send(receivingPacket, title, subtitle, 1, 2, 1);
         }
@@ -409,6 +422,7 @@ public class C {
          * @param fadeOutTime
          *            淡出时间
          */
+        @NotProguard
         public static void send(org.bukkit.entity.Player receivingPacket, String title, String subtitle, int fadeInTime, int stayTime, int fadeOutTime) {
             if (packetTitle != null) {
                 try {
