@@ -20,6 +20,7 @@ import pw.yumc.YumCore.annotation.NotProguard;
  */
 @NotProguard
 public class Log {
+    private static boolean fullDebug = new File(String.format("plugins%1$sYumCore%1$sfulldebug", File.separatorChar)).exists();
     private static boolean globalDebug = new File(String.format("plugins%1$sYumCore%1$sdebug", File.separatorChar)).exists();
     private static boolean debug = globalDebug || P.getDescription().getVersion().contains("DEV");
     private static Logger logger = P.instance.getLogger();
@@ -126,6 +127,57 @@ public class Log {
      */
     public static void d(String msg, Throwable e) {
         if (debug) {
+            logger.info("[DEBUG] " + msg);
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 完全调试消息
+     *
+     * @param msg
+     *            消息
+     */
+    public static void fd(String msg) {
+        if (fullDebug) {
+            logger.info("[DEBUG] " + msg);
+        }
+    }
+
+    /**
+     * 完全调试消息
+     *
+     * @param msg
+     *            消息
+     * @param object
+     *            参数
+     */
+    public static void fd(String msg, Object... object) {
+        fd(String.format(msg, object));
+    }
+
+    /**
+     * 完全调试消息
+     *
+     * @param e
+     *            异常
+     */
+    public static void fd(Throwable e) {
+        if (fullDebug) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 完全调试消息
+     *
+     * @param msg
+     *            消息
+     * @param e
+     *            异常
+     */
+    public static void fd(String msg, Throwable e) {
+        if (fullDebug) {
             logger.info("[DEBUG] " + msg);
             e.printStackTrace();
         }
