@@ -9,12 +9,15 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.charset.Charset;
 
+import pw.yumc.YumCore.annotation.NotProguard;
+
 /**
  * Minecraft服务器数据获取类
  * 
  * @author 喵♂呜
  * @since 2017/1/26 0026
  */
+@NotProguard
 public class ServerInfo {
     private String address = "localhost";
     private int port = 25565;

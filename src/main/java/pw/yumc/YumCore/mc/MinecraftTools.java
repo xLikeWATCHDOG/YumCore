@@ -1,11 +1,14 @@
 package pw.yumc.YumCore.mc;
 
+import pw.yumc.YumCore.annotation.NotProguard;
+
 /**
  * Minecraft工具类
  * 
  * @author 喵♂呜
  * @since 2017/1/26 0026
  */
+@NotProguard
 public class MinecraftTools {
     /**
      * 获得服务器信息
