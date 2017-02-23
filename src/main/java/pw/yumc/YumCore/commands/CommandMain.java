@@ -15,9 +15,7 @@ import org.bukkit.command.PluginCommand;
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.commands.annotation.Help;
-import pw.yumc.YumCore.commands.exception.CommandException;
 import pw.yumc.YumCore.commands.info.CommandInfo;
-import pw.yumc.YumCore.commands.interfaces.ErrorHanlder;
 import pw.yumc.YumCore.commands.interfaces.Executor;
 import pw.yumc.YumCore.commands.interfaces.HelpGenerator;
 
@@ -41,10 +39,6 @@ public class CommandMain implements CommandExecutor {
      * 命令帮助处理
      */
     private CommandHelp help;
-    /**
-     * 命令错误处理
-     */
-    private ErrorHanlder commandErrorHanlder = new CommandError();
     /**
      * 帮助页生成
      */
@@ -133,12 +127,7 @@ public class CommandMain implements CommandExecutor {
             return true;
         }
         CommandInfo manager = getByCache(label);
-        try {
-            return manager != null && manager.execute(sender, label, args);
-        } catch (CommandException e) {
-            commandErrorHanlder.error(e, sender, manager, label, args);
-        }
-        return false;
+        return manager != null && manager.execute(sender, label, args);
     }
 
     private class MainHelpGenerator extends CommandHelp.DefaultHelpGenerator {

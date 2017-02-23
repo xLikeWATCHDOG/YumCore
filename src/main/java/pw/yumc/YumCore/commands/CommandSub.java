@@ -20,7 +20,6 @@ import org.bukkit.util.StringUtil;
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.bukkit.compatible.C;
-import pw.yumc.YumCore.commands.exception.CommandException;
 import pw.yumc.YumCore.commands.info.CommandInfo;
 import pw.yumc.YumCore.commands.info.CommandTabInfo;
 import pw.yumc.YumCore.commands.interfaces.ErrorHanlder;
@@ -46,10 +45,6 @@ public class CommandSub implements TabExecutor {
      * 插件命令
      */
     private PluginCommand cmd;
-    /**
-     * 命令错误处理
-     */
-    private ErrorHanlder commandErrorHanlder = new CommandError();
     /**
      * 插件实例类
      */
@@ -188,12 +183,7 @@ public class CommandSub implements TabExecutor {
         } else {
             subargs = moveStrings(args);
         }
-        try {
-            return cmd.execute(sender, label, subargs);
-        } catch (CommandException e) {
-            commandErrorHanlder.error(e, sender, cmd, label, subargs);
-        }
-        return false;
+        return cmd.execute(sender, label, subargs);
     }
 
     @Override
@@ -293,7 +283,7 @@ public class CommandSub implements TabExecutor {
      * @return {@link CommandSub}
      */
     public CommandSub setCommandErrorHanlder(ErrorHanlder commandErrorHanlder) {
-        this.commandErrorHanlder = commandErrorHanlder;
+        cmds.forEach(commandInfo -> commandInfo.setCommandErrorHandler(commandErrorHanlder));
         return this;
     }
 

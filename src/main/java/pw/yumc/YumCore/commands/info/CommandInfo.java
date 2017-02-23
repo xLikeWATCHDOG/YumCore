@@ -10,8 +10,8 @@ import java.util.Objects;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 
-import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
+import pw.yumc.YumCore.commands.CommandError;
 import pw.yumc.YumCore.commands.CommandParse;
 import pw.yumc.YumCore.commands.annotation.Async;
 import pw.yumc.YumCore.commands.annotation.Cmd;
@@ -19,9 +19,10 @@ import pw.yumc.YumCore.commands.annotation.Cmd.Executor;
 import pw.yumc.YumCore.commands.annotation.Help;
 import pw.yumc.YumCore.commands.annotation.Sort;
 import pw.yumc.YumCore.commands.exception.ArgumentException;
-import pw.yumc.YumCore.commands.exception.ParseException;
+import pw.yumc.YumCore.commands.exception.CommandException;
 import pw.yumc.YumCore.commands.exception.PermissionException;
 import pw.yumc.YumCore.commands.exception.SenderException;
+import pw.yumc.YumCore.commands.interfaces.ErrorHanlder;
 
 /**
  * 命令信息存储类
@@ -31,7 +32,6 @@ import pw.yumc.YumCore.commands.exception.SenderException;
  */
 public class CommandInfo {
     public static CommandInfo Unknow = new CommandInfo();
-    private static String argErr = "§c参数错误: §4%s";
     private static Help defHelp = new Help() {
         @Override
         public Class<? extends Annotation> annotationType() {
@@ -60,6 +60,10 @@ public class CommandInfo {
     private Help help;
     private int sort;
     private CommandParse parse;
+    /**
+     * 命令错误处理
+     */
+    private ErrorHanlder commandErrorHandler = new CommandError();
 
     public CommandInfo(Method method, Object origin, Cmd command, Help help, boolean async, int sort, CommandParse parse) {
         this.method = method;
@@ -126,12 +130,12 @@ public class CommandInfo {
      */
     public boolean execute(final CommandSender sender, final String label, final String[] args) {
         if (method == null) { return false; }
-        check(sender, label, args);
         Runnable runnable = () -> {
             try {
+                check(sender, label, args);
                 method.invoke(origin, parse.parse(sender, label, args));
-            } catch (ParseException | ArgumentException e) {
-                Log.sender(sender, argErr, e.getMessage());
+            } catch (CommandException e) {
+                commandErrorHandler.error(e, sender, this, label, args);
             } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
@@ -216,6 +220,16 @@ public class CommandInfo {
      */
     public void setMain() {
         this.main = true;
+    }
+
+    /**
+     * 设置命令错误处理器
+     * 
+     * @param commandErrorHandler
+     *            命令错误处理器
+     */
+    public void setCommandErrorHandler(ErrorHanlder commandErrorHandler) {
+        this.commandErrorHandler = commandErrorHandler;
     }
 
     @Override
