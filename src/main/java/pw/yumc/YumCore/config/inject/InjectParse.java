@@ -54,9 +54,8 @@ public class InjectParse {
 
         @Override
         public Date parse(ConfigurationSection config, String path) {
-            String value = "0000-00-00 00:00:00";
+            String value = config.getString(path) == null ? "0000-00-00 00:00:00" : config.getString(path);
             try {
-                value = config.getString(path);
                 return df.parse(value);
             } catch (ParseException e) {
                 throw new ConfigParseException(String.format(DATE_PARSE_ERROR, path, DATE_FORMAT, value), e);
