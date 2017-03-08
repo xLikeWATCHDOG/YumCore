@@ -1,6 +1,5 @@
 package pw.yumc.YumCore.config.inject;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
@@ -51,39 +50,6 @@ public abstract class AbstractInjectConfig {
     }
 
     /**
-     * 转换字段值类型
-     *
-     * @param type
-     *            字段类型
-     * @param path
-     *            配置路径
-     * @param value
-     *            字段值
-     * @return 转换后的值
-     * @throws IllegalAccessException
-     * @throws IllegalArgumentException
-     * @throws InstantiationException
-     * @throws InvocationTargetException
-     * @throws NoSuchMethodException
-     * @throws SecurityException
-     */
-    private Object convertType(Class type, String path, Object value) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        try {
-            return type.getDeclaredMethod("valueOf", String.class).invoke(null, value);
-        } catch (NoSuchMethodException | IllegalArgumentException ignored) {
-        }
-        if (InjectConfigurationSection.class.isAssignableFrom(type)) {
-            if (config.isConfigurationSection(path)) {
-                Constructor<?> constructor = type.getDeclaredConstructor(ConfigurationSection.class);
-                constructor.setAccessible(true);
-                return constructor.newInstance(config.getConfigurationSection(path));
-            }
-            Log.w(INJECT_TYPE_ERROR, path, ConfigurationSection.class.getName(), value.getClass().getName());
-        }
-        return value;
-    }
-
-    /**
      * 处理值
      *
      * @param path
@@ -103,7 +69,7 @@ public abstract class AbstractInjectConfig {
     private void hanldeValue(Field field, String path, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException, ConfigParseException {
         Class type = field.getType();
         if (!type.equals(value.getClass())) {
-            value = convertType(type, path, value);
+            value = InjectParse.parse(type, config, path);
         }
         if (type.equals(String.class)) {
             value = ChatColor.translateAlternateColorCodes('&', String.valueOf(value));
@@ -206,18 +172,19 @@ public abstract class AbstractInjectConfig {
      *            字段
      */
     protected void setField(String path, Field field) {
-        Object value = InjectParse.parse(field.getType(), config, path);
+        Object value = null;
         try {
-            Default def = field.getAnnotation(Default.class);
-            if (value == null && def != null) {
-                value = def.value();
-            }
-            if (value == null) {
-                if (field.getAnnotation(Nullable.class) == null) {
+            if (!config.contains(path)) {
+                Default def = field.getAnnotation(Default.class);
+                if (def != null) {
+                    value = def.value();
+                } else if (field.getAnnotation(Nullable.class) == null) {
                     Log.w(PATH_NOT_FOUND, path);
                     applyDefault(field);
                 }
-                return;
+                if (value == null) { return; }
+            } else {
+                value = config.get(path);
             }
             hanldeValue(field, path, value);
         } catch (IllegalArgumentException ex) {

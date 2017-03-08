@@ -1,5 +1,7 @@
 package pw.yumc.YumCore.config.inject;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -31,8 +33,21 @@ public class InjectParse {
         new DateFormatParse();
     }
 
-    public static Object parse(Class clazz, ConfigurationSection config, String path) {
-        return allparse.containsKey(clazz) ? allparse.get(clazz).parse(config, path) : config.get(path);
+    public static Object parse(Class type, ConfigurationSection config, String path) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        if (allparse.containsKey(type)) { return allparse.get(type).parse(config, path); }
+        Object value = config.get(path);
+        try {
+            return type.getDeclaredMethod("valueOf", String.class).invoke(null, value);
+        } catch (NoSuchMethodException | IllegalArgumentException ignored) {
+        }
+        if (InjectConfigurationSection.class.isAssignableFrom(type)) {
+            if (config.isConfigurationSection(path)) {
+                Constructor<?> constructor = type.getDeclaredConstructor(ConfigurationSection.class);
+                constructor.setAccessible(true);
+                return constructor.newInstance(config.getConfigurationSection(path));
+            }
+        }
+        return value;
     }
 
     /**
