@@ -114,7 +114,7 @@ public abstract class AbstractInjectConfig {
         this.config = config;
         for (Field field : getClass().getDeclaredFields()) {
             // 忽略瞬态字段 忽略基础字段 忽略内联字段
-            if (Modifier.isTransient(field.getModifiers()) || field.getType().isPrimitive() || field.getName().startsWith("this$")) {
+            if (Modifier.isTransient(field.getModifiers()) || field.getType().isPrimitive() || field.getType().isSynthetic()) {
                 continue;
             }
             ConfigNode node = field.getAnnotation(ConfigNode.class);
