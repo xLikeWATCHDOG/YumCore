@@ -26,12 +26,21 @@ import pw.yumc.YumCore.commands.exception.ParseException;
  */
 public class CommandParse {
     private static Map<Class, Parse> allparses = new HashMap<>();
+    private static Map<String, Class> primitiveMap = new HashMap<>();
     private boolean isMain;
     private List<Parse> parse = new LinkedList<>();
     static {
-        new FileParse();
-        new PlayerParse();
-        new StringParse();
+        register(File.class, new FileParse());
+        register(Player.class, new PlayerParse());
+        register(String.class, new StringParse());
+        primitiveMap.put("boolean", Boolean.class);
+        primitiveMap.put("byte", Byte.class);
+        primitiveMap.put("char", Character.class);
+        primitiveMap.put("short", Short.class);
+        primitiveMap.put("int", Integer.class);
+        primitiveMap.put("long", Long.class);
+        primitiveMap.put("float", Float.class);
+        primitiveMap.put("double", Double.class);
     }
 
     public CommandParse(Class[] classes, Annotation[][] annons, boolean isMain) {
@@ -39,15 +48,24 @@ public class CommandParse {
         // 第一个参数实现了CommandSender忽略
         for (int i = 1; i < classes.length; i++) {
             Class clazz = classes[i];
+            if (clazz.isPrimitive()) {
+                // boolean, byte, char, short, int, long, float, and double.
+                clazz = primitiveMap.get(clazz.getName());
+            }
             Annotation[] annotations = annons[i];
-            Parse parse = allparses.get(clazz);
-            try {
-                parse = new ValueOfParse(clazz, clazz.getDeclaredMethod("valueOf", String.class));
-            } catch (NoSuchMethodException ignored) {
+            Parse parse = null;
+            if (allparses.containsKey(clazz)) {
+                parse = allparses.get(clazz);
+            } else {
+                try {
+                    parse = new ValueOfParse(clazz, clazz.getDeclaredMethod("valueOf", String.class));
+                } catch (NoSuchMethodException ignored) {
+                }
             }
             if (parse == null) { throw new ParseException(String.format("存在无法解析的参数类型 %s", clazz.getName())); }
             this.parse.add(parse.clone().parseAnnotation(annotations).handleAttrs());
         }
+        Log.d("命令解析器 %s", String.valueOf(parse));
     }
 
     public static CommandParse get(Method method) {
@@ -201,10 +219,6 @@ public class CommandParse {
     }
 
     public static class FileParse extends Parse<File> {
-        public FileParse() {
-            register(File.class, this);
-        }
-
         @Override
         public File parse(CommandSender sender, String arg) throws ParseException {
             File file = new File(arg);
@@ -215,10 +229,6 @@ public class CommandParse {
 
     public static class PlayerParse extends Parse<Player> {
         boolean check = false;
-
-        public PlayerParse() {
-            register(Player.class, this);
-        }
 
         @Override
         public Player parse(CommandSender sender, String arg) {
@@ -236,10 +246,6 @@ public class CommandParse {
 
     public static class StringParse extends Parse<String> {
         List<String> options;
-
-        public StringParse() {
-            register(String.class, this);
-        }
 
         @Override
         public String parse(CommandSender sender, String arg) {
