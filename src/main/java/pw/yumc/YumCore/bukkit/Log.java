@@ -2,6 +2,7 @@ package pw.yumc.YumCore.bukkit;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -362,5 +363,25 @@ public class Log {
      */
     public static boolean isGlobalDebug() {
         return globalDebug;
+    }
+
+    public static String osn(List<?> classes) {
+        StringBuilder str = new StringBuilder("[");
+        classes.forEach(c -> str.append(c.getClass().getSimpleName()).append(", "));
+        return classes.isEmpty() ? "[]" : str.substring(0, str.length() - 2) + "]";
+    }
+
+    public static String osn(Object... classes) {
+        return osn(Arrays.asList(classes));
+    }
+
+    public static String csn(List<Class> classes) {
+        StringBuilder str = new StringBuilder("[");
+        classes.forEach(c -> str.append(c.getSimpleName()).append(", "));
+        return classes.isEmpty() ? "[]" : str.substring(0, str.length() - 2) + "]";
+    }
+
+    public static String csn(Class[] classes) {
+        return csn(Arrays.asList(classes));
     }
 }

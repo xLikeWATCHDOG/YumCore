@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Arrays;
 
 import pw.yumc.YumCore.bukkit.Log;
 
@@ -59,12 +60,12 @@ public abstract class DataBaseCore {
      *             SQL执行异常
      */
     public boolean execute(String sql, Object... obj) throws SQLException {
-        debug(sql);
+        debug(sql, obj);
         PreparedStatement ps = prepareStatement(sql);
         for (int i = 0; i < obj.length; i++) {
             ps.setObject(i + 1, obj[i]);
         }
-        boolean result = ps.execute(sql);
+        boolean result = ps.execute();
         ps.close();
         return result;
     }
@@ -99,6 +100,24 @@ public abstract class DataBaseCore {
     }
 
     /**
+     * 查询数据库
+     *
+     * @param sql
+     *            SQL查询语句
+     * @return 查询结果
+     * @throws SQLException
+     *             SQL查询异常
+     */
+    public ResultSet query(String sql, Object[] params) throws SQLException {
+        debug(sql, params);
+        PreparedStatement pst = prepareStatement(sql);
+        for (int i = 0; i < params.length; i++) {
+            pst.setObject(i + 1, params[i]);
+        }
+        return pst.executeQuery();
+    }
+
+    /**
      * 更新数据库内的数据
      *
      * @param sql
@@ -127,14 +146,38 @@ public abstract class DataBaseCore {
      *             SQL执行异常
      */
     public int update(String sql, Object[] obj) throws SQLException {
-        debug(sql);
+        debug(sql, obj);
         PreparedStatement ps = prepareStatement(sql);
         for (int i = 0; i < obj.length; i++) {
             ps.setObject(i + 1, obj[i]);
         }
-        int result = ps.executeUpdate(sql);
+        int result = ps.executeUpdate();
         ps.close();
         return result;
+    }
+
+    /**
+     * 获得数据操作对象
+     *
+     * @return 操作对象
+     * @throws SQLException
+     *             SQL执行异常
+     */
+    public Statement getStatement() throws SQLException {
+        return getConnection().createStatement();
+    }
+
+    /**
+     * 获得数据操作对象(预处理)
+     *
+     * @param sql
+     *            SQL语句
+     * @return 操作对象
+     * @throws SQLException
+     *             SQL执行异常
+     */
+    public PreparedStatement prepareStatement(String sql) throws SQLException {
+        return getConnection().prepareStatement(sql);
     }
 
     /**
@@ -158,26 +201,14 @@ public abstract class DataBaseCore {
     }
 
     /**
-     * 获得数据操作对象
-     *
-     * @return 操作对象
-     * @throws SQLException
-     *             SQL执行异常
-     */
-    protected Statement getStatement() throws SQLException {
-        return getConnection().createStatement();
-    }
-
-    /**
-     * 获得数据操作对象(预处理)
-     *
+     * SQL调试消息
+     * 
      * @param sql
      *            SQL语句
-     * @return 操作对象
-     * @throws SQLException
-     *             SQL执行异常
+     * @param params
+     *            参数
      */
-    protected PreparedStatement prepareStatement(String sql) throws SQLException {
-        return getConnection().prepareStatement(sql);
+    private void debug(String sql, Object... params) {
+        Log.d("[SQL] %s 参数: %s", sql, Arrays.toString(params));
     }
 }

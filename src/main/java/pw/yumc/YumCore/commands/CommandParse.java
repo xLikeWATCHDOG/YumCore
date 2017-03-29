@@ -65,7 +65,7 @@ public class CommandParse {
             if (parse == null) { throw new ParseException(String.format("存在无法解析的参数类型 %s", clazz.getName())); }
             this.parse.add(parse.clone().parseAnnotation(annotations).handleAttrs());
         }
-        Log.d("命令解析器 %s", String.valueOf(parse));
+        Log.d("命令解析器 %s", Log.osn(parse));
     }
 
     public static CommandParse get(Method method) {
@@ -110,7 +110,7 @@ public class CommandParse {
                 throw new ParseException(String.format("第 %s 个参数 %s", isMain ? 1 : 2 + i, e.getMessage()));
             }
         }
-        Log.d("解析参数: %s => %s", Arrays.toString(args), pobjs);
+        Log.d("解析参数: %s => %s", Arrays.toString(args), Log.osn(pobjs));
         return pobjs.toArray();
     }
 

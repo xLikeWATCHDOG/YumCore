@@ -78,7 +78,7 @@ public class CommandMain implements CommandExecutor {
         if (ci != null) {
             injectPluginCommand(ci);
             Class[] params = method.getParameterTypes();
-            Log.d("注册主命令 %s 参数类型: %s", ci.getName(), Arrays.toString(params));
+            Log.d("注册主命令 %s 参数类型: %s", ci.getName(), Log.csn(params));
             try {
                 Class<? extends CommandSender> sender = params[0];
                 cmds.add(ci);
