@@ -24,7 +24,7 @@ import pw.yumc.YumCore.config.exception.ConfigParseException;
  */
 public abstract class AbstractInjectConfig {
     private static String INJECT_TYPE_ERROR = "配置节点 %s 数据类型不匹配 应该为: %s 但实际为: %s!";
-    private static String INJECT_ERROR = "自动注入配置失败 可能造成插件运行错误 %s: %s!";
+    private static String INJECT_ERROR = "配置节点 %s 自动注入失败 可能造成插件运行错误 %s: %s!";
     private static String PATH_NOT_FOUND = "配置节点 %s 丢失 将使用默认值!";
     protected ConfigurationSection config;
 
@@ -69,12 +69,12 @@ public abstract class AbstractInjectConfig {
     private void hanldeValue(Field field, String path, Object value) throws IllegalAccessException, IllegalArgumentException, InstantiationException, InvocationTargetException, NoSuchMethodException, SecurityException, ConfigParseException {
         Class type = field.getType();
         if (!type.equals(value.getClass())) {
-            value = InjectParse.parse(type, config, path);
+            value = InjectParse.parse(type, value, config, path);
         }
         if (type.equals(String.class)) {
             value = ChatColor.translateAlternateColorCodes('&', String.valueOf(value));
         }
-        if (value != null && !type.isAssignableFrom(value.getClass())) {
+        if (!type.isAssignableFrom(value.getClass())) {
             Log.w("字段 %s 默认类型为 %s 但解析后为 %s 可能存在转换错误!", field.getName(), type.getName(), value.getClass().getName());
         }
         field.set(this, value);
@@ -182,10 +182,10 @@ public abstract class AbstractInjectConfig {
                     Log.w(PATH_NOT_FOUND, path);
                     applyDefault(field);
                 }
-                if (value == null) { return; }
             } else {
                 value = config.get(path);
             }
+            if (value == null) { return; }
             hanldeValue(field, path, value);
         } catch (IllegalArgumentException ex) {
             Log.w(INJECT_TYPE_ERROR, path, field.getType().getName(), value != null ? value.getClass().getName() : "空指针");
@@ -193,7 +193,7 @@ public abstract class AbstractInjectConfig {
         } catch (ConfigParseException e) {
             Log.w(e.getMessage());
         } catch (InstantiationException | InvocationTargetException | NoSuchMethodException | SecurityException | IllegalAccessException ex) {
-            Log.w(INJECT_ERROR, ex.getClass().getName(), ex.getMessage());
+            Log.w(INJECT_ERROR, path, ex.getClass().getName(), ex.getMessage());
             Log.d(ex);
         }
     }
