@@ -1,14 +1,11 @@
 package pw.yumc.YumCore.engine;
 
 import java.io.Reader;
+import java.util.HashMap;
 
-import javax.script.Bindings;
-import javax.script.Invocable;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineFactory;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
+import javax.script.*;
+
+import pw.yumc.YumCore.bukkit.P;
 
 /**
  * 喵式脚本引擎
@@ -18,7 +15,20 @@ import javax.script.ScriptException;
  */
 public class MiaoScriptEngine implements ScriptEngine, Invocable {
     private static MiaoScriptEngine DEFAULT;
+    private static ScriptEngineManager manager;
     private ScriptEngine engine;
+
+    static {
+        manager = new ScriptEngineManager(P.getPlugin().getClass().getClassLoader());
+    }
+
+    public static void setBindings(Bindings bindings) {
+        manager.setBindings(bindings);
+    }
+
+    public static Bindings getBindings() {
+        return manager.getBindings();
+    }
 
     public MiaoScriptEngine() {
         this("js");
@@ -26,22 +36,22 @@ public class MiaoScriptEngine implements ScriptEngine, Invocable {
 
     public MiaoScriptEngine(final String engineType) {
         try {
-            engine = new ScriptEngineManager().getEngineByName(engineType);
+            engine = manager.getEngineByName(engineType);
         } catch (final NullPointerException ex) {
-            engine = new ScriptEngineManager().getEngineByName("javascript");
+            engine = manager.getEngineByName("javascript");
         }
     }
 
     public static MiaoScriptEngine getDefault() {
         if (DEFAULT == null) {
-            DEFAULT = new MiaoScriptEngine("javascript");
+            DEFAULT = new MiaoScriptEngine();
         }
         return DEFAULT;
     }
 
     @Override
     public Bindings createBindings() {
-        return engine.createBindings();
+        return new SimpleBindings(new HashMap<>(engine.getBindings(ScriptContext.GLOBAL_SCOPE)));
     }
 
     @Override
