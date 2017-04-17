@@ -3,9 +3,14 @@ package pw.yumc.YumCore.engine;
 import java.io.Reader;
 import java.util.HashMap;
 
-import javax.script.*;
-
-import pw.yumc.YumCore.bukkit.P;
+import javax.script.Bindings;
+import javax.script.Invocable;
+import javax.script.ScriptContext;
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineFactory;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import javax.script.SimpleBindings;
 
 /**
  * 喵式脚本引擎
@@ -19,7 +24,7 @@ public class MiaoScriptEngine implements ScriptEngine, Invocable {
     private ScriptEngine engine;
 
     static {
-        manager = new ScriptEngineManager(P.getPlugin().getClass().getClassLoader());
+        manager = new ScriptEngineManager();
     }
 
     public static void setBindings(Bindings bindings) {
