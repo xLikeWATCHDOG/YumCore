@@ -25,14 +25,14 @@ import pw.yumc.YumCore.commands.exception.ParseException;
  * @since 2016年10月5日 下午4:02:04
  */
 public class CommandParse {
-    private static Map<Class, Parse> allparses = new HashMap<>();
+    private static Map<Class, Class> allparses = new HashMap<>();
     private static Map<String, Class> primitiveMap = new HashMap<>();
     private boolean isMain;
-    private List<Parse> parse = new LinkedList<>();
+    private List<Parse> parses = new LinkedList<>();
     static {
-        register(File.class, new FileParse());
-        register(Player.class, new PlayerParse());
-        register(String.class, new StringParse());
+        register(File.class, FileParse.class);
+        register(Player.class, PlayerParse.class);
+        register(String.class, StringParse.class);
         primitiveMap.put("boolean", Boolean.class);
         primitiveMap.put("byte", Byte.class);
         primitiveMap.put("char", Character.class);
@@ -55,7 +55,10 @@ public class CommandParse {
             Annotation[] annotations = annons[i];
             Parse parse = null;
             if (allparses.containsKey(clazz)) {
-                parse = allparses.get(clazz);
+                try {
+                    parse = (Parse) allparses.get(clazz).newInstance();
+                } catch (InstantiationException | IllegalAccessException | NullPointerException ignored) {
+                }
             } else {
                 try {
                     parse = new ValueOfParse(clazz, clazz.getDeclaredMethod("valueOf", String.class));
@@ -63,9 +66,9 @@ public class CommandParse {
                 }
             }
             if (parse == null) { throw new ParseException(String.format("存在无法解析的参数类型 %s", clazz.getName())); }
-            this.parse.add(parse.clone().parseAnnotation(annotations).handleAttrs());
+            this.parses.add(parse.parseAnnotation(annotations).handleAttrs());
         }
-        Log.d("命令解析器 %s", Log.osn(parse));
+        Log.d("命令解析器 %s", Log.osn(parses));
     }
 
     public static CommandParse get(Method method) {
@@ -90,23 +93,24 @@ public class CommandParse {
         return str.length() > split.length() ? str.toString().substring(0, str.length() - split.length()) : str.toString();
     }
 
-    public static void register(Class clazz, Parse parse) {
+    public static void register(Class clazz, Class parse) {
         allparses.put(clazz, parse);
     }
 
     public Object[] parse(CommandSender sender, String label, String[] args) {
         List<Object> pobjs = new LinkedList<>();
         pobjs.add(sender);
-        for (int i = 0; i < parse.size(); i++) {
+        for (int i = 0; i < parses.size(); i++) {
             try {
-                Parse p = parse.get(i);
-                String param = i < args.length ? args[i] : p.def;
+                Parse p = parses.get(i);
+                String param = i < args.length ? args[i] : p.getDefault();
                 // 参数大于解析器 并且为最后一个参数
-                if (i + 1 == parse.size() && args.length >= parse.size()) {
+                if (i + 1 == parses.size() && args.length >= parses.size()) {
                     param = join(Arrays.copyOfRange(args, i, args.length), " ");
                 }
                 pobjs.add(param == null ? null : p.parse(sender, param));
             } catch (Exception e) {
+                Log.fd(e);
                 throw new ParseException(String.format("第 %s 个参数 %s", isMain ? 1 : 2 + i, e.getMessage()));
             }
         }
@@ -114,20 +118,11 @@ public class CommandParse {
         return pobjs.toArray();
     }
 
-    public static abstract class Parse<RT> implements Cloneable {
+    public static abstract class Parse<RT> {
         protected Map<String, String> attrs = new HashMap<>();
         protected String def;
         protected int max = Integer.MAX_VALUE;
         protected int min = 0;
-
-        @Override
-        public Parse<RT> clone() {
-            try {
-                return (Parse<RT>) super.clone();
-            } catch (CloneNotSupportedException e) {
-                return null;
-            }
-        }
 
         public String getDefault() {
             return def;
@@ -158,9 +153,11 @@ public class CommandParse {
         public Parse<RT> handleAttrs() {
             if (attrs.containsKey("def")) {
                 def = String.valueOf(attrs.get("def"));
-            } else if (attrs.containsKey("min")) {
+            }
+            if (attrs.containsKey("min")) {
                 min = Integer.parseInt(String.valueOf(attrs.get("min")));
-            } else if (attrs.containsKey("max")) {
+            }
+            if (attrs.containsKey("max")) {
                 max = Integer.parseInt(String.valueOf(attrs.get("max")));
             }
             return this;
@@ -170,8 +167,8 @@ public class CommandParse {
             throw new ParseException(String.format(str, objects));
         }
 
-        public <T> T throwRange() {
-            return throwRange("");
+        public void throwRange() {
+            throwRange("");
         }
 
         public <T> T throwRange(String str) {
@@ -239,6 +236,7 @@ public class CommandParse {
 
         @Override
         public Parse<Player> handleAttrs() {
+            super.handleAttrs();
             check = attrs.containsKey("check");
             return this;
         }
@@ -256,6 +254,7 @@ public class CommandParse {
 
         @Override
         public Parse<String> handleAttrs() {
+            super.handleAttrs();
             if (attrs.containsKey("option")) {
                 options = Arrays.asList(attrs.get("option").split(","));
             }

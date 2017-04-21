@@ -367,7 +367,7 @@ public class Log {
 
     public static String osn(List<?> classes) {
         StringBuilder str = new StringBuilder("[");
-        classes.forEach(c -> str.append(c.getClass().getSimpleName()).append(", "));
+        classes.forEach(c -> str.append(c == null ? null : c.getClass().getSimpleName()).append(", "));
         return classes.isEmpty() ? "[]" : str.substring(0, str.length() - 2) + "]";
     }
 
@@ -377,7 +377,7 @@ public class Log {
 
     public static String csn(List<Class> classes) {
         StringBuilder str = new StringBuilder("[");
-        classes.forEach(c -> str.append(c.getSimpleName()).append(", "));
+        classes.forEach(c -> str.append(c == null ? null : c.getSimpleName()).append(", "));
         return classes.isEmpty() ? "[]" : str.substring(0, str.length() - 2) + "]";
     }
 
