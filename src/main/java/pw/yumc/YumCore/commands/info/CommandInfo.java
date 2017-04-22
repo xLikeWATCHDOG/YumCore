@@ -58,7 +58,7 @@ public class CommandInfo {
     private boolean main;
     private Cmd command;
     private Help help;
-    private int sort;
+    private Integer sort;
     private CommandParse parse;
     /**
      * 命令错误处理
@@ -179,7 +179,7 @@ public class CommandInfo {
     /**
      * @return 命令排序
      */
-    public int getSort() {
+    public Integer getSort() {
         return sort;
     }
 

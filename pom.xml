@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>pw.yumc</groupId>
     <artifactId>YumCore</artifactId>
-    <version>1.7</version>
+    <version>1.8</version>
     <build>
         <finalName>${project.artifactId}</finalName>
         <plugins>
@@ -50,10 +50,6 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
     <repositories>
-        <repository>
-            <id>spigot-repo</id>
-            <url>https://hub.spigotmc.org/nexus/content/groups/public/</url>
-        </repository>
         <repository>
             <id>yumc-repo</id>
             <url>http://repo.yumc.pw/content/groups/public/</url>

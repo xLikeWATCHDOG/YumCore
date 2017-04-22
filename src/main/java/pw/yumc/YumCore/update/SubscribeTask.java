@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLDecoder;
@@ -30,6 +31,7 @@ import org.xml.sax.SAXException;
 
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.tellraw.Tellraw;
+import pw.yumc.YumCore.text.Encrypt;
 
 /**
  * 自动更新程序
@@ -61,21 +63,7 @@ public class SubscribeTask implements Runnable, Listener {
      */
     private static int interval = 25;
 
-    /**
-     * 直链下载
-     */
-    private static String direct = d("­­¥l`c¢c«¦¡g¥©`¨dWbX¬h¡¤¨®§¬ªs©¢¥a¦­¢¨h­¤­hZcU§g£¤");
-    // private static String direct = "http://ci.yumc.pw/job/%1$s/lastSuccessfulBuild/artifact/target/%1$s.jar";
-
-    /**
-     * 构建下载
-     */
-    private static String maven = d("­­¥l`c¢c«¦¡g¥©`¤¥®c«¥¡¤­¨§«`¯§«¥¢§aVe]¬dWcX¬hZeU§f^gV¤b£§");
-    // private static String maven = "http://ci.yumc.pw/plugin/repository/everything/%1$s/%2$s/%3$s-%2$s.jar";
-    /**
-     * 是否为Maven
-     */
-    private boolean isMaven;
+    private UpdateType updateType;
     /**
      * 更新文件
      */
@@ -89,17 +77,17 @@ public class SubscribeTask implements Runnable, Listener {
      * 自动更新
      */
     public SubscribeTask() {
-        this(false);
+        this(UpdateType.DIRECT);
     }
 
     /**
      * 自动更新
      *
-     * @param isMaven
+     * @param type
      *            是否为Maven
      */
-    public SubscribeTask(boolean isMaven) {
-        this(false, isMaven);
+    public SubscribeTask(UpdateType type) {
+        this(false, type);
     }
 
     /**
@@ -107,11 +95,11 @@ public class SubscribeTask implements Runnable, Listener {
      *
      * @param isSecret
      *            是否为私有
-     * @param isMaven
-     *            是否为Maven
+     * @param type
+     *            更新类型
      */
-    public SubscribeTask(boolean isSecret, boolean isMaven) {
-        this("master", isSecret, isMaven);
+    public SubscribeTask(boolean isSecret, UpdateType type) {
+        this("master", isSecret, type);
     }
 
     /**
@@ -121,13 +109,13 @@ public class SubscribeTask implements Runnable, Listener {
      *            更新分支
      * @param isSecret
      *            是否为私有
-     * @param isMaven
-     *            是否为Maven
+     * @param type
+     *            更新类型
      */
-    public SubscribeTask(String branch, boolean isSecret, boolean isMaven) {
+    public SubscribeTask(String branch, boolean isSecret, UpdateType type) {
         updateFile = new UpdateFile(instance);
         versionInfo = new VersionInfo(branch, isSecret);
-        this.isMaven = isMaven;
+        updateType = type;
         if (instance.isEnabled()) {
             Bukkit.getPluginManager().registerEvents(this, instance);
             Bukkit.getScheduler().runTaskTimerAsynchronously(instance, this, 0, interval * 1200);
@@ -140,30 +128,6 @@ public class SubscribeTask implements Runnable, Listener {
         if (player.isOp() && updateFile.isUpdated()) {
             Bukkit.getScheduler().runTaskLater(instance, () -> versionInfo.notify(player), 10);
         }
-    }
-
-    /**
-     * 解密地址
-     *
-     * @param s
-     *            密串
-     * @return 解密后的地址
-     */
-    public static String d(String s) {
-        String key = "499521";
-        StringBuilder str = new StringBuilder();
-        int ch;
-        for (int i = 0, j = 0; i < s.length(); i++, j++) {
-            if (j > key.length() - 1) {
-                j = j % key.length();
-            }
-            ch = (s.codePointAt(i) + 65535 - key.codePointAt(j));
-            if (ch > 65535) {
-                ch = ch % 65535;// ch - 33 = (ch - 33) % 95 ;
-            }
-            str.append((char) ch);
-        }
-        return str.toString();
     }
 
     @Override
@@ -185,18 +149,46 @@ public class SubscribeTask implements Runnable, Listener {
                         Log.d(e);
                     }
                 }
-                String download;
-                if (isMaven) {
-                    download = String.format(maven, instance.getClass().getPackage().getName().replaceAll("\\.", "/"), result, instance.getName());
-                } else {
-                    download = String.format(direct, instance.getName());
-                }
-                updateFile.update(download);
-                Log.d(d("©¦¢ sUW¤T¯^¨R£Y¯Z¥Qbgg"), instance.getName(), version.split("-")[0], result);
+                updateFile.update(updateType.getDownloadUrl(instance, result));
+                Log.d(Encrypt.decode("嘊⚲哀嘖⚶哅嘣⚩咖嗕♧哏嗕⚸咁嘨♢咰嘤♢哒嗚⚵呼嗣♰咊"), instance.getName(), version.split("-")[0], result);
                 versionInfo.notify(Bukkit.getConsoleSender());
             }
         } catch (Exception e) {
             Log.d(e);
+        }
+    }
+
+    public enum UpdateType {
+        /**
+         * 下载直连
+         */
+        DIRECT(Encrypt.decode("嘝⚶哐嘥♼咋嗤⚥哅嗣⚻哑嘢⚥咊嘥⚹咋嘟⚱咾嗤♧咍嗙⚵咋嘡⚣哏嘩⚕哑嘘⚥品嘨⚵哂嘪⚮咞嘪⚫哈嘙♱咽嘧⚶哅嘛⚣咿嘩♱哐嘖⚴哃嘚⚶咋嗚♳咀嘨♰哆嘖⚴")),
+        // "http://ci.yumc.pw/job/%1$s/lastSuccessfulBuild/artifact/target/%1$s.jar";
+        /**
+         * Maven下载
+         */
+        MAVEN(Encrypt.decode("嘝⚶哐嘥♼咋嗤⚥哅嗣⚻哑嘢⚥咊嘥⚹咋嘥⚮哑嘜⚫哊嗤⚴品嘥⚱哏嘞⚶哋嘧⚻咋嘚⚸品嘧⚻哐嘝⚫哊嘜♱咁嗦♦哏嗤♧咎嗙⚵咋嗚♵咀嘨♯咁嗧♦哏嗣⚬咽嘧")),
+        // "http://ci.yumc.pw/plugin/repository/everything/%1$s/%2$s/%3$s-%2$s.jar";
+        /**
+         * 工作区下载
+         */
+        WS(Encrypt.decode("嘝⚶哐嘥♼咋嗤⚥哅嗣⚻哑嘢⚥咊嘥⚹咋嘟⚱咾嗤♧咍嗙⚵咋嘬⚵咋嘩⚣哎嘜⚧哐嗤♧咍嗙⚵咊嘟⚣哎"));
+        // "http://ci.yumc.pw/job/%1$s/ws/target/%1$s.jar"
+        String url;
+
+        UpdateType(String url) {
+            this.url = url;
+        }
+
+        public String getDownloadUrl(Plugin instance, String version) {
+            switch (this) {
+            case DIRECT:
+            case WS:
+                return String.format(url, instance.getName());
+            case MAVEN:
+                return String.format(url, instance.getClass().getPackage().getName().replaceAll("\\.", "/"), version, instance.getName());
+            }
+            throw new UnsupportedOperationException();
         }
     }
 
@@ -205,14 +197,17 @@ public class SubscribeTask implements Runnable, Listener {
         public File target;
         public File temp;
 
+        private String k = Encrypt.decode("嗶⚷哐嘝⚱哎嘞⚼咽嘩⚫哋嘣");
+        private String v = Encrypt.decode("嗷⚣哏嘞⚥呼嘖⚰咮嘞⚑哆嘂⚻咪嘉⚏哕嘃⚓咙嗲");
+
         public UpdateFile(Plugin plugin) {
             String name = getPluginFile(plugin).getName();
-            parent = new File(d("¤¥®§h®¥¨h"));
+            parent = new File(Encrypt.decode("嘥⚮哑嘜⚫哊嘨♱哑嘥⚦咽嘩⚧咋"));
             if (!parent.exists()) {
                 parent.mkdirs();
             }
             target = new File(parent, name);
-            temp = new File(parent, name + d("b¨¬ £ "));
+            temp = new File(parent, name + Encrypt.decode("嗣⚦哋嘬⚰哈嘤⚣哀嘞⚰哃"));
         }
 
         public boolean isUpdated() {
@@ -242,7 +237,9 @@ public class SubscribeTask implements Runnable, Listener {
         }
 
         public void update(String url) throws IOException {
-            Files.copy(new URL(url).openStream(), temp.toPath());
+            HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+            conn.setRequestProperty(k, v);
+            Files.copy(conn.getInputStream(), temp.toPath());
             temp.renameTo(target);
         }
     }
@@ -251,12 +248,12 @@ public class SubscribeTask implements Runnable, Listener {
         /**
          * 直链POM
          */
-        private String url = d("­­¥¥kch¤¢ g£¥c®hjbcjmpekcc©hZ¥`¢­d¤«h^¨a¡£¦g­");
+        private String url = Encrypt.decode("嘝⚶哐嘥⚵咖嗤♱咿嘤⚦哅嘣⚩咊嘣⚧哐嗤⚷咋嗪♲咎嗫♶咓嗥♻咎嗤⚲咋嗚⚵咋嘜⚫哐嗤⚴咽嘬♱咁嘨♱哌嘤⚯咊嘭⚯哈");
         // private static String url = "https://coding.net/u/502647092/p/%s/git/raw/%s/pom.xml";
         /**
          * 构建POM
          */
-        private String pom = d("­­¥l`c¢c«¦¡g¥©`¨dW¤c¥¨¦©¥¤®¥w§ h¤¥¦`¤¨¦cª ");
+        private String pom = Encrypt.decode("嘝⚶哐嘥♼咋嗤⚥哅嗣⚻哑嘢⚥咊嘥⚹咋嘟⚱咾嗤♧哏嗤⚮咽嘨⚶咯嘪⚥咿嘚⚵哏嘛⚷哈嗷⚷哅嘡⚦咋嘖⚴哐嘞⚨咽嘘⚶咋嘥⚱哉嗣⚺哉嘡");
         // private static String pom = "http://ci.yumc.pw/job/%s/lastSuccessfulBuild/artifact/pom.xml";
 
         /**

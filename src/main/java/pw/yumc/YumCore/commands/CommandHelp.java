@@ -70,8 +70,8 @@ public class CommandHelp {
     public CommandHelp(CommandInfo defCmd, Collection<? extends CommandInfo> list) {
         this.defCmd = defCmd;
         cmdlist = new LinkedList<>(list);
-        cmdlist.sort(new CommandNameComparator());
-        cmdlist.sort(new CommandComparator());
+        cmdlist.sort(Comparator.comparing(CommandInfo::getName));
+        cmdlist.sort(Comparator.comparing(CommandInfo::getSort));
         HELPPAGECOUNT = (int) Math.ceil((double) cmdlist.size() / LINES_PER_PAGE);
     }
 
@@ -141,38 +141,6 @@ public class CommandHelp {
      */
     public HelpGenerator getHelpGenerator() {
         return helpGenerator;
-    }
-
-    /**
-     * 命令名称比较器
-     *
-     * @since 2016年7月23日 下午4:17:18
-     * @author 喵♂呜
-     */
-    static class CommandNameComparator implements Comparator<CommandInfo> {
-        @Override
-        public int compare(CommandInfo o1, CommandInfo o2) {
-            return o1.getName().compareTo(o2.getName());
-        }
-    }
-
-    /**
-     * 命令排序比较器
-     *
-     * @since 2016年7月23日 下午4:17:18
-     * @author 喵♂呜
-     */
-    static class CommandComparator implements Comparator<CommandInfo> {
-        @Override
-        public int compare(CommandInfo o1, CommandInfo o2) {
-            if (o1.getSort() > o2.getSort()) {
-                return 1;
-            } else if (o1.getSort() == o2.getSort()) {
-                return 0;
-            } else {
-                return -1;
-            }
-        }
     }
 
     static class DefaultHelpGenerator implements HelpGenerator {
