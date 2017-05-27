@@ -36,7 +36,7 @@ public class InjectParse {
     public static Object parse(Class type, Object value, ConfigurationSection config, String path) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         if (allparse.containsKey(type)) { return allparse.get(type).parse(config, path); }
         try {
-            return type.getDeclaredMethod("valueOf", String.class).invoke(null, value);
+            return type.getDeclaredMethod("valueOf", String.class).invoke(null, String.valueOf(value));
         } catch (NoSuchMethodException | IllegalArgumentException ignored) {
         }
         if (InjectConfigurationSection.class.isAssignableFrom(type)) {
