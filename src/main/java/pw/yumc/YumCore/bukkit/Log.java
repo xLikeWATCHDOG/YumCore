@@ -23,10 +23,22 @@ import pw.yumc.YumCore.annotation.NotProguard;
 public class Log {
     private static boolean fullDebug = new File(String.format("plugins%1$sYumCore%1$sfulldebug", File.separatorChar)).exists();
     private static boolean globalDebug = new File(String.format("plugins%1$sYumCore%1$sdebug", File.separatorChar)).exists();
-    private static boolean debug = globalDebug || P.getDescription().getVersion().contains("DEV");
-    private static Logger logger = P.instance.getLogger();
-    private static CommandSender console = Bukkit.getConsoleSender();
-    private static String prefix = String.format("§6[§b%s§6]§r ", P.instance.getName());
+    private static boolean debug;
+    private static Logger logger;
+    private static CommandSender console;
+    private static String prefix;
+    static {
+        try {
+            debug = globalDebug || P.getDescription().getVersion().contains("DEV");
+            logger = P.instance.getLogger();
+            console = Bukkit.getConsoleSender();
+            prefix = String.format("§6[§b%s§6]§r ", P.instance.getName());
+        } catch (Throwable ex) {
+            logger = Logger.getLogger("YumCore");
+            debug = true;
+            d(ex);
+        }
+    }
 
     private Log() {
     }

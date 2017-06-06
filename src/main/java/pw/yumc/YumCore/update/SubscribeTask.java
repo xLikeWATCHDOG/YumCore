@@ -44,7 +44,6 @@ public class SubscribeTask implements Runnable, Listener {
      * 插件实例
      */
     private static JavaPlugin instance;
-    private static String version;
 
     static {
         try {
@@ -52,7 +51,6 @@ public class SubscribeTask implements Runnable, Listener {
             Field field = pluginClassLoader.getClass().getDeclaredField("plugin");
             field.setAccessible(true);
             instance = (JavaPlugin) field.get(pluginClassLoader);
-            version = instance.getDescription().getVersion();
         } catch (Exception e) {
             Log.d(e);
         }
@@ -114,7 +112,7 @@ public class SubscribeTask implements Runnable, Listener {
      */
     public SubscribeTask(String branch, boolean isSecret, UpdateType type) {
         updateFile = new UpdateFile(instance);
-        versionInfo = new VersionInfo(branch, isSecret);
+        versionInfo = new VersionInfo(instance, branch, isSecret);
         updateType = type;
         if (instance.isEnabled()) {
             Bukkit.getPluginManager().registerEvents(this, instance);
@@ -150,7 +148,7 @@ public class SubscribeTask implements Runnable, Listener {
                     }
                 }
                 updateFile.update(updateType.getDownloadUrl(instance, result));
-                Log.d(Encrypt.decode("嘊⚲哀嘖⚶哅嘣⚩咖嗕♧哏嗕⚸咁嘨♢咰嘤♢哒嗚⚵呼嗣♰咊"), instance.getName(), version.split("-")[0], result);
+                Log.d(Encrypt.decode("嘊⚲哀嘖⚶哅嘣⚩咖嗕♧哏嗕⚸咁嘨♢咰嘤♢哒嗚⚵呼嗣♰咊"), instance.getName(), versionInfo.getVersion(), result);
                 versionInfo.notify(Bukkit.getConsoleSender());
             }
         } catch (Exception e) {
@@ -245,6 +243,7 @@ public class SubscribeTask implements Runnable, Listener {
     }
 
     public static class VersionInfo {
+
         /**
          * 直链POM
          */
@@ -257,17 +256,33 @@ public class SubscribeTask implements Runnable, Listener {
         // private static String pom = "http://ci.yumc.pw/job/%s/lastSuccessfulBuild/artifact/pom.xml";
 
         /**
+         * 插件名称
+         */
+        private final String name;
+        /**
+         * 插件版本
+         */
+        private final String version;
+        /**
          * 插件信息地址
          */
         private String info;
-
         /**
          * POM文件文档
          */
         private Document document;
 
-        public VersionInfo(String branch, boolean isSecret) {
-            info = String.format(isSecret ? pom : url, instance.getName(), branch);
+        public VersionInfo(Plugin plugin, String branch, boolean isSecret) {
+            this.name = plugin.getName();
+            this.version = plugin.getDescription().getVersion().split("-")[0];
+            this.info = String.format(isSecret ? pom : url, name, branch);
+        }
+
+        /**
+         * @return 插件版本
+         */
+        public String getVersion() {
+            return version;
         }
 
         /**
@@ -331,7 +346,7 @@ public class SubscribeTask implements Runnable, Listener {
          *            命令接受者
          */
         public void notify(CommandSender sender) {
-            Log.sender(sender, "§a插件更新: §b" + instance.getName() + " §a已更新到最新版本 §bv" + getLastestVersion());
+            Log.sender(sender, "§a插件更新: §b" + name + " §a已更新到最新版本 §bv" + getLastestVersion());
             Log.sender(sender, "§e版本简介: §a" + getUpdateDescription());
             final String[] changes = getUpdateChanges();
             if (changes.length != 0) {
