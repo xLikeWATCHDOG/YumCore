@@ -1,28 +1,36 @@
 package pw.yumc.YumCore.plugin.protocollib;
 
-import com.comphenix.protocol.PacketType.Play.Client;
-import com.comphenix.protocol.PacketType.Play.Server;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.events.PacketListener;
-import com.comphenix.protocol.wrappers.BlockPosition;
-import com.comphenix.protocol.wrappers.WrappedBlockData;
-import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
-import pw.yumc.YumCore.bukkit.P;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import com.comphenix.protocol.PacketType;
+import com.comphenix.protocol.PacketType.Play.Client;
+import com.comphenix.protocol.events.PacketAdapter;
+import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.events.PacketListener;
+import com.comphenix.protocol.reflect.FieldAccessException;
+import com.comphenix.protocol.wrappers.BlockPosition;
+import com.comphenix.protocol.wrappers.WrappedBlockData;
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import com.comphenix.protocol.wrappers.nbt.NbtCompound;
+import com.comphenix.protocol.wrappers.nbt.NbtFactory;
+
+import pw.yumc.YumCore.annotation.NotProguard;
+import pw.yumc.YumCore.bukkit.Log;
+import pw.yumc.YumCore.bukkit.P;
+import pw.yumc.YumCore.bukkit.compatible.C;
 
 /**
  * 木牌工具类
@@ -31,15 +39,6 @@ import java.util.List;
  * @author 喵♂呜
  */
 public class SignKit extends ProtocolLibBase {
-    private static boolean newVer = true;
-    static {
-        try {
-            GameMode.SPECTATOR.name();
-        } catch (Exception e) {
-            newVer = false;
-        }
-    }
-
     /**
      * 打开木牌
      *
@@ -51,52 +50,14 @@ public class SignKit extends ProtocolLibBase {
      *             调用异常
      */
     public static void open(Player player, String[] lines) throws InvocationTargetException {
-        Location loc = player.getLocation();
-        int x = loc.getBlockX(), y = 0, z = loc.getBlockZ();
-        if (newVer) {
-            // Set
-            PacketContainer packet = manager.createPacket(Server.BLOCK_CHANGE);
-            packet.getBlockPositionModifier().write(0, new BlockPosition(x, y, z));
-            packet.getBlockData().write(0, WrappedBlockData.createData(Material.SIGN_POST));
-            manager.sendServerPacket(player, packet);
-
-            // Update
-            packet = manager.createPacket(Server.UPDATE_SIGN);
-            packet.getBlockPositionModifier().write(0, new BlockPosition(x, y, z));
-            packet.getChatComponentArrays().write(0,
-                    new WrappedChatComponent[] { WrappedChatComponent.fromText(lines[0]), WrappedChatComponent.fromText(lines[1]), WrappedChatComponent.fromText(lines[2]),
-                                                 WrappedChatComponent.fromText(lines[3]) });
-
-            manager.sendServerPacket(player, packet);
-
-            // Edit
-            packet = manager.createPacket(Server.OPEN_SIGN_ENTITY);
-            packet.getBlockPositionModifier().write(0, new BlockPosition(x, y, z));
-            manager.sendServerPacket(player, packet);
-        } else {
-            // Set
-            PacketContainer packet = manager.createPacket(Server.BLOCK_CHANGE);
-            packet.getIntegers().write(0, x).write(1, y).write(2, z).write(3, 0);
-            packet.getBlocks().write(0, Material.SIGN_POST);
-            manager.sendServerPacket(player, packet);
-
-            // Update
-            packet = manager.createPacket(Server.UPDATE_SIGN);
-            packet.getIntegers().write(0, x).write(1, y).write(2, z);
-            packet.getStringArrays().write(0, lines);
-            manager.sendServerPacket(player, packet);
-
-            // Edit
-            packet = manager.createPacket(Server.OPEN_SIGN_ENTITY);
-            packet.getIntegers().write(0, x).write(1, y).write(2, z);
-            manager.sendServerPacket(player, packet);
-        }
+        FakeSign.create(player, lines).open();
     }
 
     /**
      * 初始化监听器
      */
-    public void init() {
+    public static void init() {
+        FakeSign.init();
         manager.addPacketListener(new SignUpdateListen());
     }
 
@@ -179,12 +140,12 @@ public class SignKit extends ProtocolLibBase {
             Player player = event.getPlayer();
             PacketContainer packet = event.getPacket();
             List<String> lines = new ArrayList<>();
-            if (newVer) {
+            try {
                 WrappedChatComponent[] input1_8 = packet.getChatComponentArrays().read(0);
                 for (WrappedChatComponent wrappedChatComponent : input1_8) {
                     lines.add(subString(wrappedChatComponent.getJson()));
                 }
-            } else {
+            } catch (FieldAccessException ex) {
                 String[] input = packet.getStringArrays().getValues().get(0);
                 lines.addAll(Arrays.asList(input));
             }
@@ -205,4 +166,207 @@ public class SignKit extends ProtocolLibBase {
         }
     }
 
+    /**
+     * Created with IntelliJ IDEA
+     *
+     * @author 喵♂呜
+     *         Created on 2017/7/5 10:20.
+     */
+    public abstract static class FakeSign {
+        private static Class<? extends FakeSign> c = null;
+        private static Constructor<? extends FakeSign> constructor;
+
+        protected int x;
+        protected int y;
+        protected int z;
+        protected String[] lines;
+        protected Player player;
+
+        public static void init() {
+            String nms = C.getNMSVersion();
+            switch (nms) {
+            case "v1_7_R4":
+                c = FakeSign_17.class;
+                break;
+            case "v1_8_R3":
+                c = FakeSign_18.class;
+                break;
+            case "v1_9_R1":
+            case "v1_9_R2":
+            case "v1_10_R1":
+            case "v1_11_R1":
+            default:
+                c = FakeSign_110.class;
+                break;
+            }
+            try {
+                constructor = c.getConstructor(Player.class, String[].class);
+            } catch (NoSuchMethodException e) {
+                Log.w("创建虚拟木牌工具初始化失败 %s!", e.getMessage());
+                Log.d(e);
+            }
+        }
+
+        public static FakeSign create(Player player, String[] lines) {
+            try {
+                return constructor.newInstance(player, lines);
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+                Log.w("创建虚拟木牌包失败 %s!", e.getMessage());
+                Log.d(e);
+            }
+            return new FakeSign_110(player, lines);
+        }
+
+        @NotProguard
+        public FakeSign(Player player, String[] lines) {
+            setPlayer(player);
+            setLines(lines);
+        }
+
+        /**
+         * 打开木牌
+         */
+        public void open() {
+            try {
+                manager.sendServerPacket(player, getBlockChangePacket());
+                manager.sendServerPacket(player, getUpdateSignPacket());
+                manager.sendServerPacket(player, getOpenSignEntityPacket());
+            } catch (InvocationTargetException e) {
+                Log.w("木牌发包错误 %s!", e.getMessage());
+                Log.d(e);
+            }
+        }
+
+        // WriteLocation
+        protected abstract void writeBlockLocation(PacketContainer packet);
+
+        //Set
+        protected PacketContainer getBlockChangePacket() {
+            PacketContainer packet = manager.createPacket(PacketType.Play.Server.BLOCK_CHANGE);
+            writeBlockLocation(packet);
+            return setBlockChangePacket(packet);
+        }
+
+        protected abstract PacketContainer setBlockChangePacket(PacketContainer packet);
+
+        // Update
+        protected PacketContainer getUpdateSignPacket() {
+            PacketContainer packet = manager.createPacket(PacketType.Play.Server.UPDATE_SIGN);
+            writeBlockLocation(packet);
+            return setUpdateSignPacket(packet);
+        }
+
+        protected abstract PacketContainer setUpdateSignPacket(PacketContainer packet);
+
+        // Edit
+        protected PacketContainer getOpenSignEntityPacket() {
+            PacketContainer packet = manager.createPacket(PacketType.Play.Server.OPEN_SIGN_ENTITY);
+            writeBlockLocation(packet);
+            return setOpenSignEntityPacket(packet);
+        }
+
+        protected abstract PacketContainer setOpenSignEntityPacket(PacketContainer packet);
+
+        public String[] getLines() {
+            return lines;
+        }
+
+        public void setLines(String[] lines) {
+            this.lines = lines;
+        }
+
+        public Player getPlayer() {
+            return player;
+        }
+
+        public void setPlayer(Player player) {
+            this.player = player;
+            Location loc = player.getLocation();
+            this.x = loc.getBlockX();
+            this.y = 0;
+            this.z = loc.getBlockZ();
+        }
+
+        public static class FakeSign_17 extends FakeSign {
+            @NotProguard
+            public FakeSign_17(Player player, String[] lines) {
+                super(player, lines);
+            }
+
+            @Override
+            protected void writeBlockLocation(PacketContainer packet) {
+                packet.getBlockPositionModifier().write(0, new BlockPosition(x, y, z));
+            }
+
+            @Override
+            protected PacketContainer setBlockChangePacket(PacketContainer packet) {
+                packet.getBlockData().write(0, WrappedBlockData.createData(Material.SIGN_POST));
+                return packet;
+            }
+
+            @Override
+            protected PacketContainer setUpdateSignPacket(PacketContainer packet) {
+                packet.getStringArrays().write(0, lines);
+                return packet;
+            }
+
+            @Override
+            protected PacketContainer setOpenSignEntityPacket(PacketContainer packet) {
+                return packet;
+            }
+        }
+
+        public static class FakeSign_18 extends FakeSign {
+            @NotProguard
+            public FakeSign_18(Player player, String[] lines) {
+                super(player, lines);
+            }
+
+            @Override
+            protected void writeBlockLocation(PacketContainer packet) {
+                packet.getBlockPositionModifier().write(0, new BlockPosition(x, y, z));
+            }
+
+            @Override
+            protected PacketContainer setBlockChangePacket(PacketContainer packet) {
+                packet.getBlockData().write(0, WrappedBlockData.createData(Material.SIGN_POST));
+                return packet;
+            }
+
+            @Override
+            protected PacketContainer setUpdateSignPacket(PacketContainer packet) {
+                packet.getChatComponentArrays().write(0,
+                        new WrappedChatComponent[] { WrappedChatComponent.fromText(lines[0]),
+                                                     WrappedChatComponent.fromText(lines[1]),
+                                                     WrappedChatComponent.fromText(lines[2]),
+                                                     WrappedChatComponent.fromText(lines[3]) });
+                return packet;
+            }
+
+            @Override
+            protected PacketContainer setOpenSignEntityPacket(PacketContainer packet) {
+                return packet;
+            }
+        }
+
+        public static class FakeSign_110 extends FakeSign_18 {
+            @NotProguard
+            public FakeSign_110(Player player, String[] lines) {
+                super(player, lines);
+            }
+
+            @Override
+            protected PacketContainer setUpdateSignPacket(PacketContainer packet) {
+                packet.getBlockPositionModifier().write(0, new BlockPosition(x, y, z));
+                packet.getIntegers().write(0, 9);
+                NbtCompound compound = NbtFactory.ofCompound("Sign");
+                for (int i = 0; i < lines.length; i++) {
+                    compound.put("Text" + (i + 1), "{\"text\":\"" + lines[i] + "\"}");
+                }
+                packet.getNbtModifier().write(0, compound);
+                return packet;
+            }
+
+        }
+    }
 }
