@@ -49,7 +49,7 @@ public class SignKit extends ProtocolLibBase {
      * @throws InvocationTargetException
      *             调用异常
      */
-    public static void open(Player player, String[] lines) throws InvocationTargetException {
+    public static void open(Player player, String[] lines) {
         FakeSign.create(player, lines).open();
     }
 
