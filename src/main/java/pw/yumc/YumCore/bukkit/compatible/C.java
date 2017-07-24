@@ -31,6 +31,7 @@ public class C {
     private static Class<?> nmsChatSerializer;
     private static Class<?> nmsIChatBaseComponent;
     private static Class<?> packetType;
+    private static Class<?> nmsChatMessageTypeClass;
 
     private static Constructor<?> packetTypeConstructor;
 
@@ -43,6 +44,8 @@ public class C {
     private static Field playerConnection;
     private static Method sendPacket;
 
+    private static Object[] ChatMessageTypes;
+
     public static boolean init;
     static {
         try {
@@ -52,7 +55,13 @@ public class C {
             chatSerializer = nmsChatSerializer.getMethod("a", String.class);
             nmsIChatBaseComponent = Class.forName(a("IChatBaseComponent"));
             packetType = Class.forName(a("PacketPlayOutChat"));
-            packetTypeConstructor = packetType.getConstructor(nmsIChatBaseComponent, newversion ? int.class : byte.class);
+            try {
+                nmsChatMessageTypeClass = Class.forName(a("ChatMessageType"));
+                ChatMessageTypes = nmsChatMessageTypeClass.getEnumConstants();
+                packetTypeConstructor = packetType.getConstructor(nmsIChatBaseComponent, nmsChatMessageTypeClass);
+            } catch (ClassNotFoundException ex) {
+                packetTypeConstructor = packetType.getConstructor(nmsIChatBaseComponent, newversion ? int.class : byte.class);
+            }
             Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
             Class<?> typeNMSPlayer = Class.forName(a("EntityPlayer"));
             Class<?> typePlayerConnection = Class.forName(a("PlayerConnection"));
@@ -103,7 +112,11 @@ public class C {
             Object serialized = chatSerializer.invoke(null, json);
             Object player = getHandle.invoke(receivingPacket);
             Object connection = playerConnection.get(player);
-            sendPacket.invoke(connection, packetTypeConstructor.newInstance(serialized, newversion ? type : (byte) type));
+            if (nmsChatMessageTypeClass != null) {
+                sendPacket.invoke(connection, packetTypeConstructor.newInstance(serialized, ChatMessageTypes[type]));
+            } else {
+                sendPacket.invoke(connection, packetTypeConstructor.newInstance(serialized, newversion ? type : (byte) type));
+            }
         } catch (Exception ex) {
             Log.d("Json发包错误 " + version, ex);
         }
@@ -305,12 +318,14 @@ public class C {
         private static Class<?> packetTitle;
         private static Constructor<?> packetTitleSendConstructor;
         private static Constructor<?> packetTitleSetTimeConstructor;
+        private static Object[] actions;
         static {
             try {
                 packetActions = Class.forName(a(newversion ? "PacketPlayOutTitle$EnumTitleAction" : "EnumTitleAction"));
                 packetTitle = Class.forName(a("PacketPlayOutTitle"));
                 packetTitleSendConstructor = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent);
                 packetTitleSetTimeConstructor = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent, Integer.TYPE, Integer.TYPE, Integer.TYPE);
+                actions = packetActions.getEnumConstants();
             } catch (Exception ignore) {
                 Log.w("Title 兼容性工具初始化失败 可能造成部分功能不可用!");
             }
@@ -383,7 +398,6 @@ public class C {
             // Send timings first
             Object player = getHandle.invoke(recoverPlayer);
             Object connection = playerConnection.get(player);
-            Object[] actions = packetActions.getEnumConstants();
             Object packet = packetTitleSendConstructor.newInstance(actions[4], null);
             sendPacket.invoke(connection, packet);
         }
@@ -428,7 +442,6 @@ public class C {
                     // Send timings first
                     Object player = getHandle.invoke(receivingPacket);
                     Object connection = playerConnection.get(player);
-                    Object[] actions = packetActions.getEnumConstants();
                     Object packet;
                     // Send if set
                     if ((fadeInTime != -1) && (fadeOutTime != -1) && (stayTime != -1)) {
