@@ -27,6 +27,7 @@ public class Tellraw implements Cloneable {
     static {
         if (Bukkit.getVersion().contains("Paper") || Bukkit.getVersion().contains("Torch")) {
             try {
+                // Paper 根据 org.spigotmc.AsyncCatcher.enabled 判断是否拦截异步命令
                 Class AsyncCatcherClass = Class.forName("org.spigotmc.AsyncCatcher");
                 Field enabledField = AsyncCatcherClass.getDeclaredField("enabled");
                 enabledField.setAccessible(true);

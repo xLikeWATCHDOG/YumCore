@@ -32,6 +32,8 @@ public class C {
     private static Class<?> nmsIChatBaseComponent;
     private static Class<?> packetType;
 
+    private static Constructor<?> packetTypeConstructor;
+
     private static Method chatSerializer;
     private static Method getHandle;
 
@@ -50,6 +52,7 @@ public class C {
             chatSerializer = nmsChatSerializer.getMethod("a", String.class);
             nmsIChatBaseComponent = Class.forName(a("IChatBaseComponent"));
             packetType = Class.forName(a("PacketPlayOutChat"));
+            packetTypeConstructor = packetType.getConstructor(nmsIChatBaseComponent, newversion ? int.class : byte.class);
             Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
             Class<?> typeNMSPlayer = Class.forName(a("EntityPlayer"));
             Class<?> typePlayerConnection = Class.forName(a("PlayerConnection"));
@@ -96,17 +99,11 @@ public class C {
      *            2. ActionBar
      */
     public static void sendJson(org.bukkit.entity.Player receivingPacket, String json, int type) {
-        Object packet;
         try {
-            Object serialized = nmsChatSerializer.getMethod("a", String.class).invoke(null, json);
-            if (!version.contains("1_7")) {
-                packet = packetType.getConstructor(nmsIChatBaseComponent, byte.class).newInstance(serialized, (byte) type);
-            } else {
-                packet = packetType.getConstructor(nmsIChatBaseComponent, int.class).newInstance(serialized, type);
-            }
+            Object serialized = chatSerializer.invoke(null, json);
             Object player = getHandle.invoke(receivingPacket);
             Object connection = playerConnection.get(player);
-            sendPacket.invoke(connection, packet);
+            sendPacket.invoke(connection, packetTypeConstructor.newInstance(serialized, newversion ? type : (byte) type));
         } catch (Exception ex) {
             Log.d("Json发包错误 " + version, ex);
         }
