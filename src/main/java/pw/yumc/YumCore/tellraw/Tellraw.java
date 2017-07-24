@@ -1,5 +1,6 @@
 package pw.yumc.YumCore.tellraw;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,7 +26,12 @@ public class Tellraw implements Cloneable {
 
     static {
         if (Bukkit.getVersion().contains("Paper") || Bukkit.getVersion().contains("Torch")) {
-            if (!C.init) {
+            try {
+                Class AsyncCatcherClass = Class.forName("org.spigotmc.AsyncCatcher");
+                Field enabledField = AsyncCatcherClass.getDeclaredField("enabled");
+                enabledField.setAccessible(true);
+                enabledField.set(null, false);
+            } catch (ClassNotFoundException | NoSuchFieldException | IllegalAccessException ex) {
                 Log.console("§c========== §4警 告 §c==========");
                 Log.console("§a 当前服务器为 §6Paper §a或 §6Torch ");
                 Log.console("§c 异步命令会刷报错 §b不影响使用");
@@ -175,11 +181,7 @@ public class Tellraw implements Cloneable {
     public void send(final CommandSender sender) {
         final String json = toJsonString();
         if (sender instanceof Player && json.getBytes().length < 32000) {
-            if (C.init) {
-                C.sendJson((Player) sender, json, 0);
-            } else {
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName() + " " + json);
-            }
+            Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "tellraw " + sender.getName() + " " + json);
         } else {
             sender.sendMessage(toOldMessageFormat());
         }
