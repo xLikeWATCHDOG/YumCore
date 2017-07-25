@@ -37,6 +37,7 @@ public class C {
 
     private static Method chatSerializer;
     private static Method getHandle;
+    private static Method nmsChatMessageTypeClassValueOf;
 
     private static String version;
     private static boolean newversion;
@@ -44,7 +45,7 @@ public class C {
     private static Field playerConnection;
     private static Method sendPacket;
 
-    private static Object[] ChatMessageTypes;
+    private static Object[] chatMessageTypes;
 
     public static boolean init;
     static {
@@ -55,12 +56,22 @@ public class C {
             chatSerializer = nmsChatSerializer.getMethod("a", String.class);
             nmsIChatBaseComponent = Class.forName(a("IChatBaseComponent"));
             packetType = Class.forName(a("PacketPlayOutChat"));
-            try {
-                nmsChatMessageTypeClass = Class.forName(a("ChatMessageType"));
-                ChatMessageTypes = nmsChatMessageTypeClass.getEnumConstants();
-                packetTypeConstructor = packetType.getConstructor(nmsIChatBaseComponent, nmsChatMessageTypeClass);
-            } catch (ClassNotFoundException ex) {
-                packetTypeConstructor = packetType.getConstructor(nmsIChatBaseComponent, newversion ? int.class : byte.class);
+            Arrays.stream(packetType.getConstructors()).forEach(c -> {
+                if (c.getParameterTypes().length == 2) {
+                    packetTypeConstructor = c;
+                }
+            });
+            nmsChatMessageTypeClass = packetTypeConstructor.getParameterTypes()[1];
+            if (nmsChatMessageTypeClass.isEnum()) {
+                chatMessageTypes = nmsChatMessageTypeClass.getEnumConstants();
+            } else {
+                switch (nmsChatMessageTypeClass.getName()) {
+                case "int":
+                    nmsChatMessageTypeClass = Integer.class;
+                case "byte":
+                    nmsChatMessageTypeClass = Byte.class;
+                }
+                nmsChatMessageTypeClassValueOf = nmsChatMessageTypeClass.getDeclaredMethod("valueOf", String.class);
             }
             Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
             Class<?> typeNMSPlayer = Class.forName(a("EntityPlayer"));
@@ -112,11 +123,8 @@ public class C {
             Object serialized = chatSerializer.invoke(null, json);
             Object player = getHandle.invoke(receivingPacket);
             Object connection = playerConnection.get(player);
-            if (nmsChatMessageTypeClass != null) {
-                sendPacket.invoke(connection, packetTypeConstructor.newInstance(serialized, ChatMessageTypes[type]));
-            } else {
-                sendPacket.invoke(connection, packetTypeConstructor.newInstance(serialized, newversion ? type : (byte) type));
-            }
+            Object typeObj = chatMessageTypes == null ? nmsChatMessageTypeClassValueOf.invoke(null, String.valueOf(type)) : chatMessageTypes[type];
+            sendPacket.invoke(connection, packetTypeConstructor.newInstance(serialized, typeObj));
         } catch (Exception ex) {
             Log.d("Json发包错误 " + version, ex);
         }
