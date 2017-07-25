@@ -1,6 +1,11 @@
 package pw.yumc.YumCore.kit;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -12,16 +17,33 @@ import java.security.cert.X509Certificate;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.net.ssl.*;
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
+import lombok.Builder;
+import lombok.Cleanup;
+import lombok.Data;
+import lombok.SneakyThrows;
+import lombok.val;
 
 /**
  * HttpKit
  */
 public class HttpKit {
 
-    private static String GET = "GET";
-
-    private static String POST = "POST";
+    public enum HttpMethod {
+        GET,
+        POST,
+        PUT,
+        HEADER,
+        DELETE,
+        PATCH
+    }
 
     private static String CHARSET = "UTF-8";
 
@@ -39,7 +61,7 @@ public class HttpKit {
      * @return 网页HTML
      */
     public static String get(String url) {
-        return get(url, null, null);
+        return get(url, null);
     }
 
     /**
@@ -67,71 +89,11 @@ public class HttpKit {
      * @return 网页HTML
      */
     public static String get(String url, Map<String, String> queryParas, Map<String, String> headers) {
-        HttpURLConnection conn = null;
-        try {
-            conn = getHttpConnection(buildUrlWithQueryString(url, queryParas), GET, headers);
-            conn.connect();
-            return readResponseString(conn);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
-        }
+        return send(HttpInfo.builder().url(url).method(HttpMethod.GET).query(queryParas).header(headers).build());
     }
 
     /**
-     * Post 获取网页
-     *
-     * @param url
-     *            网址
-     * @param queryParas
-     *            参数
-     * @param data
-     *            数据
-     * @return 网页HTML
-     */
-    public static String post(String url, Map<String, String> queryParas, String data) {
-        return post(url, queryParas, data, null);
-    }
-
-    /**
-     * Post 获取网页
-     *
-     * @param url
-     *            网址
-     * @param queryParas
-     *            参数
-     * @param data
-     *            数据
-     * @param headers
-     *            头信息
-     * @return 网页HTML
-     */
-    public static String post(String url, Map<String, String> queryParas, String data, Map<String, String> headers) {
-        HttpURLConnection conn = null;
-        try {
-            conn = getHttpConnection(buildUrlWithQueryString(url, queryParas), POST, headers);
-            conn.connect();
-
-            OutputStream out = conn.getOutputStream();
-            out.write(data.getBytes(CHARSET));
-            out.flush();
-            out.close();
-
-            return readResponseString(conn);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
-        }
-    }
-
-    /**
-     * Get 方法获取HTML
+     * Post 方法获取HTML
      *
      * @param url
      *            网址
@@ -140,64 +102,94 @@ public class HttpKit {
      * @return 网页HTML
      */
     public static String post(String url, String data) {
-        return post(url, null, data, null);
+        return post(url, data, null);
     }
 
     /**
-     * Get 方法获取HTML
+     * Post 方法获取HTML
      *
      * @param url
      *            网址
      * @param data
      *            查询参数
-     * @param headers
+     * @param header
      *            头信息
      * @return 网页HTML
      */
-    public static String post(String url, String data, Map<String, String> headers) {
-        return post(url, null, data, headers);
+    public static String post(String url, String data, Map<String, String> header) {
+        return send(HttpInfo.builder().url(url).data(data).method(HttpMethod.POST).header(header).build());
+    }
+
+    /**
+     * DELETE 方法
+     * 
+     * @param url
+     *            地址
+     * @param header
+     *            头信息
+     * @return
+     */
+    public static String delete(String url, Map<String, String> header) {
+        return send(HttpInfo.builder().url(url).method(HttpMethod.DELETE).header(header).build());
+    }
+
+    /**
+     * Post 获取网页
+     *
+     * @param info
+     *            链接信息
+     * @return 网页HTML
+     */
+    @SneakyThrows
+    public static String send(HttpInfo info) {
+        @Cleanup
+        HttpURLConnection conn = getHttpConnection(buildUrlWithQueryString(info), info.getMethod().name(), info.getHeader());
+        conn.connect();
+        if (StrKit.notBlank(info.getData())) {
+            OutputStream out = conn.getOutputStream();
+            out.write(info.getData().getBytes(CHARSET));
+            out.flush();
+            out.close();
+        }
+        return readResponseString(conn);
+    }
+
+    @Data
+    @Builder
+    public static class HttpInfo {
+        private String url;
+        private HttpMethod method;
+        private Map<String, String> query;
+        private String data;
+        private Map<String, String> header;
     }
 
     /**
      * 构建查询串为字符串
      *
-     * @param url
+     * @param info
      *            网址
-     * @param queryParas
-     *            参数
      * @return 构建后的地址
      */
-    private static String buildUrlWithQueryString(String url, Map<String, String> queryParas) {
-        if (queryParas == null || queryParas.isEmpty()) { return url; }
-
+    private static String buildUrlWithQueryString(HttpInfo info) {
+        val url = info.getUrl();
+        val query = info.getQuery();
+        if (query == null || query.isEmpty()) { return url; }
         StringBuilder sb = new StringBuilder(url);
-        boolean isFirst;
         if (!url.contains("?")) {
-            isFirst = true;
             sb.append("?");
-        } else {
-            isFirst = false;
         }
-
-        for (Entry<String, String> entry : queryParas.entrySet()) {
-            if (isFirst) {
-                isFirst = false;
-            } else {
-                sb.append("&");
-            }
-
+        query.entrySet().stream().filter(entry -> StrKit.isBlank(entry.getValue())).forEach(entry -> {
             String key = entry.getKey();
             String value = entry.getValue();
-            if (StrKit.notBlank(value)) {
-                try {
-                    value = URLEncoder.encode(value, CHARSET);
-                } catch (UnsupportedEncodingException e) {
-                    throw new RuntimeException(e);
-                }
+            try {
+                value = URLEncoder.encode(value, CHARSET);
+            } catch (UnsupportedEncodingException e) {
+                throw new RuntimeException(e);
             }
             sb.append(key).append("=").append(value);
-        }
-        return sb.toString();
+        });
+        return sb.toString().substring(0, sb.length() - 1);
     }
 
     /**
@@ -247,15 +239,12 @@ public class HttpKit {
      *
      * @return 安全套接字工厂
      */
+    @SneakyThrows
     private static SSLSocketFactory initSSLSocketFactory() {
-        try {
-            TrustManager[] tm = { new HttpKit.TrustAnyTrustManager() };
-            SSLContext sslContext = SSLContext.getInstance("TLS", "SunJSSE");
-            sslContext.init(null, tm, new java.security.SecureRandom());
-            return sslContext.getSocketFactory();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        TrustManager[] tm = { new HttpKit.TrustAnyTrustManager() };
+        SSLContext sslContext = SSLContext.getInstance("TLS", "SunJSSE");
+        sslContext.init(null, tm, new java.security.SecureRandom());
+        return sslContext.getSocketFactory();
     }
 
     /**
@@ -265,28 +254,17 @@ public class HttpKit {
      *            HTTP连接
      * @return 字符串
      */
+    @SneakyThrows
     private static String readResponseString(HttpURLConnection conn) {
         StringBuilder sb = new StringBuilder();
-        InputStream inputStream = null;
-        try {
-            inputStream = conn.getInputStream();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, CHARSET));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                sb.append(line).append("\n");
-            }
-            return sb.toString();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+        @Cleanup
+        InputStream inputStream = conn.getInputStream();
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, CHARSET));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            sb.append(line).append("\n");
         }
+        return sb.toString();
     }
 
     /**
