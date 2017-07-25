@@ -142,16 +142,19 @@ public class HttpKit {
      */
     @SneakyThrows
     public static String send(HttpInfo info) {
-        @Cleanup
         HttpURLConnection conn = getHttpConnection(buildUrlWithQueryString(info), info.getMethod().name(), info.getHeader());
-        conn.connect();
-        if (StrKit.notBlank(info.getData())) {
-            OutputStream out = conn.getOutputStream();
-            out.write(info.getData().getBytes(CHARSET));
-            out.flush();
-            out.close();
+        try {
+            conn.connect();
+            if (StrKit.notBlank(info.getData())) {
+                OutputStream out = conn.getOutputStream();
+                out.write(info.getData().getBytes(CHARSET));
+                out.flush();
+                out.close();
+            }
+            return readResponseString(conn);
+        } finally {
+            conn.disconnect();
         }
-        return readResponseString(conn);
     }
 
     @Data
