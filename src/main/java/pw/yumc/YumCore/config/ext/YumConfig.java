@@ -2,6 +2,7 @@ package pw.yumc.YumCore.config.ext;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.config.FileConfig;
@@ -39,7 +40,7 @@ public class YumConfig {
     public static FileConfig getRemote(String configname) {
         FileConfig config;
         try {
-            config = new RemoteConfig(REMOTEFILECENTER + configname);
+            config = new FileConfig(new URL(REMOTEFILECENTER + configname).openStream());
             config.save(new File(CacheFolder, configname));
             Log.i(fromYumc, configname);
         } catch (IOException e) {
