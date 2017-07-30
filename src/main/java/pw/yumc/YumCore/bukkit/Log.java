@@ -115,7 +115,9 @@ public class Log {
      *            参数
      */
     public static void d(String msg, Object... object) {
-        d(String.format(msg, object));
+        if (debug) {
+            logger.info(String.format(msg, object));
+        }
     }
 
     /**
@@ -166,7 +168,9 @@ public class Log {
      *            参数
      */
     public static void fd(String msg, Object... object) {
-        fd(String.format(msg, object));
+        if (fullDebug) {
+            logger.info("[DEBUG] " + String.format(msg, object));
+        }
     }
 
     /**
@@ -301,7 +305,8 @@ public class Log {
     /**
      * Log a SEVERE message.
      * <p>
-     * If the logger is currently enabled for the SEVERE message level then the given message is forwarded to all the registered output Handler objects.
+     * If the logger is currently enabled for the SEVERE message level then the
+     * given message is forwarded to all the registered output Handler objects.
      *
      * @param msg
      *            The string message (or a key in the message catalog)
@@ -367,7 +372,7 @@ public class Log {
      *            参数
      */
     public static void w(String string, Object... objects) {
-        logger.warning(String.format(string, objects));
+        w(String.format(string, objects));
     }
 
     /**
