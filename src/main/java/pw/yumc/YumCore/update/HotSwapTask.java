@@ -1,0 +1,48 @@
+package pw.yumc.YumCore.update;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
+
+import javax.script.ScriptException;
+
+import org.junit.Test;
+
+import pw.yumc.YumCore.engine.MiaoScriptEngine;
+
+/**
+ * Created with IntelliJ IDEA
+ * 热更新任务
+ * 
+ * @author 喵♂呜
+ *         Created on 2017/7/31 11:09.
+ */
+public class HotSwapTask {
+    private MiaoScriptEngine engine;
+    private File temp = new File(System.getProperty("java.io.tmpdir"), "hotswap.js");
+
+    public HotSwapTask() {
+        this.engine = new MiaoScriptEngine();
+        engine.put("$", this);
+        init();
+    }
+
+    private void init() {
+        try {
+            Files.copy(new URL("http://api.yumc.pw/script/hotswap.js").openStream(), temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            engine.eval(new FileReader(temp));
+            temp.deleteOnExit();
+        } catch (IOException | ScriptException ignored) {
+        }
+    }
+
+    @Test
+    public void test() throws FileNotFoundException, ScriptException {
+        System.out.println(temp.getAbsolutePath());
+        engine.eval(new FileReader(new File("src/main/resources/hotswap.js")));
+    }
+}
