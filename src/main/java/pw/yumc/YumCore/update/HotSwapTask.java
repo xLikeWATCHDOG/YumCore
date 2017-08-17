@@ -12,14 +12,15 @@ import javax.script.ScriptException;
 
 import org.junit.Test;
 
+import pw.yumc.YumCore.bungee.Log;
 import pw.yumc.YumCore.engine.MiaoScriptEngine;
 
 /**
  * Created with IntelliJ IDEA
  * 热更新任务
- * 
+ *
  * @author 喵♂呜
- *         Created on 2017/7/31 11:09.
+ * Created on 2017/7/31 11:09.
  */
 public class HotSwapTask {
     private MiaoScriptEngine engine;
@@ -35,14 +36,14 @@ public class HotSwapTask {
         try {
             Files.copy(new URL("http://api.yumc.pw/script/hotswap.js").openStream(), temp.toPath(), StandardCopyOption.REPLACE_EXISTING);
             engine.eval(new FileReader(temp));
-            temp.deleteOnExit();
-        } catch (IOException | ScriptException ignored) {
+            temp.delete();
+        } catch (IOException | ScriptException e) {
+            Log.d("热更新脚本加载失败!", e);
         }
     }
 
     @Test
     public void test() throws FileNotFoundException, ScriptException {
-        System.out.println(temp.getAbsolutePath());
         engine.eval(new FileReader(new File("src/main/resources/hotswap.js")));
     }
 }
