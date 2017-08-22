@@ -74,7 +74,7 @@ public class CommandSub implements TabExecutor {
      * 命令管理器
      *
      * @param name
-     *            注册的命令
+     *         注册的命令
      */
     public CommandSub(String name) {
         cmd = plugin.getCommand(name);
@@ -90,9 +90,9 @@ public class CommandSub implements TabExecutor {
      * 命令管理器
      *
      * @param name
-     *            注册的命令
+     *         注册的命令
      * @param executor
-     *            命令执行类
+     *         命令执行类
      */
     public CommandSub(String name, Executor... executor) {
         this(name);
@@ -115,7 +115,7 @@ public class CommandSub implements TabExecutor {
      * 检查缓存并获得命令
      *
      * @param subcmd
-     *            子命令
+     *         子命令
      * @return 命令信息
      */
     private CommandInfo getByCache(String subcmd) {
@@ -137,21 +137,25 @@ public class CommandSub implements TabExecutor {
      * 获取玩家命令补全
      *
      * @param sender
-     *            命令发送者
+     *         命令发送者
      * @param command
-     *            命令
+     *         命令
      * @param alias
-     *            别名
+     *         别名
      * @param args
-     *            数组
+     *         数组
      * @return 在线玩家数组
      */
     private List<String> getPlayerTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         String lastWord = args[args.length - 1];
         Player senderPlayer = sender instanceof Player ? (Player) sender : null;
         List<String> matchedPlayers = new ArrayList<>();
-        C.Player.getOnlinePlayers().stream().filter(player -> (senderPlayer == null || senderPlayer.canSee(player)) && StringUtil.startsWithIgnoreCase(player.getName(), lastWord)).forEach(
-                player -> matchedPlayers.add(player.getName()));
+        C.Player.getOnlinePlayers()
+                .stream()
+                .filter(player -> (senderPlayer == null || senderPlayer.canSee(player)) && StringUtil.startsWithIgnoreCase(player.getName(),
+                                                                                                                           lastWord))
+                .forEach(
+                        player -> matchedPlayers.add(player.getName()));
         return matchedPlayers;
     }
 
@@ -159,7 +163,7 @@ public class CommandSub implements TabExecutor {
      * 转移数组
      *
      * @param args
-     *            原数组
+     *         原数组
      * @return 转移后的数组字符串
      */
     private String[] moveStrings(String[] args) {
@@ -203,10 +207,10 @@ public class CommandSub implements TabExecutor {
      * 通过注解读取命令并注册
      *
      * @param clazzs
-     *            子命令处理类
+     *         子命令处理类
      * @return {@link CommandSub}
      */
-    public CommandSub register(Executor... clazzs) {
+    public void register(Executor... clazzs) {
         for (Executor clazz : clazzs) {
             Log.d("解析执行类: %s", clazz.getClass().getName());
             Method[] methods = clazz.getClass().getDeclaredMethods();
@@ -219,23 +223,22 @@ public class CommandSub implements TabExecutor {
         }
         help = new CommandHelp(defCmd, cmds);
         buildCmdNameCache();
-        return this;
     }
 
     /**
      * 注册命令
      *
      * @param method
-     *            方法
+     *         方法
      * @param clazz
-     *            调用对象
+     *         调用对象
      * @return 是否成功
      */
     private boolean registerCommand(Method method, Executor clazz) {
         CommandInfo ci = CommandInfo.parse(method, clazz);
         if (ci != null) {
             Class[] params = method.getParameterTypes();
-            Log.d("注册子命令: %s 参数类型: %s", ci.getName(), Log.csn(params));
+            Log.d("注册子命令: %s 参数类型: %s", ci.getName(), Log.getSimpleNames((Object[]) params));
             try {
                 Class<? extends CommandSender> sender = params[0];
                 // 用于消除unuse警告
@@ -257,29 +260,28 @@ public class CommandSub implements TabExecutor {
      * 注册Tab补全
      *
      * @param method
-     *            方法
+     *         方法
      * @param clazz
-     *            调用对象
+     *         调用对象
      * @return 是否成功
      */
-    private boolean registerTab(Method method, Executor clazz) {
+    private void registerTab(Method method, Executor clazz) {
         CommandTabInfo ti = CommandTabInfo.parse(method, clazz);
         if (ti != null) {
             if (method.getReturnType().equals(List.class)) {
                 Log.d("注册子命令补全: %s ", method.getName());
                 tabs.add(ti);
-                return true;
+            } else {
+                Log.w(returnTypeError, method.getName(), clazz.getClass().getName());
             }
-            Log.w(returnTypeError, method.getName(), clazz.getClass().getName());
         }
-        return false;
     }
 
     /**
      * 设置命令错误处理器
-     * 
+     *
      * @param commandErrorHanlder
-     *            命令错误处理器
+     *         命令错误处理器
      * @return {@link CommandSub}
      */
     public CommandSub setCommandErrorHanlder(ErrorHanlder commandErrorHanlder) {
@@ -291,7 +293,7 @@ public class CommandSub implements TabExecutor {
      * 设置帮助生成器
      *
      * @param helpGenerator
-     *            帮助生成器
+     *         帮助生成器
      * @return {@link CommandSub}
      */
     public CommandSub setHelpGenerator(HelpGenerator helpGenerator) {
@@ -303,7 +305,7 @@ public class CommandSub implements TabExecutor {
      * 设置帮助解析器
      *
      * @param helpParse
-     *            帮助解析器
+     *         帮助解析器
      * @return {@link CommandSub}
      */
     public CommandSub setHelpParse(HelpParse helpParse) {

@@ -7,18 +7,21 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.util.Arrays;
 import java.util.jar.JarFile;
 import java.util.logging.Logger;
 
+import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
  * 插件Instance获取类
  *
- * @since 2016年7月23日 上午9:09:57
  * @author 喵♂呜
+ * @since 2016年7月23日 上午9:09:57
  */
 public class P {
     /**
@@ -48,8 +51,7 @@ public class P {
 
     /**
      * @param name
-     *            命令名称
-     *
+     *         命令名称
      * @return 插件命令
      */
     public static PluginCommand getCommand(String name) {
@@ -58,7 +60,7 @@ public class P {
 
     /**
      * @param <FC>
-     *            配置源类型
+     *         配置源类型
      * @return 获得插件配置文件
      */
     public static <FC> FC getConfig() {
@@ -67,7 +69,7 @@ public class P {
 
     /**
      * @param <FC>
-     *            注入配置源类型
+     *         注入配置源类型
      * @return 获得插件注入配置
      */
     public static <FC> FC getInjectConfig() {
@@ -108,7 +110,7 @@ public class P {
 
     /**
      * @param <PI>
-     *            插件源类型
+     *         插件源类型
      * @return 获得插件
      */
     public static <PI> PI getPlugin() {
@@ -123,10 +125,20 @@ public class P {
     }
 
     /**
+     * 批量注册监听器
+     *
+     * @param listeners
+     *         监听器
+     */
+    public static void registerEvents(Listener... listeners) {
+        Arrays.stream(listeners).forEach(listener -> Bukkit.getPluginManager().registerEvents(listener, instance));
+    }
+
+    /**
      * 保存文件
      *
      * @param dirs
-     *            目录
+     *         目录
      */
     public static void saveFile(final String... dirs) {
         saveFile(false, dirs);
@@ -134,11 +146,11 @@ public class P {
 
     /**
      * 保存文件
-     * 
+     *
      * @param replace
-     *            是否替换
+     *         是否替换
      * @param dirs
-     *            目录
+     *         目录
      */
     public static void saveFile(boolean replace, final String... dirs) {
         URL url = instance.getClass().getClassLoader().getResource("plugin.yml");

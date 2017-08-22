@@ -21,7 +21,7 @@ import pw.yumc.YumCore.commands.interfaces.HelpGenerator;
 
 /**
  * 主类命令管理
- * 
+ *
  * @author 喵♂呜
  * @since 2016/11/18 0018
  */
@@ -46,9 +46,9 @@ public class CommandMain implements CommandExecutor {
 
     /**
      * 主类命令管理类
-     * 
+     *
      * @param clazzs
-     *            命令类
+     *         命令类
      */
     public CommandMain(Executor... clazzs) {
         register(clazzs);
@@ -56,12 +56,12 @@ public class CommandMain implements CommandExecutor {
 
     /**
      * 注册命令
-     * 
+     *
      * @param clazzs
-     *            命令类
+     *         命令类
      * @return {@link CommandMain}
      */
-    public CommandMain register(Executor... clazzs) {
+    public void register(Executor... clazzs) {
         for (Executor clazz : clazzs) {
             Method[] methods = clazz.getClass().getDeclaredMethods();
             for (Method method : methods) {
@@ -70,30 +70,29 @@ public class CommandMain implements CommandExecutor {
         }
         help = new CommandHelp(cmds);
         help.setHelpGenerator(helpGenerator);
-        return this;
     }
 
-    private boolean registerCommand(Method method, Executor clazz) {
+    private void registerCommand(Method method, Executor clazz) {
         CommandInfo ci = CommandInfo.parse(method, clazz);
         if (ci != null) {
             injectPluginCommand(ci);
             Class[] params = method.getParameterTypes();
-            Log.d("注册主命令 %s 参数类型: %s", ci.getName(), Log.csn(params));
+            Log.d("注册主命令 %s 参数类型: %s", ci.getName(), Log.getSimpleNames((Object[]) params));
             try {
                 Class<? extends CommandSender> sender = params[0];
                 cmds.add(ci);
-                return true;
             } catch (ArrayIndexOutOfBoundsException | ClassCastException ignored) {
+                Log.w(argumentTypeError, method.getName(), clazz.getClass().getName());
             }
-            Log.w(argumentTypeError, method.getName(), clazz.getClass().getName());
         }
-        return false;
     }
 
     private void injectPluginCommand(CommandInfo ci) {
         PluginCommand cmd = P.getCommand(ci.getName());
         if (cmd == null) {
-            if ((cmd = CommandKit.create(ci.getName(), ci.getAliases().toArray(new String[] {}))) == null) { throw new IllegalStateException("未找到命令 必须在plugin.yml先注册 " + ci.getName() + " 命令!"); }
+            if ((cmd = CommandKit.create(ci.getName(), ci.getAliases().toArray(new String[]{}))) == null) {
+                throw new IllegalStateException("未找到命令 必须在plugin.yml先注册 " + ci.getName() + " 命令!");
+            }
         }
         cmd.setExecutor(this);
     }
@@ -102,7 +101,7 @@ public class CommandMain implements CommandExecutor {
      * 检查缓存并获得命令
      *
      * @param cmd
-     *            子命令
+     *         子命令
      * @return 命令信息
      */
     private CommandInfo getByCache(String cmd) {

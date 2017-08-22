@@ -29,6 +29,7 @@ public class CommandParse {
     private static Map<String, Class> primitiveMap = new HashMap<>();
     private boolean isMain;
     private List<Parse> parses = new LinkedList<>();
+
     static {
         register(File.class, FileParse.class);
         register(Player.class, PlayerParse.class);
@@ -68,7 +69,7 @@ public class CommandParse {
             if (parse == null) { throw new ParseException(String.format("存在无法解析的参数类型 %s", clazz.getName())); }
             this.parses.add(parse.parseAnnotation(annotations).handleAttrs());
         }
-        Log.d("命令解析器 %s", Log.osn(parses));
+        Log.d("命令解析器 %s", Log.getSimpleNames(parses));
     }
 
     public static CommandParse get(Method method) {
@@ -79,9 +80,9 @@ public class CommandParse {
      * 转化数组为字符串
      *
      * @param arr
-     *            数组
+     *         数组
      * @param split
-     *            分割符
+     *         分割符
      * @return 字符串
      */
     public static String join(Object[] arr, String split) {
@@ -114,7 +115,7 @@ public class CommandParse {
                 throw new ParseException(String.format("第 %s 个参数 %s", isMain ? 1 : 2 + i, e.getMessage()));
             }
         }
-        Log.d("解析参数: %s => %s", Arrays.toString(args), Log.osn(pobjs));
+        Log.d("解析参数: %s => %s", Arrays.toString(args), Log.getSimpleNames(pobjs));
         return pobjs.toArray();
     }
 

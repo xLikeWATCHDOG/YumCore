@@ -2,7 +2,7 @@ package pw.yumc.YumCore.bukkit;
 
 import java.io.File;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Optional;
 import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,6 +27,7 @@ public class Log {
     private static Logger logger;
     private static CommandSender console;
     private static String prefix;
+
     static {
         try {
             debug = globalDebug || P.getDescription().getVersion().contains("DEV");
@@ -36,7 +37,6 @@ public class Log {
         } catch (Throwable ex) {
             logger = Logger.getLogger("YumCore");
             debug = true;
-            d(ex);
         }
     }
 
@@ -51,10 +51,10 @@ public class Log {
      * that essentially act as default handlers for all loggers.
      *
      * @param handler
-     *            a logging Handler
+     *         a logging Handler
      * @throws SecurityException
-     *             if a security manager exists and if
-     *             the caller does not have LoggingPermission("control").
+     *         if a security manager exists and if
+     *         the caller does not have LoggingPermission("control").
      */
     public static void addHandler(Handler handler) throws SecurityException {
         logger.addHandler(handler);
@@ -64,7 +64,7 @@ public class Log {
      * Sends console a message
      *
      * @param message
-     *            Message to be displayed
+     *         Message to be displayed
      */
     public static void console(String message) {
         console.sendMessage(prefix + message);
@@ -74,9 +74,9 @@ public class Log {
      * Sends console a message
      *
      * @param message
-     *            消息
+     *         消息
      * @param object
-     *            格式化参数
+     *         格式化参数
      */
     public static void console(String message, Object... object) {
         console.sendMessage(prefix + String.format(message, object));
@@ -86,7 +86,7 @@ public class Log {
      * Sends console a message
      *
      * @param msg
-     *            Message to be displayed
+     *         Message to be displayed
      */
     public static void console(String[] msg) {
         for (String str : msg) {
@@ -98,7 +98,7 @@ public class Log {
      * 调试消息
      *
      * @param msg
-     *            消息
+     *         消息
      */
     public static void d(String msg) {
         if (debug) {
@@ -110,9 +110,9 @@ public class Log {
      * 调试消息
      *
      * @param msg
-     *            消息
+     *         消息
      * @param object
-     *            参数
+     *         参数
      */
     public static void d(String msg, Object... object) {
         if (debug) {
@@ -124,7 +124,7 @@ public class Log {
      * 调试消息
      *
      * @param e
-     *            异常
+     *         异常
      */
     public static void d(Throwable e) {
         if (debug) {
@@ -136,9 +136,9 @@ public class Log {
      * 调试消息
      *
      * @param msg
-     *            消息
+     *         消息
      * @param e
-     *            异常
+     *         异常
      */
     public static void d(String msg, Throwable e) {
         if (debug) {
@@ -151,7 +151,7 @@ public class Log {
      * 完全调试消息
      *
      * @param msg
-     *            消息
+     *         消息
      */
     public static void fd(String msg) {
         if (fullDebug) {
@@ -163,9 +163,9 @@ public class Log {
      * 完全调试消息
      *
      * @param msg
-     *            消息
+     *         消息
      * @param object
-     *            参数
+     *         参数
      */
     public static void fd(String msg, Object... object) {
         if (fullDebug) {
@@ -177,7 +177,7 @@ public class Log {
      * 完全调试消息
      *
      * @param e
-     *            异常
+     *         异常
      */
     public static void fd(Throwable e) {
         if (fullDebug) {
@@ -189,9 +189,9 @@ public class Log {
      * 完全调试消息
      *
      * @param msg
-     *            消息
+     *         消息
      * @param e
-     *            异常
+     *         异常
      */
     public static void fd(String msg, Throwable e) {
         if (fullDebug) {
@@ -224,9 +224,9 @@ public class Log {
      * <p>
      *
      * @param level
-     *            One of the message level identifiers, e.g., SEVERE
+     *         One of the message level identifiers, e.g., SEVERE
      * @param msg
-     *            The string message (or a key in the message catalog)
+     *         The string message (or a key in the message catalog)
      */
     public static void log(Level level, String msg) {
         logger.log(level, msg);
@@ -241,11 +241,11 @@ public class Log {
      * <p>
      *
      * @param level
-     *            One of the message level identifiers, e.g., SEVERE
+     *         One of the message level identifiers, e.g., SEVERE
      * @param msg
-     *            The string message (or a key in the message catalog)
+     *         The string message (or a key in the message catalog)
      * @param param1
-     *            parameter to the message
+     *         parameter to the message
      */
     public static void log(Level level, String msg, Object param1) {
         logger.log(level, msg, param1);
@@ -260,11 +260,11 @@ public class Log {
      * <p>
      *
      * @param level
-     *            One of the message level identifiers, e.g., SEVERE
+     *         One of the message level identifiers, e.g., SEVERE
      * @param msg
-     *            The string message (or a key in the message catalog)
+     *         The string message (or a key in the message catalog)
      * @param params
-     *            array of parameters to the message
+     *         array of parameters to the message
      */
     public static void log(Level level, String msg, Object[] params) {
         logger.log(level, msg, params);
@@ -284,11 +284,11 @@ public class Log {
      * <p>
      *
      * @param level
-     *            One of the message level identifiers, e.g., SEVERE
+     *         One of the message level identifiers, e.g., SEVERE
      * @param msg
-     *            The string message (or a key in the message catalog)
+     *         The string message (or a key in the message catalog)
      * @param thrown
-     *            Throwable associated with log message.
+     *         Throwable associated with log message.
      */
     public static void log(Level level, String msg, Throwable thrown) {
         logger.log(level, msg, thrown);
@@ -296,7 +296,7 @@ public class Log {
 
     /**
      * @param prefix
-     *            插件前缀
+     *         插件前缀
      */
     public static void setPrefix(String prefix) {
         Log.prefix = ChatColor.translateAlternateColorCodes('&', prefix);
@@ -309,7 +309,7 @@ public class Log {
      * given message is forwarded to all the registered output Handler objects.
      *
      * @param msg
-     *            The string message (or a key in the message catalog)
+     *         The string message (or a key in the message catalog)
      */
     public static void severe(String msg) {
         logger.severe(msg);
@@ -319,9 +319,9 @@ public class Log {
      * Sends this sender a message
      *
      * @param sender
-     *            命令发送者
+     *         命令发送者
      * @param msg
-     *            消息
+     *         消息
      */
     public static void sender(CommandSender sender, String msg) {
         sender.sendMessage(prefix + msg);
@@ -331,11 +331,11 @@ public class Log {
      * Sends this sender a message
      *
      * @param sender
-     *            命令发送者
+     *         命令发送者
      * @param msg
-     *            消息
+     *         消息
      * @param objs
-     *            参数
+     *         参数
      */
     public static void sender(CommandSender sender, String msg, Object... objs) {
         sender.sendMessage(prefix + String.format(msg, objs));
@@ -345,9 +345,9 @@ public class Log {
      * Sends this sender a message
      *
      * @param sender
-     *            命令发送者
+     *         命令发送者
      * @param msg
-     *            消息
+     *         消息
      */
     public static void sender(CommandSender sender, String[] msg) {
         Arrays.stream(msg).forEach(str -> sender(sender, str));
@@ -357,7 +357,7 @@ public class Log {
      * 格式化警告消息
      *
      * @param string
-     *            消息
+     *         消息
      */
     public static void w(String string) {
         logger.warning(string);
@@ -367,12 +367,19 @@ public class Log {
      * 格式化警告消息
      *
      * @param string
-     *            消息
+     *         消息
      * @param objects
-     *            参数
+     *         参数
      */
     public static void w(String string, Object... objects) {
         w(String.format(string, objects));
+    }
+
+    /**
+     * @return 是否为调试模式
+     */
+    public static boolean isDebug() {
+        return debug;
     }
 
     /**
@@ -382,23 +389,20 @@ public class Log {
         return globalDebug;
     }
 
-    public static String osn(List<?> classes) {
+    /**
+     * 打印对象简易名称
+     *
+     * @param objects
+     *         对象
+     * @return
+     */
+    public static String getSimpleNames(Object... objects) {
         StringBuilder str = new StringBuilder("[");
-        classes.forEach(c -> str.append(c == null ? null : c.getClass().getSimpleName()).append(", "));
-        return classes.isEmpty() ? "[]" : str.substring(0, str.length() - 2) + "]";
-    }
-
-    public static String osn(Object... classes) {
-        return osn(Arrays.asList(classes));
-    }
-
-    public static String csn(List<Class> classes) {
-        StringBuilder str = new StringBuilder("[");
-        classes.forEach(c -> str.append(c == null ? null : c.getSimpleName()).append(", "));
-        return classes.isEmpty() ? "[]" : str.substring(0, str.length() - 2) + "]";
-    }
-
-    public static String csn(Class[] classes) {
-        return csn(Arrays.asList(classes));
+        Arrays.stream(objects)
+              .forEach(o -> str.append(Optional.ofNullable(o)
+                                               .map(obj -> obj instanceof Class ? (Class) obj : obj.getClass())
+                                               .map(Class::getSimpleName)
+                                               .orElse(null)).append(", "));
+        return objects.length == 0 ? "[]" : str.substring(0, str.length() - 2) + "]";
     }
 }
