@@ -114,7 +114,6 @@ public class FakePlugin implements Plugin {
 
     }
 
-    @Override
     public EbeanServer getDatabase() {
         return null;
     }
