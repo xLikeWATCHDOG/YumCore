@@ -116,7 +116,7 @@ public class Log {
      */
     public static void d(String msg, Object... object) {
         if (debug) {
-            logger.info(String.format(msg, object));
+            logger.info(String.format("[DEBUG] " + msg, object));
         }
     }
 

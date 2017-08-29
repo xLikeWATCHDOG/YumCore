@@ -14,7 +14,7 @@ import javax.script.SimpleBindings;
 
 /**
  * 喵式脚本引擎
- * 
+ *
  * @author 喵♂呜
  * @since 2016年8月29日 上午7:51:43
  */
@@ -24,7 +24,7 @@ public class MiaoScriptEngine implements ScriptEngine, Invocable {
     private ScriptEngine engine;
 
     static {
-        manager = new ScriptEngineManager();
+        manager = new ScriptEngineManager(ClassLoader.getSystemClassLoader());
     }
 
     public static void setBindings(Bindings bindings) {

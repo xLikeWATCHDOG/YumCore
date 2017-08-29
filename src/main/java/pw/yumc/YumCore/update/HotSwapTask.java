@@ -1,7 +1,6 @@
 package pw.yumc.YumCore.update;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.URL;
@@ -9,8 +8,6 @@ import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 
 import javax.script.ScriptException;
-
-import org.junit.Test;
 
 import pw.yumc.YumCore.bungee.Log;
 import pw.yumc.YumCore.engine.MiaoScriptEngine;
@@ -40,10 +37,5 @@ public class HotSwapTask {
         } catch (IOException | ScriptException e) {
             Log.d("热更新脚本加载失败!", e);
         }
-    }
-
-    @Test
-    public void test() throws FileNotFoundException, ScriptException {
-        engine.eval(new FileReader(new File("src/main/resources/hotswap.js")));
     }
 }

@@ -39,13 +39,13 @@ public class P {
             Field field = pluginClassLoader.getClass().getDeclaredField("plugin");
             field.setAccessible(true);
             instance = (JavaPlugin) field.get(pluginClassLoader);
+            try {
+                getInjectConfigMethod = instance.getClass().getMethod("get" + instance.getName() + "Config");
+            } catch (NoSuchMethodException e) {
+                Log.d("配置方法 get%sConfig 未找到 将返回getConfig 调用结果!", instance.getName());
+            }
         } catch (Exception e) {
-            Log.d(e);
-        }
-        try {
-            getInjectConfigMethod = instance.getClass().getMethod("get" + instance.getName() + "Config");
-        } catch (NoSuchMethodException e) {
-            Log.d("配置方法 get%sConfig 未找到 将返回getConfig 调用结果!", instance.getName());
+            Log.d("P 类初始化失败 %s:%s", e.getClass().getName(), e.getMessage());
         }
     }
 
