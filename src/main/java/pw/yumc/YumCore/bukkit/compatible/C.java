@@ -103,11 +103,11 @@ public class C {
                         packetTypeConstructor = c;
                     }
                 });
-                nmsChatMessageTypeClass = packetTypeConstructor.getParameterTypes()[1];
-                if (nmsChatMessageTypeClass.isEnum()) {
-                    chatMessageTypes = nmsChatMessageTypeClass.getEnumConstants();
-                } else {
-                    if(newversion) {
+                try {
+                    nmsChatMessageTypeClass = packetTypeConstructor.getParameterTypes()[1];
+                    if (nmsChatMessageTypeClass.isEnum()) {
+                        chatMessageTypes = nmsChatMessageTypeClass.getEnumConstants();
+                    } else {
                         switch (nmsChatMessageTypeClass.getName()) {
                             case "int":
                                 nmsChatMessageTypeClass = Integer.class;
@@ -116,6 +116,8 @@ public class C {
                         }
                         nmsChatMessageTypeClassValueOf = nmsChatMessageTypeClass.getDeclaredMethod("valueOf", String.class);
                     }
+                }catch (Exception e){
+                    packetTypeConstructor=packetType.getConstructor(String.class);
                 }
                 Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
                 Class<?> typeNMSPlayer = Class.forName(a("EntityPlayer"));
@@ -173,13 +175,14 @@ public class C {
                 sendPacket.invoke(connection,Title.packetTitleSendConstructor.newInstance(Title.actions[2],serialized));
                 return;
             }else {
-                if (!newversion) {
-                    typeObj = true;
+                if (nmsChatMessageTypeClass==null) {
+                    sendPacket.invoke(connection, packetTypeConstructor.newInstance(serialized));
+                    return;
                 } else {
                     typeObj = chatMessageTypes == null ? nmsChatMessageTypeClassValueOf.invoke(null, String.valueOf(type)) : chatMessageTypes[type];
                 }
             }
-            sendPacket.invoke(connection, packetTypeConstructor.newInstance(serialized, typeObj));
+            sendPacket.invoke(connection, packetTypeConstructor.newInstance(serialized,typeObj));
         } catch (Exception ex) {
             Log.d("Json发包错误 " + version, ex);
         }
