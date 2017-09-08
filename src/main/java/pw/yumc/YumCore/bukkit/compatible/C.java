@@ -63,6 +63,7 @@ public class C {
             }
             try {
                 cauldron=true;
+                newversion=false;
                 nmsChatSerializer = Class.forName("net.minecraft.util.IChatComponent$Serializer");
                 chatSerializer = nmsChatSerializer.getMethod("func_150699_a", String.class);
                 nmsIChatBaseComponent = Class.forName("net.minecraft.util.IChatComponent");
