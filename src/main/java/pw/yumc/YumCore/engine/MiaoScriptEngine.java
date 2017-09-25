@@ -40,10 +40,18 @@ public class MiaoScriptEngine implements ScriptEngine, Invocable {
     }
 
     public MiaoScriptEngine(final String engineType) {
+        this(manager, engineType);
+    }
+
+    public MiaoScriptEngine(ScriptEngineManager engineManager) {
+        this(engineManager, "js");
+    }
+
+    public MiaoScriptEngine(ScriptEngineManager engineManager, final String engineType) {
         try {
-            engine = manager.getEngineByName(engineType);
+            engine = engineManager.getEngineByName(engineType);
         } catch (final NullPointerException ex) {
-            engine = manager.getEngineByName("javascript");
+            engine = engineManager.getEngineByName("javascript");
         }
     }
 

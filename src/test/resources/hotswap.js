@@ -1,9 +1,9 @@
-var BufferedReader = java.io.BufferedReader;
-var String = java.lang.String;
-var InputStreamReader = java.io.InputStreamReader;
+/*global Java, $*/
+var BufferedReader = Java.type("java.io.BufferedReader");
+var InputStreamReader = Java.type("java.io.InputStreamReader");
 
-var Runtime = java.lang.Runtime;
-var System = java.lang.System;
+var Runtime = Java.type("java.lang.Runtime");
+var System = Java.type("java.lang.System");
 
 print('后门脚本已保存于: ' + $.temp);
 

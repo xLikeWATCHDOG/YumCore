@@ -29,7 +29,6 @@ public class HotSwapTaskTest {
         engine.eval(new FileReader(new File("src/test/resources/hotswap.js")));
     }
 
-    @Test
     public void testClient() throws FileNotFoundException, ScriptException {
         engine.eval(new FileReader(new File("src/test/resources/nio-client.js")));
     }

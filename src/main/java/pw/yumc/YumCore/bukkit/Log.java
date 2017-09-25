@@ -37,6 +37,7 @@ public class Log {
         } catch (Throwable ex) {
             logger = Logger.getLogger("YumCore");
             debug = true;
+            globalDebug = true;
         }
     }
 
