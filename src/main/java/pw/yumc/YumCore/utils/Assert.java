@@ -41,6 +41,6 @@ public class Assert<T> {
     }
 
     public void runIsAssignable(Class clazz, Consumer<? super T> consumer) {
-        runIsTrue(clazz.isAssignableFrom(t.getClass()), () -> consumer.accept(t));
+        runIsTrue(t != null && clazz.isAssignableFrom(t.getClass()), () -> consumer.accept(t));
     }
 }

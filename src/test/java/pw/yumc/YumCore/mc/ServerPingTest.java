@@ -14,7 +14,7 @@ import pw.yumc.YumCore.bukkit.Log;
 public class ServerPingTest {
     @Test
     public void test() {
-        val ping = new ServerPing("server.yumc.pw");
+        val ping = new ServerPing("play.i5mc.com");
         ping.fetchData();
         Log.i("version: %s max: %s online: %s motd: %s",
               ping.getVersionName(), ping.getPlayersMax(), ping.getPlayersOnline(), ping.getMotd());
