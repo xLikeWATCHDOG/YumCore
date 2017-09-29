@@ -1,14 +1,14 @@
 package pw.yumc.YumCore.mc;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.regex.Pattern;
+import java.nio.charset.Charset;
 
-import lombok.Data;
 import pw.yumc.YumCore.annotation.NotProguard;
 
 /**
@@ -17,37 +17,8 @@ import pw.yumc.YumCore.annotation.NotProguard;
  * @author 喵♂呜
  * @since 2017/1/26 0026
  */
-@Data
 @NotProguard
 public class ServerInfo {
-    private static byte PACKET_HANDSHAKE = 0x00, PACKET_STATUSREQUEST = 0x00, PACKET_PING = 0x01;
-    private static int PROTOCOL_VERSION = 4;
-    private static int STATUS_HANDSHAKE = 1;
-    private static Pattern pattern = Pattern.compile(".*\"description\":\"(.*)\".*");
-    /**
-     * {
-     * "version": {"name": "BungeeCord 1.8.x, 1.9.x, 1.10.x, 1.11.x", "protocol": 316},
-     * "players": {"max": 922, "online": 921},
-     * "description": {
-     * "extra": [
-     * {"color": "white", "text": "                       "},
-     * {"color": "aqua", "bold": true, "text": "梦世界 "},
-     * {"color": "red","bold": true, "obfuscated": true, "text": "|"},
-     * {"color": "white", "text": " "},
-     * {"color": "white", "bold": true, "text": "i5mc.com\n"},
-     * {"color": "white", "text": "       " },
-     * {"color": "yellow", "bold": true, "text": "★"},
-     * {"color": "red", "bold": true, "text": "1.8-1.11"},
-     * {"color": "yellow", "bold": true, "text": "★  ★"},
-     * {"color": "yellow", "text": "黄金周末"},
-     * {"color": "gray", "text": "-"},
-     * {"color": "green", "text": "空岛战争"},
-     * {"color": "red", "bold": true, "text": "双倍硬币"},
-     * {"color": "green", "text": "奖励"},
-     * {"color": "yellow", "bold": true, "text": "★"}
-     * ],"text": "" }
-     * }
-     */
     private String address = "localhost";
     private int port = 25565;
     private int timeout = 1500;
@@ -88,56 +59,63 @@ public class ServerInfo {
      */
     public boolean fetchData() {
         try (Socket socket = new Socket()) {
-            socket.connect(new InetSocketAddress(getAddress(), getPort()), getTimeout());
+            OutputStream outputStream;
+            DataOutputStream dataOutputStream;
+            InputStream inputStream;
+            InputStreamReader inputStreamReader;
 
-            final DataInputStream in = new DataInputStream(socket.getInputStream());
-            final DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+            socket.setSoTimeout(this.timeout);
 
-            //> Handshake
-            ByteArrayOutputStream handshake_bytes = new ByteArrayOutputStream();
-            DataOutputStream handshake = new DataOutputStream(handshake_bytes);
+            socket.connect(new InetSocketAddress(this.getAddress(), this.getPort()), this.getTimeout());
 
-            handshake.writeByte(PACKET_HANDSHAKE);
-            writeVarInt(handshake, PROTOCOL_VERSION);
-            writeVarInt(handshake, getAddress().length());
-            handshake.writeBytes(getAddress());
-            handshake.writeShort(getPort());
-            writeVarInt(handshake, STATUS_HANDSHAKE);
+            outputStream = socket.getOutputStream();
+            dataOutputStream = new DataOutputStream(outputStream);
 
-            writeVarInt(out, handshake_bytes.size());
-            out.write(handshake_bytes.toByteArray());
+            inputStream = socket.getInputStream();
+            inputStreamReader = new InputStreamReader(inputStream, Charset.forName("UTF-16BE"));
 
-            //> Status request
+            dataOutputStream.write(new byte[]{(byte) 0xFE, (byte) 0x01});
 
-            out.writeByte(0x01); // Size of packet
-            out.writeByte(PACKET_STATUSREQUEST);
+            int packetId = inputStream.read();
 
-            //< Status response
+            if (packetId == -1) { throw new IOException("Premature end of stream."); }
 
-            readVarInt(in); // Size
-            int id = readVarInt(in);
+            if (packetId != 0xFF) { throw new IOException("Invalid packet ID (" + packetId + ")."); }
 
-            int length = readVarInt(in);
+            int length = inputStreamReader.read();
 
-            byte[] data = new byte[length];
-            in.readFully(data);
-            String json = new String(data, "UTF-8");
-            System.out.println(json);
-            //            //> Ping
-            //
-            //            out.writeByte(0x09); // Size of packet
-            //            out.writeByte(PACKET_PING);
-            //            out.writeLong(System.currentTimeMillis());
-            //
-            //            //< Ping
-            //            readVarInt(in); // Size
-            //            id = readVarInt(in);
+            if (length == -1) { throw new IOException("Premature end of stream."); }
 
-            // Close
-            handshake.close();
-            handshake_bytes.close();
-            out.close();
-            in.close();
+            if (length == 0) { throw new IOException("Invalid string length."); }
+
+            char[] chars = new char[length];
+
+            if (inputStreamReader.read(chars, 0, length) != length) { throw new IOException("Premature end of stream."); }
+
+            String string = new String(chars);
+
+            if (string.startsWith("§")) {
+                String[] data = string.split("\0");
+                this.pingVersion = Integer.parseInt(data[0].substring(1));
+                this.protocolVersion = Integer.parseInt(data[1]);
+                this.gameVersion = data[2];
+                this.motd = data[3];
+                this.playersOnline = Integer.parseInt(data[4]);
+                this.maxPlayers = Integer.parseInt(data[5]);
+            } else {
+                String[] data = string.split("§");
+                this.motd = data[0];
+                this.playersOnline = Integer.parseInt(data[1]);
+                this.maxPlayers = Integer.parseInt(data[2]);
+            }
+
+            dataOutputStream.close();
+            outputStream.close();
+
+            inputStreamReader.close();
+            inputStream.close();
+
+            socket.close();
         } catch (IOException exception) {
             gameVersion = "获取失败!";
             motd = "获取失败!";
@@ -146,36 +124,44 @@ public class ServerInfo {
         return true;
     }
 
-    /**
-     * @author thinkofdeath
-     * See: https://gist.github.com/thinkofdeath/e975ddee04e9c87faf22
-     */
-    public int readVarInt(DataInputStream in) throws IOException {
-        int i = 0;
-        int j = 0;
-        while (true) {
-            int k = in.readByte();
-            i |= (k & 0x7F) << j++ * 7;
-            if (j > 5)
-                throw new RuntimeException("VarInt too big");
-            if ((k & 0x80) != 128)
-                break;
-        }
-        return i;
+    public String getAddress() {
+        return this.address;
     }
 
-    /**
-     * @author thinkofdeath
-     * See: https://gist.github.com/thinkofdeath/e975ddee04e9c87faf22
-     */
-    public void writeVarInt(DataOutputStream out, int paramInt) throws IOException {
-        while (true) {
-            if ((paramInt & 0xFFFFFF80) == 0) {
-                out.writeByte(paramInt);
-                return;
-            }
-            out.writeByte(paramInt & 0x7F | 0x80);
-            paramInt >>>= 7;
-        }
+    public int getPort() {
+        return this.port;
     }
+
+    public void setTimeout(int timeout) {
+        this.timeout = timeout;
+    }
+
+    public int getTimeout() {
+        return this.timeout;
+    }
+
+    public int getPingVersion() {
+        return this.pingVersion;
+    }
+
+    public int getProtocolVersion() {
+        return this.protocolVersion;
+    }
+
+    public String getGameVersion() {
+        return this.gameVersion;
+    }
+
+    public String getMotd() {
+        return this.motd;
+    }
+
+    public int getPlayersOnline() {
+        return this.playersOnline;
+    }
+
+    public int getMaxPlayers() {
+        return this.maxPlayers;
+    }
+
 }
