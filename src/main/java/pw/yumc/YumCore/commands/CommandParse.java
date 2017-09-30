@@ -115,7 +115,7 @@ public class CommandParse {
                 throw new ParseException(String.format("第 %s 个参数 %s", isMain ? 1 : 2 + i, e.getMessage()));
             }
         }
-        Log.d("解析参数: %s => %s", Arrays.toString(args), Log.getSimpleNames(pobjs));
+        Log.d("解析参数: %s => %s", Arrays.toString(args), Log.getSimpleNames(pobjs.toArray()));
         return pobjs.toArray();
     }
 
