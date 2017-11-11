@@ -18,6 +18,8 @@ import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 import javax.script.SimpleBindings;
 
+import lombok.val;
+
 /**
  * 喵式脚本引擎
  *
@@ -59,21 +61,25 @@ public class MiaoScriptEngine implements ScriptEngine, Invocable {
         } catch (final NullPointerException ignored) {
         }
         if (engine == null) {
-            File nashorn = new File(System.getProperty("java.ext.dirs").split(File.pathSeparator)[0], "nashorn.jar");
-            if (nashorn.exists()) {
-                try {
-                    Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-                    // 设置方法的访问权限
-                    method.setAccessible(true);
-                    // 获取系统类加载器
-                    URL url = nashorn.toURI().toURL();
-                    method.invoke(Thread.currentThread().getContextClassLoader(), url);
-                    engineManager = new ScriptEngineManager();
-                    engine = engineManager.getEngineByName(engineType);
-                } catch (NoSuchMethodException | MalformedURLException | IllegalAccessException | InvocationTargetException ignored) {
-                    ignored.printStackTrace();
+            val dirs = System.getProperty("java.ext.dirs").split(File.pathSeparator);
+            for (String dir : dirs) {
+                File nashorn = new File(dir, "nashorn.jar");
+                if (nashorn.exists()) {
+                    try {
+                        Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+                        // 设置方法的访问权限
+                        method.setAccessible(true);
+                        // 获取系统类加载器
+                        URL url = nashorn.toURI().toURL();
+                        method.invoke(Thread.currentThread().getContextClassLoader(), url);
+                        engineManager = new ScriptEngineManager();
+                        engine = engineManager.getEngineByName(engineType);
+                    } catch (NoSuchMethodException | MalformedURLException | IllegalAccessException | InvocationTargetException | NullPointerException ignored) {
+                    }
+                    return;
                 }
             }
+            throw new UnsupportedOperationException("当前环境不支持 " + engineType + " 脚本类型!");
         }
     }
 
