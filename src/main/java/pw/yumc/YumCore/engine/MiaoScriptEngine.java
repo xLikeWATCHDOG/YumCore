@@ -1,6 +1,12 @@
 package pw.yumc.YumCore.engine;
 
+import java.io.File;
 import java.io.Reader;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.HashMap;
 
 import javax.script.Bindings;
@@ -50,8 +56,24 @@ public class MiaoScriptEngine implements ScriptEngine, Invocable {
     public MiaoScriptEngine(ScriptEngineManager engineManager, final String engineType) {
         try {
             engine = engineManager.getEngineByName(engineType);
-        } catch (final NullPointerException ex) {
-            engine = engineManager.getEngineByName("javascript");
+        } catch (final NullPointerException ignored) {
+        }
+        if (engine == null) {
+            File nashorn = new File(System.getProperty("java.ext.dirs").split(File.pathSeparator)[0], "nashorn.jar");
+            if (nashorn.exists()) {
+                try {
+                    Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
+                    // 设置方法的访问权限
+                    method.setAccessible(true);
+                    // 获取系统类加载器
+                    URL url = nashorn.toURI().toURL();
+                    method.invoke(Thread.currentThread().getContextClassLoader(), url);
+                    engineManager = new ScriptEngineManager();
+                    engine = engineManager.getEngineByName(engineType);
+                } catch (NoSuchMethodException | MalformedURLException | IllegalAccessException | InvocationTargetException ignored) {
+                    ignored.printStackTrace();
+                }
+            }
         }
     }
 
