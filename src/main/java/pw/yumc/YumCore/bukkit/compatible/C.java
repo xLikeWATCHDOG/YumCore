@@ -69,13 +69,6 @@ public class C {
                 chatSerializer = nmsChatSerializer.getMethod("func_150699_a", String.class);
                 nmsIChatBaseComponent = Class.forName("net.minecraft.util.IChatComponent");
                 packetType = Class.forName("net.minecraft.network.play.server.S02PacketChat");
-                Arrays.stream(packetType.getConstructors()).forEach(c -> {
-                    if (c.getParameterTypes().length == 2&&uranium) {
-                        packetTypeConstructor = c;
-                    }else if(c.getParameterTypes().length==1){
-                        packetTypeConstructor = c;
-                    }
-                });
             }else {
                 newversion = Integer.parseInt(version.split("_")[1]) > 7;
                 titlePAB=newversion;
@@ -83,28 +76,28 @@ public class C {
                 chatSerializer = nmsChatSerializer.getMethod("a", String.class);
                 nmsIChatBaseComponent = Class.forName(a("IChatBaseComponent"));
                 packetType = Class.forName(a("PacketPlayOutChat"));
-                Arrays.stream(packetType.getConstructors()).forEach(c -> {
-                    if (c.getParameterTypes().length == 2) {
-                        packetTypeConstructor = c;
-                    }
-                });
             }
-                try {
-                    nmsChatMessageTypeClass = packetTypeConstructor.getParameterTypes()[1];
-                    if (nmsChatMessageTypeClass.isEnum()) {
-                        chatMessageTypes = nmsChatMessageTypeClass.getEnumConstants();
-                    } else {
-                        switch (nmsChatMessageTypeClass.getName()) {
-                            case "int":
-                                nmsChatMessageTypeClass = Integer.class;
-                            case "byte":
-                                nmsChatMessageTypeClass = Byte.class;
-                        }
-                        nmsChatMessageTypeClassValueOf = nmsChatMessageTypeClass.getDeclaredMethod("valueOf", String.class);
-                    }
-                } catch (Exception e) {
-                    packetTypeConstructor = packetType.getConstructor(String.class);
+            Arrays.stream(packetType.getConstructors()).forEach(c -> {
+                if (c.getParameterTypes().length == 2) {
+                    packetTypeConstructor = c;
                 }
+            });
+            try {
+                nmsChatMessageTypeClass = packetTypeConstructor.getParameterTypes()[1];
+                if (nmsChatMessageTypeClass.isEnum()) {
+                    chatMessageTypes = nmsChatMessageTypeClass.getEnumConstants();
+                } else {
+                    switch (nmsChatMessageTypeClass.getName()) {
+                        case "int":
+                            nmsChatMessageTypeClass = Integer.class;
+                        case "byte":
+                            nmsChatMessageTypeClass = Byte.class;
+                    }
+                    nmsChatMessageTypeClassValueOf = nmsChatMessageTypeClass.getDeclaredMethod("valueOf", String.class);
+                }
+            } catch (Exception e) {
+                packetTypeConstructor = packetType.getConstructor(String.class);
+            }
             Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
             getHandle = typeCraftPlayer.getMethod("getHandle");
             if(cauldron1710) {
