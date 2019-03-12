@@ -48,88 +48,41 @@ public class C {
     private static Object[] chatMessageTypes;
 
     public static boolean init;
-    public static boolean cauldron;
-    public static boolean uranium;
-    public static boolean titlePAB;
     static {
-        version=getNMSVersion();
-        titlePAB=false;
-        if(version.equals("v1_7_R4")&&Package.getPackage("net.minecraftforge.cauldron")!=null) {
-            try{
-                Class.forName("cc.uraniummc.Uranium");
-                uranium=true;
-            }catch (Exception e){
-                Log.d("检测到不是Uranium服务端");
-            }
-            try {
-                cauldron=true;
-                newversion=false;
-                nmsChatSerializer = Class.forName("net.minecraft.util.IChatComponent$Serializer");
-                chatSerializer = nmsChatSerializer.getMethod("func_150699_a", String.class);
-                nmsIChatBaseComponent = Class.forName("net.minecraft.util.IChatComponent");
-                packetType = Class.forName("net.minecraft.network.play.server.S02PacketChat");
-                Arrays.stream(packetType.getConstructors()).forEach(c -> {
-                    if (c.getParameterTypes().length == 2) {
-                        packetTypeConstructor = c;
-                    }
-                });
-                nmsChatMessageTypeClass = packetTypeConstructor.getParameterTypes()[1];
-                if (nmsChatMessageTypeClass.isEnum()) {
-                    chatMessageTypes = nmsChatMessageTypeClass.getEnumConstants();
-                } else if(uranium) {
-                    titlePAB=true;
+        try {
+            version = getNMSVersion();
+            newversion = Integer.parseInt(version.split("_")[1]) > 7;
+            nmsChatSerializer = Class.forName(a(newversion ? "IChatBaseComponent$ChatSerializer" : "ChatSerializer"));
+            chatSerializer = nmsChatSerializer.getMethod("a", String.class);
+            nmsIChatBaseComponent = Class.forName(a("IChatBaseComponent"));
+            packetType = Class.forName(a("PacketPlayOutChat"));
+            Arrays.stream(packetType.getConstructors()).forEach(c -> {
+                if (c.getParameterTypes().length == 2) {
+                    packetTypeConstructor = c;
                 }
-                Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
-                Class<?> typeNMSPlayer = Class.forName("net.minecraft.entity.player.EntityPlayerMP");
-                Class<?> typePlayerConnection = Class.forName("net.minecraft.network.NetHandlerPlayServer");
-                getHandle = typeCraftPlayer.getMethod("getHandle");
-                playerConnection = typeNMSPlayer.getField("field_71135_a");
-                sendPacket = typePlayerConnection.getMethod("func_147359_a", Class.forName("net.minecraft.network.Packet"));
-                init = true;
-            } catch (Exception e) {
-                Log.w("C(Cauldron_1710) 兼容性工具初始化失败 可能造成部分功能不可用!");
-                Log.d(e);
-            }
-        }else {
-            try {
-                version = getNMSVersion();
-                newversion = Integer.parseInt(version.split("_")[1]) > 7;
-                nmsChatSerializer = Class.forName(a(newversion ? "IChatBaseComponent$ChatSerializer" : "ChatSerializer"));
-                chatSerializer = nmsChatSerializer.getMethod("a", String.class);
-                nmsIChatBaseComponent = Class.forName(a("IChatBaseComponent"));
-                packetType = Class.forName(a("PacketPlayOutChat"));
-                Arrays.stream(packetType.getConstructors()).forEach(c -> {
-                    if (c.getParameterTypes().length == 2) {
-                        packetTypeConstructor = c;
-                    }
-                });
-                try {
-                    nmsChatMessageTypeClass = packetTypeConstructor.getParameterTypes()[1];
-                    if (nmsChatMessageTypeClass.isEnum()) {
-                        chatMessageTypes = nmsChatMessageTypeClass.getEnumConstants();
-                    } else {
-                        switch (nmsChatMessageTypeClass.getName()) {
-                            case "int":
-                                nmsChatMessageTypeClass = Integer.class;
-                            case "byte":
-                                nmsChatMessageTypeClass = Byte.class;
-                        }
-                        nmsChatMessageTypeClassValueOf = nmsChatMessageTypeClass.getDeclaredMethod("valueOf", String.class);
-                    }
-                }catch (Exception e){
-                    packetTypeConstructor=packetType.getConstructor(String.class);
+            });
+            nmsChatMessageTypeClass = packetTypeConstructor.getParameterTypes()[1];
+            if (nmsChatMessageTypeClass.isEnum()) {
+                chatMessageTypes = nmsChatMessageTypeClass.getEnumConstants();
+            } else {
+                switch (nmsChatMessageTypeClass.getName()) {
+                case "int":
+                    nmsChatMessageTypeClass = Integer.class;
+                case "byte":
+                    nmsChatMessageTypeClass = Byte.class;
                 }
-                Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
-                Class<?> typeNMSPlayer = Class.forName(a("EntityPlayer"));
-                Class<?> typePlayerConnection = Class.forName(a("PlayerConnection"));
-                getHandle = typeCraftPlayer.getMethod("getHandle");
-                playerConnection = typeNMSPlayer.getField("playerConnection");
-                sendPacket = typePlayerConnection.getMethod("sendPacket", Class.forName(a("Packet")));
-                init = true;
-            } catch (Exception e) {
-                Log.w("C 兼容性工具初始化失败 可能造成部分功能不可用!");
-                Log.d(e);
+                nmsChatMessageTypeClassValueOf = nmsChatMessageTypeClass.getDeclaredMethod("valueOf", String.class);
             }
+            Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
+            Class<?> typeNMSPlayer = Class.forName(a("EntityPlayer"));
+            Class<?> typePlayerConnection = Class.forName(a("PlayerConnection"));
+            getHandle = typeCraftPlayer.getMethod("getHandle");
+            playerConnection = typeNMSPlayer.getField("playerConnection");
+            sendPacket = typePlayerConnection.getMethod("sendPacket", Class.forName(a("Packet")));
+            init = true;
+        } catch (Exception e) {
+            Log.w("C 兼容性工具初始化失败 可能造成部分功能不可用!");
+            Log.d(e);
         }
     }
 
@@ -170,19 +123,8 @@ public class C {
             Object serialized = chatSerializer.invoke(null, json);
             Object player = getHandle.invoke(receivingPacket);
             Object connection = playerConnection.get(player);
-            Object typeObj;
-            if(titlePAB){
-                sendPacket.invoke(connection,Title.packetTitleSendConstructor.newInstance(Title.actions[2],serialized));
-                return;
-            }else {
-                if (nmsChatMessageTypeClass==null) {
-                    sendPacket.invoke(connection, packetTypeConstructor.newInstance(serialized));
-                    return;
-                } else {
-                    typeObj = chatMessageTypes == null ? nmsChatMessageTypeClassValueOf.invoke(null, String.valueOf(type)) : chatMessageTypes[type];
-                }
-            }
-            sendPacket.invoke(connection, packetTypeConstructor.newInstance(serialized,typeObj));
+            Object typeObj = chatMessageTypes == null ? nmsChatMessageTypeClassValueOf.invoke(null, String.valueOf(type)) : chatMessageTypes[type];
+            sendPacket.invoke(connection, packetTypeConstructor.newInstance(serialized, typeObj));
         } catch (Exception ex) {
             Log.d("Json发包错误 " + version, ex);
         }
@@ -386,35 +328,14 @@ public class C {
         private static Constructor<?> packetTitleSetTimeConstructor;
         private static Object[] actions;
         static {
-            if(cauldron&&uranium) {
-                try {
-                    packetActions = Class.forName("cc.uraniummc.packet.S45PacketTitle$Type");
-                    packetTitle = Class.forName("cc.uraniummc.packet.S45PacketTitle");
-                    packetTitleSendConstructor = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent);
-                    packetTitleSetTimeConstructor = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent, Integer.TYPE, Integer.TYPE, Integer.TYPE);
-                    actions = packetActions.getEnumConstants();
-                } catch (Exception ignore) {
-                    titlePAB=false;
-                    Log.w("Title(Uranium 1.7.10) 兼容性工具初始化失败 可能造成部分功能不可用!");
-                    Log.d(ignore);
-                }
-            }else {
-                try {
-                    packetActions = Class.forName(a(newversion ? "PacketPlayOutTitle$EnumTitleAction" : "EnumTitleAction"));
-                    packetTitle = Class.forName(a("PacketPlayOutTitle"));
-                    packetTitleSendConstructor = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent);
-                    packetTitleSetTimeConstructor = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent, Integer.TYPE, Integer.TYPE, Integer.TYPE);
-                    actions = packetActions.getEnumConstants();
-                    for(Object data:actions){
-                        Enum enum_=(Enum)data;
-                        if(enum_.name().equals("ACTIONBAR")){
-                            titlePAB=true;
-                        }
-                    }
-                } catch (Exception ignore) {
-                    Log.w("Title 兼容性工具初始化失败 可能造成部分功能不可用!");
-                    Log.d(ignore);
-                }
+            try {
+                packetActions = Class.forName(a(newversion ? "PacketPlayOutTitle$EnumTitleAction" : "EnumTitleAction"));
+                packetTitle = Class.forName(a("PacketPlayOutTitle"));
+                packetTitleSendConstructor = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent);
+                packetTitleSetTimeConstructor = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent, Integer.TYPE, Integer.TYPE, Integer.TYPE);
+                actions = packetActions.getEnumConstants();
+            } catch (Exception ignore) {
+                Log.w("Title 兼容性工具初始化失败 可能造成部分功能不可用!");
             }
         }
 
@@ -485,7 +406,7 @@ public class C {
             // Send timings first
             Object player = getHandle.invoke(recoverPlayer);
             Object connection = playerConnection.get(player);
-            Object packet = packetTitleSendConstructor.newInstance(titlePAB?actions[5]:actions[4], null);
+            Object packet = packetTitleSendConstructor.newInstance(actions[4], null);
             sendPacket.invoke(connection, packet);
         }
 
@@ -532,7 +453,7 @@ public class C {
                     Object packet;
                     // Send if set
                     if ((fadeInTime != -1) && (fadeOutTime != -1) && (stayTime != -1)) {
-                        packet = packetTitleSetTimeConstructor.newInstance(titlePAB?actions[3]:actions[2], null, fadeInTime * 20, stayTime * 20, fadeOutTime * 20);
+                        packet = packetTitleSetTimeConstructor.newInstance(actions[2], null, fadeInTime * 20, stayTime * 20, fadeOutTime * 20);
                         sendPacket.invoke(connection, packet);
                     }
                     // Send title
