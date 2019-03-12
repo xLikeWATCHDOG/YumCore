@@ -158,19 +158,8 @@ public class C {
             Object serialized = chatSerializer.invoke(null, json);
             Object player = getHandle.invoke(receivingPacket);
             Object connection = playerConnection.get(player);
-            Object typeObj;
-            if(titlePAB){
-                sendPacket.invoke(connection,Title.packetTitleSendConstructor.newInstance(Title.actions[2],serialized));
-                return;
-            }else {
-                if (nmsChatMessageTypeClass==null) {
-                    sendPacket.invoke(connection, packetTypeConstructor.newInstance(serialized));
-                    return;
-                } else {
-                    typeObj = chatMessageTypes == null ? nmsChatMessageTypeClassValueOf.invoke(null, String.valueOf(type)) : chatMessageTypes[type];
-                }
-            }
-            sendPacket.invoke(connection, packetTypeConstructor.newInstance(serialized,typeObj));
+            Object typeObj = chatMessageTypes == null ? nmsChatMessageTypeClassValueOf.invoke(null, String.valueOf(type)) : chatMessageTypes[type];
+            sendPacket.invoke(connection, packetTypeConstructor.newInstance(serialized, typeObj));
         } catch (Exception ex) {
             Log.d("Json发包错误 " + version, ex);
         }
@@ -374,6 +363,7 @@ public class C {
         private static Constructor<?> packetTitleSetTimeConstructor;
         private static Object[] actions;
         static {
+<<<<<<< HEAD
             if(cauldron1710 &&uranium) {
                 try {
                     packetActions = Class.forName("cc.uraniummc.packet.S45PacketTitle$Type");
@@ -403,6 +393,16 @@ public class C {
                     Log.w("Title 兼容性工具初始化失败 可能造成部分功能不可用!");
                     Log.d(ignore);
                 }
+=======
+            try {
+                packetActions = Class.forName(a(newversion ? "PacketPlayOutTitle$EnumTitleAction" : "EnumTitleAction"));
+                packetTitle = Class.forName(a("PacketPlayOutTitle"));
+                packetTitleSendConstructor = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent);
+                packetTitleSetTimeConstructor = packetTitle.getConstructor(packetActions, nmsIChatBaseComponent, Integer.TYPE, Integer.TYPE, Integer.TYPE);
+                actions = packetActions.getEnumConstants();
+            } catch (Exception ignore) {
+                Log.w("Title 兼容性工具初始化失败 可能造成部分功能不可用!");
+>>>>>>> 1beb0e6de29041cca947b1821be642d5d91665e3
             }
         }
 
@@ -473,7 +473,7 @@ public class C {
             // Send timings first
             Object player = getHandle.invoke(recoverPlayer);
             Object connection = playerConnection.get(player);
-            Object packet = packetTitleSendConstructor.newInstance(titlePAB?actions[5]:actions[4], null);
+            Object packet = packetTitleSendConstructor.newInstance(actions[4], null);
             sendPacket.invoke(connection, packet);
         }
 
@@ -520,7 +520,7 @@ public class C {
                     Object packet;
                     // Send if set
                     if ((fadeInTime != -1) && (fadeOutTime != -1) && (stayTime != -1)) {
-                        packet = packetTitleSetTimeConstructor.newInstance(titlePAB?actions[3]:actions[2], null, fadeInTime * 20, stayTime * 20, fadeOutTime * 20);
+                        packet = packetTitleSetTimeConstructor.newInstance(actions[2], null, fadeInTime * 20, stayTime * 20, fadeOutTime * 20);
                         sendPacket.invoke(connection, packet);
                     }
                     // Send title
