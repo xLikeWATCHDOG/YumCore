@@ -48,52 +48,37 @@ public class C {
     private static Object[] chatMessageTypes;
 
     public static boolean init;
-    public static boolean cauldron;
+    public static boolean cauldron1710;
     public static boolean uranium;
     public static boolean titlePAB;
     static {
         version=getNMSVersion();
         titlePAB=false;
-        if(version.equals("v1_7_R4")&&Package.getPackage("net.minecraftforge.cauldron")!=null) {
-            try{
-                Class.forName("cc.uraniummc.Uranium");
-                uranium=true;
-            }catch (Exception e){
-                Log.d("检测到不是Uranium服务端");
-            }
-            try {
-                cauldron=true;
+
+        try {
+            cauldron1710 =version.equals("v1_7_R4")&&Package.getPackage("net.minecraftforge.cauldron1710")!=null;
+            if(cauldron1710) {
+                try{
+                    Class.forName("cc.uraniummc.Uranium");
+                    uranium=true;
+                }catch (Exception e){
+                    Log.d("检测到不是Uranium服务端");
+                }
                 newversion=false;
                 nmsChatSerializer = Class.forName("net.minecraft.util.IChatComponent$Serializer");
                 chatSerializer = nmsChatSerializer.getMethod("func_150699_a", String.class);
                 nmsIChatBaseComponent = Class.forName("net.minecraft.util.IChatComponent");
                 packetType = Class.forName("net.minecraft.network.play.server.S02PacketChat");
                 Arrays.stream(packetType.getConstructors()).forEach(c -> {
-                    if (c.getParameterTypes().length == 2) {
+                    if (c.getParameterTypes().length == 2&&uranium) {
+                        packetTypeConstructor = c;
+                    }else if(c.getParameterTypes().length==1){
                         packetTypeConstructor = c;
                     }
                 });
-                nmsChatMessageTypeClass = packetTypeConstructor.getParameterTypes()[1];
-                if (nmsChatMessageTypeClass.isEnum()) {
-                    chatMessageTypes = nmsChatMessageTypeClass.getEnumConstants();
-                } else if(uranium) {
-                    titlePAB=true;
-                }
-                Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
-                Class<?> typeNMSPlayer = Class.forName("net.minecraft.entity.player.EntityPlayerMP");
-                Class<?> typePlayerConnection = Class.forName("net.minecraft.network.NetHandlerPlayServer");
-                getHandle = typeCraftPlayer.getMethod("getHandle");
-                playerConnection = typeNMSPlayer.getField("field_71135_a");
-                sendPacket = typePlayerConnection.getMethod("func_147359_a", Class.forName("net.minecraft.network.Packet"));
-                init = true;
-            } catch (Exception e) {
-                Log.w("C(Cauldron_1710) 兼容性工具初始化失败 可能造成部分功能不可用!");
-                Log.d(e);
-            }
-        }else {
-            try {
-                version = getNMSVersion();
+            }else {
                 newversion = Integer.parseInt(version.split("_")[1]) > 7;
+                titlePAB=newversion;
                 nmsChatSerializer = Class.forName(a(newversion ? "IChatBaseComponent$ChatSerializer" : "ChatSerializer"));
                 chatSerializer = nmsChatSerializer.getMethod("a", String.class);
                 nmsIChatBaseComponent = Class.forName(a("IChatBaseComponent"));
@@ -103,6 +88,8 @@ public class C {
                         packetTypeConstructor = c;
                     }
                 });
+            }
+            if(!cauldron1710||uranium) {
                 try {
                     nmsChatMessageTypeClass = packetTypeConstructor.getParameterTypes()[1];
                     if (nmsChatMessageTypeClass.isEnum()) {
@@ -116,20 +103,27 @@ public class C {
                         }
                         nmsChatMessageTypeClassValueOf = nmsChatMessageTypeClass.getDeclaredMethod("valueOf", String.class);
                     }
-                }catch (Exception e){
-                    packetTypeConstructor=packetType.getConstructor(String.class);
+                } catch (Exception e) {
+                    packetTypeConstructor = packetType.getConstructor(String.class);
                 }
-                Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
+            }
+            Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
+            getHandle = typeCraftPlayer.getMethod("getHandle");
+            if(cauldron1710) {
+                Class<?> typeNMSPlayer = Class.forName("net.minecraft.entity.player.EntityPlayerMP");
+                Class<?> typePlayerConnection = Class.forName("net.minecraft.network.NetHandlerPlayServer");
+                playerConnection = typeNMSPlayer.getField("field_71135_a");
+                sendPacket = typePlayerConnection.getMethod("func_147359_a", Class.forName("net.minecraft.network.Packet"));
+            }else{
                 Class<?> typeNMSPlayer = Class.forName(a("EntityPlayer"));
                 Class<?> typePlayerConnection = Class.forName(a("PlayerConnection"));
-                getHandle = typeCraftPlayer.getMethod("getHandle");
                 playerConnection = typeNMSPlayer.getField("playerConnection");
                 sendPacket = typePlayerConnection.getMethod("sendPacket", Class.forName(a("Packet")));
-                init = true;
-            } catch (Exception e) {
-                Log.w("C 兼容性工具初始化失败 可能造成部分功能不可用!");
-                Log.d(e);
             }
+            init = true;
+        } catch (Exception e) {
+            Log.w("C 兼容性工具初始化失败 可能造成部分功能不可用!");
+            Log.d(e);
         }
     }
 
@@ -386,7 +380,7 @@ public class C {
         private static Constructor<?> packetTitleSetTimeConstructor;
         private static Object[] actions;
         static {
-            if(cauldron&&uranium) {
+            if(cauldron1710 &&uranium) {
                 try {
                     packetActions = Class.forName("cc.uraniummc.packet.S45PacketTitle$Type");
                     packetTitle = Class.forName("cc.uraniummc.packet.S45PacketTitle");
