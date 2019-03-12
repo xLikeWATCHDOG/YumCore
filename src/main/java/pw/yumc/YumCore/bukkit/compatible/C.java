@@ -54,9 +54,10 @@ public class C {
     static {
         version=getNMSVersion();
         titlePAB=false;
-
         try {
-            cauldron1710 =version.equals("v1_7_R4")&&Package.getPackage("net.minecraftforge.cauldron1710")!=null;
+            try {
+                cauldron1710 = version.equals("v1_7_R4") && Package.getPackage("net.minecraftforge.cauldron") != null;
+            }catch (Exception e){}
             if(cauldron1710) {
                 try{
                     Class.forName("cc.uraniummc.Uranium");
