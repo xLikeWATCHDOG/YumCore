@@ -55,9 +55,7 @@ public class C {
         version=getNMSVersion();
         titlePAB=false;
         try {
-            try {
-                cauldron1710 = version.equals("v1_7_R4") && Package.getPackage("net.minecraftforge.cauldron") != null;
-            }catch (Exception e){}
+            cauldron1710 = version.equals("v1_7_R4") && Package.getPackage("net.minecraftforge.cauldron") != null;
             if(cauldron1710) {
                 try{
                     Class.forName("cc.uraniummc.Uranium");
@@ -79,7 +77,7 @@ public class C {
                 packetType = Class.forName(a("PacketPlayOutChat"));
             }
             Arrays.stream(packetType.getConstructors()).forEach(c -> {
-                if (c.getParameterTypes().length == 2) {
+                if (c.getParameterTypes().length == 2&&!c.getParameterTypes()[1].getName().equals("boolean")) {
                     packetTypeConstructor = c;
                 }
             });
@@ -97,7 +95,11 @@ public class C {
                     nmsChatMessageTypeClassValueOf = nmsChatMessageTypeClass.getDeclaredMethod("valueOf", String.class);
                 }
             } catch (Exception e) {
-                packetTypeConstructor = packetType.getConstructor(String.class);
+                try {
+                    packetTypeConstructor = packetType.getConstructor(String.class);
+                }catch (Exception e2){
+                    packetTypeConstructor = packetType.getConstructor(nmsIChatBaseComponent);
+                }
             }
             Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
             getHandle = typeCraftPlayer.getMethod("getHandle");
