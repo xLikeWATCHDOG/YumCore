@@ -89,7 +89,6 @@ public class C {
                     }
                 });
             }
-            if(!cauldron1710||uranium) {
                 try {
                     nmsChatMessageTypeClass = packetTypeConstructor.getParameterTypes()[1];
                     if (nmsChatMessageTypeClass.isEnum()) {
@@ -106,7 +105,6 @@ public class C {
                 } catch (Exception e) {
                     packetTypeConstructor = packetType.getConstructor(String.class);
                 }
-            }
             Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
             getHandle = typeCraftPlayer.getMethod("getHandle");
             if(cauldron1710) {
