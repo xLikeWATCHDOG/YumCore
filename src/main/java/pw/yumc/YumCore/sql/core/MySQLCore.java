@@ -50,7 +50,8 @@ public class MySQLCore extends DataBaseCore {
         this.info.put("password", password);
         this.info.put("useUnicode", "true");
         this.info.put("characterEncoding", "utf8");
-        this.url = "jdbc:mysql://" + host + ":" + port + "/" + dbname;
+        this.info.put("useSSL", "false");
+        this.url = "jdbc:mysql://" + host + ":" + port + "/" + dbname + "";
         try {
             Class.forName(driverName).newInstance();
         } catch (Exception e) {
