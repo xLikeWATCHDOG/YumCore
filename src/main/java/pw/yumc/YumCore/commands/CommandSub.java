@@ -70,6 +70,9 @@ public class CommandSub implements TabExecutor {
      */
     private List<String> cmdNameCache = new ArrayList<>();
 
+    public CommandSub() {
+    }
+
     /**
      * 命令管理器
      *
@@ -178,9 +181,9 @@ public class CommandSub implements TabExecutor {
             if (defCmd != null) { return defCmd.execute(sender, label, args); }
             return help.send(sender, label, args);
         }
-        String subcmd = args[0].toLowerCase();
-        if (subcmd.equalsIgnoreCase("help")) { return help.send(sender, label, args); }
-        CommandInfo cmd = getByCache(subcmd);
+        String subCmd = args[0].toLowerCase();
+        if ("help".equalsIgnoreCase(subCmd)) { return help.send(sender, label, args); }
+        CommandInfo cmd = getByCache(subCmd);
         String[] subargs = args;
         if (cmd.equals(CommandInfo.Unknow) && defCmd != null) {
             cmd = defCmd;
@@ -238,7 +241,7 @@ public class CommandSub implements TabExecutor {
         CommandInfo ci = CommandInfo.parse(method, clazz);
         if (ci != null) {
             Class[] params = method.getParameterTypes();
-            Log.d("注册子命令: %s 参数类型: %s", ci.getName(), Log.getSimpleNames((Object[]) params));
+            Log.d("注册子命令: %s 参数类型: %s", ci.getName(), Log.getSimpleNames(params));
             try {
                 Class<? extends CommandSender> sender = params[0];
                 // 用于消除unuse警告

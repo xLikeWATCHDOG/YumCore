@@ -104,12 +104,14 @@ public class CommandParse {
         for (int i = 0; i < parses.size(); i++) {
             try {
                 Parse p = parses.get(i);
-                String param = i < args.length ? args[i] : p.getDefault();
+                String param = i < args.length ? args[i] : null;
+                param = param == null ? p.getDefault(sender) : param;
                 // 参数大于解析器 并且为最后一个参数
                 if (i + 1 == parses.size() && args.length >= parses.size()) {
                     param = join(Arrays.copyOfRange(args, i, args.length), " ");
                 }
-                pobjs.add(param == null ? null : p.parse(sender, param));
+                // 尝试让解析器解析Null参数
+                try { pobjs.add(p.parse(sender, param)); } catch (NullPointerException npe) { pobjs.add(null); }
             } catch (Exception e) {
                 Log.fd(e);
                 throw new ParseException(String.format("第 %s 个参数 %s", isMain ? 1 : 2 + i, e.getMessage()));
@@ -125,7 +127,7 @@ public class CommandParse {
         protected int max = Integer.MAX_VALUE;
         protected int min = 0;
 
-        public String getDefault() {
+        public String getDefault(CommandSender sender) {
             return def;
         }
 
@@ -178,20 +180,20 @@ public class CommandParse {
     }
 
     public static class ValueOfParse extends Parse<Object> {
-        private Class etype;
-        private Enum[] elist;
+        private Class eType;
+        private Enum[] eList;
         private Method method;
         private Method checker;
 
-        public ValueOfParse(Class etype, Method method) {
-            this.etype = etype;
+        public ValueOfParse(Class eType, Method method) {
+            this.eType = eType;
             try {
-                checker = etype.getDeclaredMethod("doubleValue");
+                checker = eType.getDeclaredMethod("doubleValue");
             } catch (NoSuchMethodException ignored) {
             }
             this.method = method;
-            if (etype.isEnum()) {
-                this.elist = ((Class<Enum>) etype).getEnumConstants();
+            if (eType.isEnum()) {
+                this.eList = ((Class<Enum>) eType).getEnumConstants();
             }
         }
 
@@ -207,10 +209,10 @@ public class CommandParse {
                 }
                 return result;
             } catch (IllegalArgumentException | InvocationTargetException | IllegalAccessException ex) {
-                if (etype.isEnum() && elist.length < 21) {
-                    return throwException("%s 不是 %s 有效值为 %s", arg, etype.getSimpleName(), Arrays.toString(elist));
+                if (eType.isEnum() && eList.length < 21) {
+                    return throwException("%s 不是 %s 有效值为 %s", arg, eType.getSimpleName(), Arrays.toString(eList));
                 } else {
-                    return throwException("%s 不是一个有效的 %s", arg, etype.getSimpleName());
+                    return throwException("%s 不是一个有效的 %s", arg, eType.getSimpleName());
                 }
             }
         }
@@ -226,20 +228,27 @@ public class CommandParse {
     }
 
     public static class PlayerParse extends Parse<Player> {
+        boolean sender = false;
         boolean check = false;
 
         @Override
         public Player parse(CommandSender sender, String arg) {
             Player p = Bukkit.getPlayerExact(arg);
-            if (check && p == null) { return throwException("玩家 %s 不存在或不在线!", arg); }
+            if (this.check && p == null) { return throwException("玩家 %s 不存在或不在线!", arg); }
             return p;
         }
 
         @Override
         public Parse<Player> handleAttrs() {
             super.handleAttrs();
+            sender = attrs.containsKey("sender");
             check = attrs.containsKey("check");
             return this;
+        }
+
+        @Override
+        public String getDefault(CommandSender sender) {
+            return this.sender && sender instanceof Player ? sender.getName() : super.getDefault(sender);
         }
     }
 

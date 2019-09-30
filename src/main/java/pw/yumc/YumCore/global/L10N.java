@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.SpawnEggMeta;
 import org.bukkit.material.SpawnEgg;
 
 import pw.yumc.YumCore.bukkit.Log;
@@ -14,8 +15,8 @@ import pw.yumc.YumCore.config.ext.YumConfig;
 /**
  * 本地化工具类
  *
- * @since 2015年12月14日 下午1:33:52
  * @author 喵♂呜
+ * @since 2015年12月14日 下午1:33:52
  */
 public class L10N {
     private static String CONFIG_NAME = "Item_zh_CN.yml";
@@ -35,18 +36,19 @@ public class L10N {
      * 获取物品完整汉化名称(包括原版)
      *
      * @param i
-     *            物品实体
+     *         物品实体
      * @return 物品名称
      */
     public static String getFullName(ItemStack i) {
-        return getItemName(getItemType(i)) + (i.hasItemMeta() && i.getItemMeta().hasDisplayName() ? "§r(" + i.getItemMeta().getDisplayName() + "§r)" : "");
+        return getItemName(getItemType(i)) + (i.hasItemMeta() && i.getItemMeta().hasDisplayName() ? "§r(" + i.getItemMeta()
+                .getDisplayName() + "§r)" : "");
     }
 
     /**
      * 获取物品汉化名称
      *
      * @param i
-     *            物品实体
+     *         物品实体
      * @return 物品名称
      */
     public static String getItemName(ItemStack i) {
@@ -57,7 +59,7 @@ public class L10N {
      * 获取物品汉化名称(优先显示名称)
      *
      * @param i
-     *            物品实体
+     *         物品实体
      * @return 物品名称
      */
     public static String getName(ItemStack i) {
@@ -77,7 +79,7 @@ public class L10N {
      * 获取物品汉化名称
      *
      * @param iname
-     *            物品类型名称
+     *         物品类型名称
      * @return 物品名称
      */
     private static String getItemName(String iname) {
@@ -96,14 +98,18 @@ public class L10N {
      * 获取物品类型名称
      *
      * @param i
-     *            物品实体
+     *         物品实体
      * @return 物品类型
      */
     private static String getItemType(ItemStack i) {
         String name = i.getType().name();
         String dura = "";
         if (i.getType() == Material.MONSTER_EGG) {
-            name = ((SpawnEgg) i.getData()).getSpawnedType().name();
+            try {
+                name = ((SpawnEgg) i.getData()).getSpawnedType().name();
+            } catch (NullPointerException npe) {
+                name = ((SpawnEggMeta) i.getItemMeta()).getSpawnedType().name();
+            }
         } else {
             int dur = i.getDurability();
             dura = (i.getMaxStackSize() != 1 && dur != 0) ? Integer.toString(dur) : "";

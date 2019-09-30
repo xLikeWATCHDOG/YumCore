@@ -46,6 +46,7 @@ public class P {
             }
         } catch (Exception e) {
             Log.d("P 类初始化失败 %s:%s", e.getClass().getName(), e.getMessage());
+            Log.d(e);
         }
     }
 
