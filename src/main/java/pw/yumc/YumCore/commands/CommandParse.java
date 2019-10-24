@@ -25,10 +25,10 @@ import pw.yumc.YumCore.commands.exception.ParseException;
  * @since 2016年10月5日 下午4:02:04
  */
 public class CommandParse {
-    private static Map<Class, Class> allparses = new HashMap<>();
+    private static Map<Class, Class> allParse = new HashMap<>();
     private static Map<String, Class> primitiveMap = new HashMap<>();
     private boolean isMain;
-    private List<Parse> parses = new LinkedList<>();
+    private List<BaseParse> pars = new LinkedList<>();
 
     static {
         register(File.class, FileParse.class);
@@ -44,7 +44,7 @@ public class CommandParse {
         primitiveMap.put("double", Double.class);
     }
 
-    public CommandParse(Class[] classes, Annotation[][] annons, boolean isMain) {
+    private CommandParse(Class[] classes, Annotation[][] annons, boolean isMain) {
         this.isMain = isMain;
         // 第一个参数实现了CommandSender忽略
         for (int i = 1; i < classes.length; i++) {
@@ -54,22 +54,22 @@ public class CommandParse {
                 clazz = primitiveMap.get(clazz.getName());
             }
             Annotation[] annotations = annons[i];
-            Parse parse = null;
-            if (allparses.containsKey(clazz)) {
+            BaseParse baseParse = null;
+            if (allParse.containsKey(clazz)) {
                 try {
-                    parse = (Parse) allparses.get(clazz).newInstance();
+                    baseParse = (BaseParse) allParse.get(clazz).newInstance();
                 } catch (InstantiationException | IllegalAccessException | NullPointerException ignored) {
                 }
             } else {
                 try {
-                    parse = new ValueOfParse(clazz, clazz.getDeclaredMethod("valueOf", String.class));
+                    baseParse = new ValueOfParse(clazz, clazz.getDeclaredMethod("valueOf", String.class));
                 } catch (NoSuchMethodException ignored) {
                 }
             }
-            if (parse == null) { throw new ParseException(String.format("存在无法解析的参数类型 %s", clazz.getName())); }
-            this.parses.add(parse.parseAnnotation(annotations).handleAttrs());
+            if (baseParse == null) { throw new ParseException(String.format("存在无法解析的参数类型 %s", clazz.getName())); }
+            this.pars.add(baseParse.parseAnnotation(annotations).handleAttrs());
         }
-        Log.d("命令解析器 %s", Log.getSimpleNames(parses.toArray()));
+        Log.d("命令解析器 %s", Log.getSimpleNames(pars.toArray()));
     }
 
     public static CommandParse get(Method method) {
@@ -81,34 +81,32 @@ public class CommandParse {
      *
      * @param arr
      *         数组
-     * @param split
-     *         分割符
      * @return 字符串
      */
-    public static String join(Object[] arr, String split) {
+    private static String join(Object[] arr) {
         StringBuilder str = new StringBuilder();
         for (Object s : arr) {
             str.append(s.toString());
-            str.append(split);
+            str.append(" ");
         }
-        return str.length() > split.length() ? str.toString().substring(0, str.length() - split.length()) : str.toString();
+        return str.length() > " ".length() ? str.toString().substring(0, str.length() - " ".length()) : str.toString();
     }
 
     public static void register(Class clazz, Class parse) {
-        allparses.put(clazz, parse);
+        allParse.put(clazz, parse);
     }
 
     public Object[] parse(CommandSender sender, String label, String[] args) {
         List<Object> pobjs = new LinkedList<>();
         pobjs.add(sender);
-        for (int i = 0; i < parses.size(); i++) {
+        for (int i = 0; i < pars.size(); i++) {
             try {
-                Parse p = parses.get(i);
+                BaseParse p = pars.get(i);
                 String param = i < args.length ? args[i] : null;
                 param = param == null ? p.getDefault(sender) : param;
                 // 参数大于解析器 并且为最后一个参数
-                if (i + 1 == parses.size() && args.length >= parses.size()) {
-                    param = join(Arrays.copyOfRange(args, i, args.length), " ");
+                if (i + 1 == pars.size() && args.length >= pars.size()) {
+                    param = join(Arrays.copyOfRange(args, i, args.length));
                 }
                 // 尝试让解析器解析Null参数
                 try { pobjs.add(p.parse(sender, param)); } catch (NullPointerException npe) { pobjs.add(null); }
@@ -121,7 +119,7 @@ public class CommandParse {
         return pobjs.toArray();
     }
 
-    public static abstract class Parse<RT> {
+    public static abstract class BaseParse<RT> {
         protected Map<String, String> attrs = new HashMap<>();
         protected String def;
         protected int max = Integer.MAX_VALUE;
@@ -131,9 +129,20 @@ public class CommandParse {
             return def;
         }
 
+        /**
+         * 解析参数
+         *
+         * @param sender
+         *         发送者
+         * @param arg
+         *         命令参数
+         * @return 解析后的数据
+         * @throws ParseException
+         *         解析异常
+         */
         public abstract RT parse(CommandSender sender, String arg) throws ParseException;
 
-        public Parse<RT> parseAnnotation(Annotation[] annotations) {
+        public BaseParse<RT> parseAnnotation(Annotation[] annotations) {
             for (Annotation annotation : annotations) {
                 if (annotation.annotationType() == Option.class) {
                     String value = ((Option) annotation).value();
@@ -153,7 +162,7 @@ public class CommandParse {
             return this;
         }
 
-        public Parse<RT> handleAttrs() {
+        public BaseParse<RT> handleAttrs() {
             if (attrs.containsKey("def")) {
                 def = String.valueOf(attrs.get("def"));
             }
@@ -179,7 +188,7 @@ public class CommandParse {
         }
     }
 
-    public static class ValueOfParse extends Parse<Object> {
+    public static class ValueOfParse extends BaseParse<Object> {
         private Class eType;
         private Enum[] eList;
         private Method method;
@@ -218,7 +227,7 @@ public class CommandParse {
         }
     }
 
-    public static class FileParse extends Parse<File> {
+    public static class FileParse extends BaseParse<File> {
         @Override
         public File parse(CommandSender sender, String arg) throws ParseException {
             File file = new File(arg);
@@ -227,7 +236,7 @@ public class CommandParse {
         }
     }
 
-    public static class PlayerParse extends Parse<Player> {
+    public static class PlayerParse extends BaseParse<Player> {
         boolean sender = false;
         boolean check = false;
 
@@ -239,7 +248,7 @@ public class CommandParse {
         }
 
         @Override
-        public Parse<Player> handleAttrs() {
+        public BaseParse<Player> handleAttrs() {
             super.handleAttrs();
             sender = attrs.containsKey("sender");
             check = attrs.containsKey("check");
@@ -252,7 +261,7 @@ public class CommandParse {
         }
     }
 
-    public static class StringParse extends Parse<String> {
+    public static class StringParse extends BaseParse<String> {
         List<String> options;
 
         @Override
@@ -263,7 +272,7 @@ public class CommandParse {
         }
 
         @Override
-        public Parse<String> handleAttrs() {
+        public BaseParse<String> handleAttrs() {
             super.handleAttrs();
             if (attrs.containsKey("option")) {
                 options = Arrays.asList(attrs.get("option").split(","));

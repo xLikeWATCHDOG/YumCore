@@ -233,12 +233,11 @@ public class SubscribeTask implements Runnable, Listener {
     }
 
     public static class VersionInfo {
-
         /**
          * 直链POM
          */
-        private String url = Encrypt.decode("嘝⚶哐嘥⚵咖嗤♱咿嘤⚦哅嘣⚩咊嘣⚧哐嗤⚷咋嗪♲咎嗫♶咓嗥♻咎嗤⚲咋嗚⚵咋嘜⚫哐嗤⚴咽嘬♱咁嘨♱哌嘤⚯咊嘭⚯哈");
-        // private static String url = "https://coding.net/u/502647092/p/%s/git/raw/%s/pom.xml";
+        private String url = Encrypt.decode("嘝⚶哐嘥⚵咖嗤♱哀嘚⚸咊嘩⚧哊嘘⚧哊嘩♰咿嘤⚯咋嘪♱咑嗥♴咒嗩♹和嗮♴咋嘥♱咁嘨♱哃嘞⚶咋嘧⚣哓嗤♧哏嗤⚲哋嘢♰哔嘢⚮");
+        // private static String url = "https://dev.tencent.com/u/502647092/p/%s/git/raw/%s/pom.xml";
         /**
          * 构建POM
          */

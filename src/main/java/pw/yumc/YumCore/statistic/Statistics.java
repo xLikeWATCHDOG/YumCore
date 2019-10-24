@@ -14,6 +14,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -49,7 +50,7 @@ public class Statistics {
     /**
      * UTF-8编码
      */
-    private static Charset UTF_8 = Charset.forName("UTF-8");
+    private static Charset UTF_8 = StandardCharsets.UTF_8;
 
     /**
      * getOnlinePlayers方法
@@ -255,7 +256,7 @@ public class Statistics {
         data.put("plugin_version", description.getVersion());
         data.put("players_online", getOnlinePlayerNumber());
         data.put("os_name", System.getProperty("os.name"));
-        data.put("os_arch", tmposarch.equalsIgnoreCase("amd64") ? "x86_64" : tmposarch);
+        data.put("os_arch", "amd64".equalsIgnoreCase(tmposarch) ? "x86_64" : tmposarch);
         data.put("os_version", System.getProperty("os.version"));
         data.put("os_usemem", (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / 1024 / 1024);
         data.put("os_cores", Runtime.getRuntime().availableProcessors());
