@@ -15,6 +15,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
+import pw.yumc.YumCore.reflect.Reflect;
 
 /**
  * 命令工具类
@@ -38,9 +39,7 @@ public class CommandKit {
             commandMapField.setAccessible(true);
             SimpleCommandMap commandMap = (SimpleCommandMap) commandMapField.get(pluginManager);
 
-            Field knownCommandsField = commandMap.getClass().getDeclaredField("knownCommands");
-            knownCommandsField.setAccessible(true);
-            knownCommands = (Map<String, Command>) knownCommandsField.get(commandMap);
+            knownCommands = Reflect.on(commandMap).field("knownCommands").get();
 
             PluginCommandConstructor = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
             PluginCommandConstructor.setAccessible(true);
