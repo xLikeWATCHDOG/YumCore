@@ -13,7 +13,7 @@ import pw.yumc.YumCore.commands.interfaces.ErrorHanlder;
 
 /**
  * 命令错误处理
- * 
+ *
  * @author 喵♂呜
  * @since 2016/11/27 0027
  */
@@ -24,6 +24,7 @@ public class CommandError implements ErrorHanlder {
     private static String cmdUse = "§6使用方法: §e/%s %s%s";
     private static String cmdDes = "§6命令描述: §3%s";
     private static String argErr = "§c参数错误: §4%s";
+    private static String execErr = "§c命令执行失败: §4%s";
 
     @Override
     public void error(CommandException e, CommandSender sender, CommandInfo info, String label, String[] args) {
@@ -39,7 +40,7 @@ public class CommandError implements ErrorHanlder {
         } else if (e instanceof ParseException) {
             Log.sender(sender, argErr, e.getMessage());
         } else {
-            throw e;
+            Log.sender(sender, execErr, e.getMessage());
         }
     }
 }

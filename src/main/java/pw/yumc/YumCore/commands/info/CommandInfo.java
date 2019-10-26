@@ -1,7 +1,6 @@
 package pw.yumc.YumCore.commands.info;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -99,9 +98,9 @@ public class CommandInfo {
      * 解析CommandInfo
      *
      * @param method
-     *            方法
+     *         方法
      * @param origin
-     *            源对象
+     *         源对象
      * @return {@link CommandInfo}
      */
     public static CommandInfo parse(Method method, Object origin) {
@@ -121,11 +120,11 @@ public class CommandInfo {
      * 执行命令
      *
      * @param sender
-     *            命令发送者
+     *         命令发送者
      * @param label
-     *            命令标签
+     *         命令标签
      * @param args
-     *            参数
+     *         参数
      * @return 是否执行成功
      */
     public boolean execute(final CommandSender sender, final String label, final String[] args) {
@@ -134,9 +133,12 @@ public class CommandInfo {
             try {
                 check(sender, label, args);
                 method.invoke(origin, parse.parse(sender, label, args));
-            } catch (CommandException e) {
-                commandErrorHandler.error(e, sender, this, label, args);
-            } catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+            } catch (Exception e) {
+                if (e.getCause() instanceof CommandException) { e = (Exception) e.getCause(); }
+                if (e instanceof CommandException) {
+                    commandErrorHandler.error((CommandException) e, sender, this, label, args);
+                    return;
+                }
                 throw new RuntimeException(e);
             }
         };
@@ -208,7 +210,7 @@ public class CommandInfo {
      * 验证命令是否匹配
      *
      * @param cmd
-     *            需验证命令
+     *         需验证命令
      * @return 是否匹配
      */
     public boolean isValid(String cmd) {
@@ -224,9 +226,9 @@ public class CommandInfo {
 
     /**
      * 设置命令错误处理器
-     * 
+     *
      * @param commandErrorHandler
-     *            命令错误处理器
+     *         命令错误处理器
      */
     public void setCommandErrorHandler(ErrorHanlder commandErrorHandler) {
         this.commandErrorHandler = commandErrorHandler;
