@@ -150,18 +150,18 @@ public class SubscribeTask implements Runnable, Listener {
         /**
          * 下载直连
          */
-        DIRECT(Encrypt.decode("嘝⚶哐嘥♼咋嗤⚥哅嗣⚻哑嘢⚥咊嘥⚹咋嘟⚱咾嗤♧咍嗙⚵咋嘡⚣哏嘩⚕哑嘘⚥品嘨⚵哂嘪⚮咞嘪⚫哈嘙♱咽嘧⚶哅嘛⚣咿嘩♱哐嘖⚴哃嘚⚶咋嗚♳咀嘨♰哆嘖⚴")),
-        // "http://ci.yumc.pw/job/%1$s/lastSuccessfulBuild/artifact/target/%1$s.jar";
+        DIRECT(Encrypt.decode("嘝⚶哐嘥⚵咖嗤♱咿嘞♰哕嘪⚯咿嗣⚲哓嗤⚬哋嘗♱咩嘞⚰品嘘⚴咽嘛⚶咋嘟⚱咾嗤♧咍嗙⚵咋嘡⚣哏嘩⚕哑嘘⚥品嘨⚵哂嘪⚮咞嘪⚫哈嘙♱咽嘧⚶哅嘛⚣咿嘩♱哐嘖⚴哃嘚⚶咋嗚♳咀嘨♰哆嘖⚴")),
+        // https://ci.yumc.pw/job/Minecraft/job/%1$s/lastSuccessfulBuild/artifact/target/%1$s.jar
         /**
          * Maven下载
          */
-        MAVEN(Encrypt.decode("嘝⚶哐嘥♼咋嗤⚥哅嗣⚻哑嘢⚥咊嘥⚹咋嘥⚮哑嘜⚫哊嗤⚴品嘥⚱哏嘞⚶哋嘧⚻咋嘚⚸品嘧⚻哐嘝⚫哊嘜♱咁嗦♦哏嗤♧咎嗙⚵咋嗚♵咀嘨♯咁嗧♦哏嗣⚬咽嘧")),
-        // "http://ci.yumc.pw/plugin/repository/everything/%1$s/%2$s/%3$s-%2$s.jar";
+        MAVEN(Encrypt.decode("嘝⚶哐嘥⚵咖嗤♱咿嘞♰哕嘪⚯咿嗣⚲哓嗤⚲哈嘪⚩哅嘣♱哎嘚⚲哋嘨⚫哐嘤⚴哕嗤⚧哒嘚⚴哕嘩⚪哅嘣⚩咋嗚♳咀嘨♱咁嗧♦哏嗤♧咏嗙⚵咉嗚♴咀嘨♰哆嘖⚴")),
+        // "https://ci.yumc.pw/plugin/repository/everything/%1$s/%2$s/%3$s-%2$s.jar";
         /**
          * 工作区下载
          */
-        WS(Encrypt.decode("嘝⚶哐嘥♼咋嗤⚥哅嗣⚻哑嘢⚥咊嘥⚹咋嘟⚱咾嗤♧咍嗙⚵咋嘬⚵咋嘩⚣哎嘜⚧哐嗤♧咍嗙⚵咊嘟⚣哎"));
-        // "http://ci.yumc.pw/job/%1$s/ws/target/%1$s.jar"
+        WS(Encrypt.decode("嘝⚶哐嘥⚵咖嗤♱咿嘞♰哕嘪⚯咿嗣⚲哓嗤⚬哋嘗♱咩嘞⚰品嘘⚴咽嘛⚶咋嘟⚱咾嗤♧咍嗙⚵咋嘬⚵咋嘩⚣哎嘜⚧哐嗤♧咍嗙⚵咊嘟⚣哎"));
+        // https://ci.yumc.pw/job/Minecraft/job/%1$s/ws/target/%1$s.jar
         String url;
 
         UpdateType(String url) {
@@ -237,12 +237,12 @@ public class SubscribeTask implements Runnable, Listener {
          * 直链POM
          */
         private String url = Encrypt.decode("嘝⚶哐嘥⚵咖嗤♱哀嘚⚸咊嘩⚧哊嘘⚧哊嘩♰咿嘤⚯咋嘪♱咑嗥♴咒嗩♹和嗮♴咋嘥♱咁嘨♱哃嘞⚶咋嘧⚣哓嗤♧哏嗤⚲哋嘢♰哔嘢⚮");
-        // private static String url = "https://dev.tencent.com/u/502647092/p/%s/git/raw/%s/pom.xml";
+        // https://dev.tencent.com/u/502647092/p/%s/git/raw/%s/pom.xml
         /**
          * 构建POM
          */
-        private String pom = Encrypt.decode("嘝⚶哐嘥♼咋嗤⚥哅嗣⚻哑嘢⚥咊嘥⚹咋嘟⚱咾嗤♧哏嗤⚮咽嘨⚶咯嘪⚥咿嘚⚵哏嘛⚷哈嗷⚷哅嘡⚦咋嘖⚴哐嘞⚨咽嘘⚶咋嘥⚱哉嗣⚺哉嘡");
-        // private static String pom = "http://ci.yumc.pw/job/%s/lastSuccessfulBuild/artifact/pom.xml";
+        private String pom = Encrypt.decode("嘝⚶哐嘥⚵咖嗤♱咿嘞♰哕嘪⚯咿嗣⚲哓嗤⚬哋嘗♱咩嘞⚰品嘘⚴咽嘛⚶咋嘟⚱咾嗤♧哏嗤⚮咽嘨⚶咯嘪⚥咿嘚⚵哏嘛⚷哈嗷⚷哅嘡⚦咋嘖⚴哐嘞⚨咽嘘⚶咋嘩⚣哎嘜⚧哐嗤⚲哋嘢♰哔嘢⚮");
+        // https://ci.yumc.pw/job/Minecraft/job/%s/lastSuccessfulBuild/artifact/target/pom.xml
 
         /**
          * 插件名称
