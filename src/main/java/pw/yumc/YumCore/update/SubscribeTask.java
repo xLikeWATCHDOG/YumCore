@@ -44,7 +44,10 @@ public class SubscribeTask implements Runnable, Listener {
      * 插件实例
      */
     private static JavaPlugin instance = P.instance;
-
+    /**
+     * 是否禁止更新
+     */
+    private static boolean notUpdate = new File(String.format("plugins%1$sYumCore%1$snotupdate", File.separatorChar)).exists();
     /**
      * 检查间隔
      */
@@ -236,13 +239,13 @@ public class SubscribeTask implements Runnable, Listener {
         /**
          * 直链POM
          */
-        private String url = Encrypt.decode("嘝⚶哐嘥⚵咖嗤♱哀嘚⚸咊嘩⚧哊嘘⚧哊嘩♰咿嘤⚯咋嘪♱咑嗥♴咒嗩♹和嗮♴咋嘥♱咁嘨♱哃嘞⚶咋嘧⚣哓嗤♧哏嗤⚲哋嘢♰哔嘢⚮");
-        // https://dev.tencent.com/u/502647092/p/%s/git/raw/%s/pom.xml
+        private String url = Encrypt.decode("嘝⚶哐嘥⚵咖嗤♱咿嘤⚦哅嘣⚩咊嘣⚧哐嗤⚷咋嗪♲咎嗫♶咓嗥♻咎嗤⚲咋嗚⚵咋嘜⚫哐嗤⚴咽嘬♱咁嘨♱哌嘤⚯咊嘭⚯哈");
+        // https://coding.net/u/502647092/p/%s/git/raw/%s/pom.xml
         /**
          * 构建POM
          */
-        private String pom = Encrypt.decode("嘝⚶哐嘥⚵咖嗤♱咿嘞♰哕嘪⚯咿嗣⚲哓嗤⚬哋嘗♱咩嘞⚰品嘘⚴咽嘛⚶咋嘟⚱咾嗤♧哏嗤⚮咽嘨⚶咯嘪⚥咿嘚⚵哏嘛⚷哈嗷⚷哅嘡⚦咋嘖⚴哐嘞⚨咽嘘⚶咋嘩⚣哎嘜⚧哐嗤⚲哋嘢♰哔嘢⚮");
-        // https://ci.yumc.pw/job/Minecraft/job/%s/lastSuccessfulBuild/artifact/target/pom.xml
+        private String pom = Encrypt.decode("嘝⚶哐嘥⚵咖嗤♱咿嘞♰哕嘪⚯咿嗣⚲哓嗤⚬哋嘗♱咩嘞⚰品嘘⚴咽嘛⚶咋嘟⚱咾嗤♧哏嗤⚮咽嘨⚶咯嘪⚥咿嘚⚵哏嘛⚷哈嗷⚷哅嘡⚦咋嘖⚴哐嘞⚨咽嘘⚶咋嘥⚱哉嗣⚺哉嘡");
+        // https://ci.yumc.pw/job/Minecraft/job/%s/lastSuccessfulBuild/artifact/pom.xml
 
         /**
          * 插件名称
