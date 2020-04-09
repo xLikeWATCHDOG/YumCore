@@ -104,16 +104,18 @@ public class L10N {
     private static String getItemType(ItemStack i) {
         String name = i.getType().name();
         String dura = "";
-        if (i.getType() == Material.MONSTER_EGG) {
-            try {
-                name = ((SpawnEgg) i.getData()).getSpawnedType().name();
-            } catch (NullPointerException npe) {
-                name = ((SpawnEggMeta) i.getItemMeta()).getSpawnedType().name();
+        try {
+            if (i.getType() == Material.MONSTER_EGG) {
+                try {
+                    name = ((SpawnEgg) i.getData()).getSpawnedType().name();
+                } catch (NullPointerException npe) {
+                    name = ((SpawnEggMeta) i.getItemMeta()).getSpawnedType().name();
+                }
             }
-        } else {
-            int dur = i.getDurability();
-            dura = (i.getMaxStackSize() != 1 && dur != 0) ? Integer.toString(dur) : "";
+        } catch (Throwable ignored) {
         }
+        int dur = i.getDurability();
+        dura = (i.getMaxStackSize() != 1 && dur != 0) ? Integer.toString(dur) : "";
         return (name + (dura.isEmpty() ? "" : "-" + dura)).toUpperCase();
     }
 
