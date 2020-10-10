@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>pw.yumc</groupId>
     <artifactId>YumCore</artifactId>
-    <version>1.8.9</version>
+    <version>1.9.0</version>
     <build>
         <finalName>${project.artifactId}</finalName>
         <plugins>
@@ -123,7 +123,7 @@
         <dependency>
             <groupId>com.comphenix.protocol</groupId>
             <artifactId>ProtocolLib</artifactId>
-            <version>4.2.1</version>
+            <version>4.5.1</version>
         </dependency>
         <dependency>
             <groupId>com.sk89q.worldedit</groupId>

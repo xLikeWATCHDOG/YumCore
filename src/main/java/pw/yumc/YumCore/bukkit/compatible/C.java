@@ -1,5 +1,13 @@
 package pw.yumc.YumCore.bukkit.compatible;
 
+import com.google.common.base.Charsets;
+import org.bukkit.*;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.json.simple.JSONObject;
+import pw.yumc.YumCore.annotation.NotProguard;
+import pw.yumc.YumCore.bukkit.Log;
+import pw.yumc.YumCore.bukkit.P;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -7,69 +15,54 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.Server;
-import org.bukkit.World;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.json.simple.JSONObject;
-
-import com.google.common.base.Charsets;
-
-import pw.yumc.YumCore.annotation.NotProguard;
-import pw.yumc.YumCore.bukkit.Log;
-import pw.yumc.YumCore.bukkit.P;
-
 /**
  * Bukkit兼容类
  *
- * @since 2016年7月23日 下午1:04:56
  * @author 喵♂呜
+ * @since 2016年7月23日 下午1:04:56
  */
 public class C {
-    private static Class<?> nmsChatSerializer;
+    public static boolean init;
+    private static boolean above_1_16 = false;
     private static Class<?> nmsIChatBaseComponent;
-    private static Class<?> packetType;
-    private static Class<?> nmsChatMessageTypeClass;
-
     private static Constructor<?> packetTypeConstructor;
-
     private static Method chatSerializer;
     private static Method getHandle;
     private static Method nmsChatMessageTypeClassValueOf;
-
     private static String version;
     private static boolean newversion;
-
     private static Field playerConnection;
     private static Method sendPacket;
-
     private static Object[] chatMessageTypes;
 
-    public static boolean init;
     static {
         try {
             version = getNMSVersion();
             newversion = Integer.parseInt(version.split("_")[1]) > 7;
-            nmsChatSerializer = Class.forName(a(newversion ? "IChatBaseComponent$ChatSerializer" : "ChatSerializer"));
+            Class<?> nmsChatSerializer = Class.forName(a(newversion ? "IChatBaseComponent$ChatSerializer" : "ChatSerializer"));
             chatSerializer = nmsChatSerializer.getMethod("a", String.class);
             nmsIChatBaseComponent = Class.forName(a("IChatBaseComponent"));
-            packetType = Class.forName(a("PacketPlayOutChat"));
+            Class<?> packetType = Class.forName(a("PacketPlayOutChat"));
             Arrays.stream(packetType.getConstructors()).forEach(c -> {
                 if (c.getParameterTypes().length == 2) {
                     packetTypeConstructor = c;
                 }
+                if (c.getParameterTypes().length == 3) {
+                    packetTypeConstructor = c;
+                    above_1_16 = true;
+                }
             });
-            nmsChatMessageTypeClass = packetTypeConstructor.getParameterTypes()[1];
+            Class<?> nmsChatMessageTypeClass = packetTypeConstructor.getParameterTypes()[1];
             if (nmsChatMessageTypeClass.isEnum()) {
                 chatMessageTypes = nmsChatMessageTypeClass.getEnumConstants();
             } else {
                 switch (nmsChatMessageTypeClass.getName()) {
-                case "int":
-                    nmsChatMessageTypeClass = Integer.class;
-                case "byte":
-                    nmsChatMessageTypeClass = Byte.class;
+                    case "int":
+                        nmsChatMessageTypeClass = Integer.class;
+                        break;
+                    case "byte":
+                        nmsChatMessageTypeClass = Byte.class;
+                        break;
                 }
                 nmsChatMessageTypeClassValueOf = nmsChatMessageTypeClass.getDeclaredMethod("valueOf", String.class);
             }
@@ -109,14 +102,11 @@ public class C {
     /**
      * 给玩家发送Json消息
      *
-     * @param receivingPacket
-     *            接受信息的玩家
-     * @param json
-     *            Json信息
-     * @param type
-     *            类型
-     *            0. 消息
-     *            2. ActionBar
+     * @param receivingPacket 接受信息的玩家
+     * @param json            Json信息
+     * @param type            类型
+     *                        0. 消息
+     *                        2. ActionBar
      */
     public static void sendJson(org.bukkit.entity.Player receivingPacket, String json, int type) {
         try {
@@ -124,7 +114,9 @@ public class C {
             Object player = getHandle.invoke(receivingPacket);
             Object connection = playerConnection.get(player);
             Object typeObj = chatMessageTypes == null ? nmsChatMessageTypeClassValueOf.invoke(null, String.valueOf(type)) : chatMessageTypes[type];
-            sendPacket.invoke(connection, packetTypeConstructor.newInstance(serialized, typeObj));
+            sendPacket.invoke(connection, above_1_16
+                    ? packetTypeConstructor.newInstance(serialized, typeObj, receivingPacket.getUniqueId())
+                    : packetTypeConstructor.newInstance(serialized, typeObj));
         } catch (Exception ex) {
             Log.d("Json发包错误 " + version, ex);
         }
@@ -137,8 +129,7 @@ public class C {
         /**
          * 公告发送ActionBar
          *
-         * @param message
-         *            需要发送的消息
+         * @param message 需要发送的消息
          */
         @NotProguard
         public static void broadcast(String message) {
@@ -150,10 +141,8 @@ public class C {
         /**
          * 公告发送ActionBar
          *
-         * @param message
-         *            需要发送的消息
-         * @param times
-         *            需要显示的时间
+         * @param message 需要发送的消息
+         * @param times   需要显示的时间
          */
         @NotProguard
         public static void broadcast(final String message, final int times) {
@@ -174,12 +163,9 @@ public class C {
         /**
          * 公告发送ActionBar(分世界)
          *
-         * @param world
-         *            需要发送的世界
-         * @param message
-         *            需要发送的消息
-         * @param times
-         *            需要显示的时间
+         * @param world   需要发送的世界
+         * @param message 需要发送的消息
+         * @param times   需要显示的时间
          */
         @NotProguard
         public static void broadcast(final World world, final String message, final int times) {
@@ -200,10 +186,8 @@ public class C {
         /**
          * 给玩家发送ActionBar消息
          *
-         * @param receivingPacket
-         *            接受信息的玩家
-         * @param msg
-         *            ActionBar信息
+         * @param receivingPacket 接受信息的玩家
+         * @param msg             ActionBar信息
          */
         @NotProguard
         public static void send(org.bukkit.entity.Player receivingPacket, String msg) {
@@ -213,12 +197,9 @@ public class C {
         /**
          * 给玩家发送ActionBar消息
          *
-         * @param receivingPacket
-         *            接受信息的玩家
-         * @param msg
-         *            需要发送的消息
-         * @param times
-         *            需要显示的时间
+         * @param receivingPacket 接受信息的玩家
+         * @param msg             需要发送的消息
+         * @param times           需要显示的时间
          */
         @NotProguard
         public static void send(final org.bukkit.entity.Player receivingPacket, final String msg, final int times) {
@@ -240,14 +221,15 @@ public class C {
     /**
      * Bukkit Player兼容类
      *
-     * @since 2016年7月23日 下午4:33:40
      * @author 喵♂呜
+     * @since 2016年7月23日 下午4:33:40
      */
     public static class Player {
         private static Class<?> gameProfileClass;
         private static Constructor<?> gameProfileConstructor;
         private static Constructor<?> craftOfflinePlayerConstructor;
         private static Method getOnlinePlayers;
+
         static {
             try {
                 // getOnlinePlayers start
@@ -291,8 +273,7 @@ public class C {
         /**
          * 获取离线玩家(跳过网络获取)
          *
-         * @param playerName
-         *            玩家名称
+         * @param playerName 玩家名称
          * @return {@link OfflinePlayer}
          */
         @NotProguard
@@ -327,6 +308,7 @@ public class C {
         private static Constructor<?> packetTitleSendConstructor;
         private static Constructor<?> packetTitleSetTimeConstructor;
         private static Object[] actions;
+
         static {
             try {
                 packetActions = Class.forName(a(newversion ? "PacketPlayOutTitle$EnumTitleAction" : "EnumTitleAction"));
@@ -345,10 +327,8 @@ public class C {
         /**
          * 发送Title公告
          *
-         * @param title
-         *            标题
-         * @param subtitle
-         *            子标题
+         * @param title    标题
+         * @param subtitle 子标题
          */
         @NotProguard
         public static void broadcast(String title, String subtitle) {
@@ -360,16 +340,11 @@ public class C {
         /**
          * 发送Title公告
          *
-         * @param title
-         *            标题
-         * @param subtitle
-         *            子标题
-         * @param fadeInTime
-         *            淡入时间
-         * @param stayTime
-         *            持续时间
-         * @param fadeOutTime
-         *            淡出时间
+         * @param title       标题
+         * @param subtitle    子标题
+         * @param fadeInTime  淡入时间
+         * @param stayTime    持续时间
+         * @param fadeOutTime 淡出时间
          */
         @NotProguard
         public static void broadcast(String title, String subtitle, int fadeInTime, int stayTime, int fadeOutTime) {
@@ -381,12 +356,9 @@ public class C {
         /**
          * 发送Title公告
          *
-         * @param world
-         *            世界
-         * @param title
-         *            标题
-         * @param subtitle
-         *            子标题
+         * @param world    世界
+         * @param title    标题
+         * @param subtitle 子标题
          */
         @NotProguard
         public static void broadcast(World world, String title, String subtitle) {
@@ -396,10 +368,8 @@ public class C {
         /**
          * 重置玩家的Title
          *
-         * @param recoverPlayer
-         *            接受的玩家
-         * @throws Exception
-         *             异常
+         * @param recoverPlayer 接受的玩家
+         * @throws Exception 异常
          */
         @NotProguard
         public static void reset(org.bukkit.entity.Player recoverPlayer) throws Exception {
@@ -413,12 +383,9 @@ public class C {
         /**
          * 发送Titile(默认时间 1 2 1)
          *
-         * @param receivingPacket
-         *            接受信息的玩家
-         * @param title
-         *            标题
-         * @param subtitle
-         *            子标题
+         * @param receivingPacket 接受信息的玩家
+         * @param title           标题
+         * @param subtitle        子标题
          */
         @NotProguard
         public static void send(org.bukkit.entity.Player receivingPacket, String title, String subtitle) {
@@ -428,18 +395,12 @@ public class C {
         /**
          * 发送Titile
          *
-         * @param receivingPacket
-         *            接受信息的玩家
-         * @param title
-         *            标题
-         * @param subtitle
-         *            子标题
-         * @param fadeInTime
-         *            淡入时间
-         * @param stayTime
-         *            持续时间
-         * @param fadeOutTime
-         *            淡出时间
+         * @param receivingPacket 接受信息的玩家
+         * @param title           标题
+         * @param subtitle        子标题
+         * @param fadeInTime      淡入时间
+         * @param stayTime        持续时间
+         * @param fadeOutTime     淡出时间
          */
         @NotProguard
         public static void send(org.bukkit.entity.Player receivingPacket, String title, String subtitle, int fadeInTime, int stayTime, int fadeOutTime) {
