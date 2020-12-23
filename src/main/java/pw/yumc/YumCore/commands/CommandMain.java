@@ -1,23 +1,18 @@
 package pw.yumc.YumCore.commands;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
-
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.commands.annotation.Help;
 import pw.yumc.YumCore.commands.info.CommandInfo;
 import pw.yumc.YumCore.commands.interfaces.Executor;
 import pw.yumc.YumCore.commands.interfaces.HelpGenerator;
+
+import java.lang.reflect.Method;
+import java.util.*;
 
 /**
  * 主类命令管理
@@ -47,8 +42,7 @@ public class CommandMain implements CommandExecutor {
     /**
      * 主类命令管理类
      *
-     * @param clazzs
-     *         命令类
+     * @param clazzs 命令类
      */
     public CommandMain(Executor... clazzs) {
         register(clazzs);
@@ -57,8 +51,7 @@ public class CommandMain implements CommandExecutor {
     /**
      * 注册命令
      *
-     * @param clazzs
-     *         命令类
+     * @param clazzs 命令类
      * @return {@link CommandMain}
      */
     public void register(Executor... clazzs) {
@@ -76,6 +69,8 @@ public class CommandMain implements CommandExecutor {
         CommandInfo ci = CommandInfo.parse(method, clazz);
         if (ci != null) {
             injectPluginCommand(ci);
+            // 主命令注册统一设置
+            ci.setMain();
             Class[] params = method.getParameterTypes();
             Log.d("注册主命令 %s 参数类型: %s", ci.getName(), Log.getSimpleNames((Object[]) params));
             try {
@@ -100,8 +95,7 @@ public class CommandMain implements CommandExecutor {
     /**
      * 检查缓存并获得命令
      *
-     * @param cmd
-     *         子命令
+     * @param cmd 子命令
      * @return 命令信息
      */
     private CommandInfo getByCache(String cmd) {
