@@ -38,11 +38,18 @@ public class C {
     static {
         try {
             version = getNMSVersion();
-            newversion = Integer.parseInt(version.split("_")[1]) > 7;
-            Class<?> nmsChatSerializer = Class.forName(a(newversion ? "IChatBaseComponent$ChatSerializer" : "ChatSerializer"));
+            Integer subVersion = Integer.parseInt(version.split("_")[1]);
+            newversion = subVersion > 7;
+            Class<?> nmsChatSerializer = subVersion < 17 ?
+                    Class.forName(a(newversion ? "IChatBaseComponent$ChatSerializer" : "ChatSerializer")) :
+                    Class.forName("net.minecraft.network.chat.IChatBaseComponent$ChatSerializer");
             chatSerializer = nmsChatSerializer.getMethod("a", String.class);
-            nmsIChatBaseComponent = Class.forName(a("IChatBaseComponent"));
-            Class<?> packetType = Class.forName(a("PacketPlayOutChat"));
+            nmsIChatBaseComponent = subVersion < 17 ?
+                    Class.forName(a("IChatBaseComponent")) :
+                    Class.forName("net.minecraft.network.chat.IChatBaseComponent");
+            Class<?> packetType = subVersion < 17 ?
+                    Class.forName(a("PacketPlayOutChat")) :
+                    Class.forName("net.minecraft.network.protocol.game.PacketPlayOutChat");
             Arrays.stream(packetType.getConstructors()).forEach(c -> {
                 if (c.getParameterTypes().length == 2) {
                     packetTypeConstructor = c;
@@ -67,11 +74,13 @@ public class C {
                 nmsChatMessageTypeClassValueOf = nmsChatMessageTypeClass.getDeclaredMethod("valueOf", String.class);
             }
             Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
-            Class<?> typeNMSPlayer = Class.forName(a("EntityPlayer"));
-            Class<?> typePlayerConnection = Class.forName(a("PlayerConnection"));
+            Class<?> typeNMSPlayer = subVersion < 17 ? Class.forName(a("EntityPlayer")) : Class.forName("net.minecraft.server.level.EntityPlayer");
+            Class<?> typePlayerConnection = subVersion < 17 ? Class.forName(a("PlayerConnection")) : Class.forName("net.minecraft.server.network.PlayerConnection");
             getHandle = typeCraftPlayer.getMethod("getHandle");
-            playerConnection = typeNMSPlayer.getField("playerConnection");
-            sendPacket = typePlayerConnection.getMethod("sendPacket", Class.forName(a("Packet")));
+            playerConnection = subVersion < 17 ? typeNMSPlayer.getField("playerConnection") : typeNMSPlayer.getField("b");
+            sendPacket = typePlayerConnection.getMethod("sendPacket", subVersion < 17 ?
+                    Class.forName(a("Packet")) :
+                    Class.forName("net.minecraft.network.protocol.Packet"));
             init = true;
         } catch (Exception e) {
             Log.w("C 兼容性工具初始化失败 可能造成部分功能不可用!");
