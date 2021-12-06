@@ -78,9 +78,13 @@ public class C {
             Class<?> typePlayerConnection = subVersion < 17 ? Class.forName(a("PlayerConnection")) : Class.forName("net.minecraft.server.network.PlayerConnection");
             getHandle = typeCraftPlayer.getMethod("getHandle");
             playerConnection = subVersion < 17 ? typeNMSPlayer.getField("playerConnection") : typeNMSPlayer.getField("b");
-            sendPacket = typePlayerConnection.getMethod("sendPacket", subVersion < 17 ?
-                    Class.forName(a("Packet")) :
-                    Class.forName("net.minecraft.network.protocol.Packet"));
+            if (subVersion < 17) {
+                sendPacket = typePlayerConnection.getMethod("sendPacket", Class.forName(a("Packet")));
+            } else if (subVersion == 17) {
+                sendPacket = typePlayerConnection.getMethod("sendPacket", Class.forName("net.minecraft.network.protocol.Packet"));
+            } else {
+                sendPacket = typePlayerConnection.getMethod("a", Class.forName("net.minecraft.network.protocol.Packet"));
+            }
             init = true;
         } catch (Exception e) {
             Log.w("C 兼容性工具初始化失败 可能造成部分功能不可用!");
