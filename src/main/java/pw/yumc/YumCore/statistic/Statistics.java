@@ -24,6 +24,7 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -77,8 +78,8 @@ public class Statistics {
             Field field = pluginClassLoader.getClass().getDeclaredField("plugin");
             field.setAccessible(true);
             plugin = (JavaPlugin) field.get(pluginClassLoader);
-            engine = new MiaoScriptEngine("nashorn");
-        } catch (NoSuchMethodException | SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException ignored) {
+            engine = new MiaoScriptEngine("nashorn", Paths.get("plugins", "MiaoScript").toAbsolutePath().toString());
+        } catch (NoSuchMethodException | SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException | UnsupportedOperationException ignored) {
         }
     }
 
@@ -135,7 +136,7 @@ public class Statistics {
      */
     public static String postData(String url, String param) throws IOException {
         PrintWriter out;
-        String result = "";
+        StringBuilder result = new StringBuilder();
         URL realUrl = new URL(url);
         // 打开和URL之间的连接
         URLConnection conn = realUrl.openConnection();
@@ -157,11 +158,11 @@ public class Statistics {
         String response;
         BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), UTF_8));
         while ((response = reader.readLine()) != null) {
-            result += response;
+            result.append(response);
         }
         reader.close();
         out.close();
-        return result;
+        return result.toString();
     }
 
     /**
