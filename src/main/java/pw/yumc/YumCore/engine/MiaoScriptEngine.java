@@ -1,24 +1,20 @@
 package pw.yumc.YumCore.engine;
 
+import lombok.SneakyThrows;
+import lombok.val;
+
+import javax.script.ScriptEngine;
+import javax.script.*;
 import java.io.File;
 import java.io.Reader;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
-
-import javax.script.Bindings;
-import javax.script.Invocable;
-import javax.script.ScriptContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineFactory;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import javax.script.SimpleBindings;
-
-import lombok.val;
 
 /**
  * 喵式脚本引擎
@@ -27,8 +23,12 @@ import lombok.val;
  * @since 2016年8月29日 上午7:51:43
  */
 public class MiaoScriptEngine implements ScriptEngine, Invocable {
+    private static String MavenRepo = "https://maven.aliyun.com/repository/public";
     private static MiaoScriptEngine DEFAULT;
-    private static ScriptEngineManager manager;
+    private static final ScriptEngineManager manager;
+
+    private Object ucp;
+    private MethodHandle addURLMethodHandle;
     private ScriptEngine engine;
 
     static {
@@ -48,39 +48,122 @@ public class MiaoScriptEngine implements ScriptEngine, Invocable {
     }
 
     public MiaoScriptEngine(final String engineType) {
-        this(manager, engineType);
+        this(manager, engineType, null);
     }
 
     public MiaoScriptEngine(ScriptEngineManager engineManager) {
-        this(engineManager, "js");
+        this(engineManager, "js", null);
     }
 
-    public MiaoScriptEngine(ScriptEngineManager engineManager, final String engineType) {
+    public MiaoScriptEngine(final String engineType, String engineRoot) {
+        this(manager, engineType, engineRoot);
+    }
+
+    public MiaoScriptEngine(ScriptEngineManager engineManager, final String engineType, String engineRoot) {
+        // JDK11 Polyfill 存在类效验问题 直接用OpenJDK的Nashorn
+        if (System.getProperty("java.version").startsWith("11.") && engineRoot != null) {
+            this.loadNetworkNashorn(engineRoot);
+            if (engine == null)
+                throw new UnsupportedOperationException("当前环境 JDK11 不支持 Nashorn 脚本类型!");
+            return;
+        }
         try {
             engine = engineManager.getEngineByName(engineType);
         } catch (final NullPointerException ignored) {
         }
         if (engine == null) {
-            val dirs = System.getProperty("java.ext.dirs").split(File.pathSeparator);
-            for (String dir : dirs) {
-                File nashorn = new File(dir, "nashorn.jar");
-                if (nashorn.exists()) {
-                    try {
-                        Method method = URLClassLoader.class.getDeclaredMethod("addURL", URL.class);
-                        // 设置方法的访问权限
-                        method.setAccessible(true);
-                        // 获取系统类加载器
-                        URL url = nashorn.toURI().toURL();
-                        method.invoke(Thread.currentThread().getContextClassLoader(), url);
-                        engineManager = new ScriptEngineManager();
-                        engine = engineManager.getEngineByName(engineType);
-                    } catch (NoSuchMethodException | MalformedURLException | IllegalAccessException | InvocationTargetException | NullPointerException ignored) {
-                    }
-                    return;
-                }
+            val extDirs = System.getProperty("java.ext.dirs");
+            if (extDirs != null) {
+                this.loadLocalNashorn(extDirs, engineType);
+            } else if (engineRoot != null) {
+                this.loadNetworkNashorn(engineRoot);
             }
-            throw new UnsupportedOperationException("当前环境不支持 " + engineType + " 脚本类型!");
         }
+        if (engine == null)
+            throw new UnsupportedOperationException("当前环境不支持 " + engineType + " 脚本类型!");
+    }
+
+    private void loadLocalNashorn(String extDirs, String engineType) {
+        val dirs = extDirs.split(File.pathSeparator);
+        for (String dir : dirs) {
+            File nashorn = new File(dir, "nashorn.jar");
+            if (nashorn.exists()) {
+                this.loadJar(nashorn);
+                this.createEngineByName(engineType);
+            }
+        }
+    }
+
+    private void initReflect() {
+        try {
+            ClassLoader loader = Thread.currentThread().getContextClassLoader();
+            Field theUnsafe = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
+            theUnsafe.setAccessible(true);
+            sun.misc.Unsafe unsafe = (sun.misc.Unsafe) theUnsafe.get(null);
+            Field field = MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP");
+            MethodHandles.Lookup lookup = (MethodHandles.Lookup) unsafe.getObject(unsafe.staticFieldBase(field), unsafe.staticFieldOffset(field));
+            Field ucpField;
+            try {
+                ucpField = loader.getClass().getDeclaredField("ucp");
+            } catch (NoSuchFieldException e) {
+                ucpField = loader.getClass().getSuperclass().getDeclaredField("ucp");
+            }
+            long offset = unsafe.objectFieldOffset(ucpField);
+            ucp = unsafe.getObject(loader, offset);
+            Method method = ucp.getClass().getDeclaredMethod("addURL", URL.class);
+            addURLMethodHandle = lookup.unreflect(method);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @SneakyThrows
+    private void loadNetworkNashorn(String engineRoot) {
+        initReflect();
+        File libRootFile = new File(engineRoot, "lib");
+        libRootFile.mkdirs();
+        String libRoot = libRootFile.getCanonicalPath();
+        downloadJar(libRoot, "org.openjdk.nashorn", "nashorn-core", "15.3");
+        downloadJar(libRoot, "org.ow2.asm", "asm", "9.2");
+        downloadJar(libRoot, "org.ow2.asm", "asm-commons", "9.2");
+        downloadJar(libRoot, "org.ow2.asm", "asm-tree", "9.2");
+        downloadJar(libRoot, "org.ow2.asm", "asm-util", "9.2");
+        Class<?> NashornScriptEngineFactory = Class.forName("org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory");
+        Method getScriptEngine = NashornScriptEngineFactory.getMethod("getScriptEngine", ClassLoader.class);
+        Object factory = NashornScriptEngineFactory.newInstance();
+        engine = (ScriptEngine) getScriptEngine.invoke(factory, Thread.currentThread().getContextClassLoader());
+    }
+
+    @SneakyThrows
+    private void loadJar(File file) {
+        addURLMethodHandle.invoke(ucp, file.toURI().toURL());
+    }
+
+    @SneakyThrows
+    private void downloadJar(String engineRoot, String groupId, String artifactId, String version) {
+        File lib = new File(engineRoot, String.format("%s-%s.jar", artifactId, version));
+        if (!lib.exists()) {
+            Files.copy(new URL(MavenRepo +
+                            String.format("/%1$s/%2$s/%3$s/%2$s-%3$s.jar",
+                                    groupId.replace(".", "/"),
+                                    artifactId,
+                                    version)
+                    ).openStream(),
+                    lib.toPath(),
+                    StandardCopyOption.REPLACE_EXISTING);
+        }
+        this.loadJar(lib);
+    }
+
+    private void createEngineByName(String engineType) {
+        try {
+            engine = new ScriptEngineManager(Thread.currentThread().getContextClassLoader()).getEngineByName(engineType);
+        } catch (NullPointerException ignored) {
+        }
+    }
+
+    public ScriptEngine getEngine() {
+        return this.engine;
     }
 
     public static MiaoScriptEngine getDefault() {

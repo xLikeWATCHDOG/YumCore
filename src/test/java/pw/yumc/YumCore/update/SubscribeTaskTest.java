@@ -1,23 +1,20 @@
 package pw.yumc.YumCore.update;
 
-import java.io.IOException;
-import java.util.logging.Logger;
-
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.bukkit.plugin.Plugin;
 import org.junit.Test;
 import org.xml.sax.SAXException;
-
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.plugin.FakePlugin;
+
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 
 /**
  * @author 喵♂呜
  * @since 2017/6/1
  */
 public class SubscribeTaskTest {
-    private Plugin plugin = new FakePlugin("YumCore", "1.0");
+    private Plugin plugin = new FakePlugin("YumCore", "1.9.52");
 
     @Test
     public void test() throws IOException, SAXException, ParserConfigurationException {

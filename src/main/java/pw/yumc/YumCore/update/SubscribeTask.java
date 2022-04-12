@@ -1,20 +1,5 @@
 package pw.yumc.YumCore.update;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.net.URLDecoder;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -27,11 +12,24 @@ import org.bukkit.plugin.PluginDescriptionFile;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
-
 import pw.yumc.YumCore.bukkit.Log;
 import pw.yumc.YumCore.bukkit.P;
 import pw.yumc.YumCore.tellraw.Tellraw;
 import pw.yumc.YumCore.text.Encrypt;
+
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.net.URLDecoder;
+import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 自动更新程序
@@ -73,8 +71,7 @@ public class SubscribeTask implements Runnable, Listener {
     /**
      * 自动更新
      *
-     * @param type
-     *         是否为Maven
+     * @param type 是否为Maven
      */
     public SubscribeTask(UpdateType type) {
         this(false, type);
@@ -83,10 +80,8 @@ public class SubscribeTask implements Runnable, Listener {
     /**
      * 自动更新
      *
-     * @param isSecret
-     *         是否为私有
-     * @param type
-     *         更新类型
+     * @param isSecret 是否为私有
+     * @param type     更新类型
      */
     public SubscribeTask(boolean isSecret, UpdateType type) {
         this("master", isSecret, type);
@@ -95,12 +90,9 @@ public class SubscribeTask implements Runnable, Listener {
     /**
      * 自动更新
      *
-     * @param branch
-     *         更新分支
-     * @param isSecret
-     *         是否为私有
-     * @param type
-     *         更新类型
+     * @param branch   更新分支
+     * @param isSecret 是否为私有
+     * @param type     更新类型
      */
     public SubscribeTask(String branch, boolean isSecret, UpdateType type) {
         Log.d("订阅更新 分支 %s 是否加密 %s 更新类型 %s", branch, isSecret, type.name());
@@ -134,7 +126,7 @@ public class SubscribeTask implements Runnable, Listener {
                 if (updateFile.target.exists()) {
                     try {
                         PluginDescriptionFile desc = instance.getPluginLoader().getPluginDescription(updateFile.target);
-                        if (!versionInfo.needUpdate(result, desc.getVersion().split("-")[0])) { return; }
+                        if (!versionInfo.needUpdate(result, desc.getVersion().split("-")[0])) {return;}
                         updateFile.target.delete();
                     } catch (Exception e) {
                         Log.d(e);
@@ -208,8 +200,7 @@ public class SubscribeTask implements Runnable, Listener {
         /**
          * 获得插件绝对路径
          *
-         * @param plugin
-         *         - 插件
+         * @param plugin - 插件
          * @return 插件的绝对路径
          */
         public File getPluginFile(Plugin plugin) {
@@ -280,10 +271,8 @@ public class SubscribeTask implements Runnable, Listener {
         /**
          * 获得插件信息
          *
-         * @param tag
-         *         数据标签
-         * @param def
-         *         默认值
+         * @param tag 数据标签
+         * @param def 默认值
          * @return 信息
          */
         public String getPluginInfo(String tag, String def) {
@@ -305,7 +294,7 @@ public class SubscribeTask implements Runnable, Listener {
          */
         public String[] getUpdateChanges() {
             final String des = getPluginInfo("update.changes", null);
-            if (des == null) { return new String[]{}; }
+            if (des == null) {return new String[]{};}
             String[] temp = ChatColor.translateAlternateColorCodes('&', des).replaceAll("\n", "").replaceAll("\u0009", "").split(";");
             List<String> ltemp = new ArrayList<>();
             Arrays.stream(temp).forEach(s -> ltemp.add(s.trim()));
@@ -334,8 +323,7 @@ public class SubscribeTask implements Runnable, Listener {
         /**
          * 通知更新信息
          *
-         * @param sender
-         *         命令接受者
+         * @param sender 命令接受者
          */
         public void notify(CommandSender sender) {
             Log.sender(sender, "§a插件更新: §b" + name + " §a已更新到最新版本 §bv" + getLastestVersion());
@@ -358,10 +346,8 @@ public class SubscribeTask implements Runnable, Listener {
         /**
          * 比较版本号
          *
-         * @param v1
-         *         新版本
-         * @param v2
-         *         旧版本
+         * @param v1 新版本
+         * @param v2 旧版本
          * @return 是否需要更新
          */
         public boolean needUpdate(String v1, String v2) {
@@ -371,7 +357,7 @@ public class SubscribeTask implements Runnable, Listener {
             int minLength = Math.min(va1.length, va2.length);// 取最小长度值
             int diff = 0;
             while (idx < minLength && (diff = va1[idx].length() - va2[idx].length()) == 0// 先比较长度
-                   && (diff = va1[idx].compareTo(va2[idx])) == 0) {// 再比较字符
+                    && (diff = va1[idx].compareTo(va2[idx])) == 0) {// 再比较字符
                 ++idx;
             }
             // 如果已经分出大小 则直接返回 如果未分出大小 则再比较位数 有子版本的为大
@@ -386,7 +372,7 @@ public class SubscribeTask implements Runnable, Listener {
                     Log.console("§4注意: §c当前版本为开发版本 且未开启全局调试 已自动下载最新稳定版!");
                     return result;
                 }
-                if (needUpdate(result, version)) { return result; }
+                if (needUpdate(result, version)) {return result;}
             } catch (Exception e) {
                 Log.d(e);
             }

