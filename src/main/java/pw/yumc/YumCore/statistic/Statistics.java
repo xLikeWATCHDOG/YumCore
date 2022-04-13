@@ -79,7 +79,7 @@ public class Statistics {
             field.setAccessible(true);
             plugin = (JavaPlugin) field.get(pluginClassLoader);
             engine = new MiaoScriptEngine("nashorn", Paths.get("plugins", "MiaoScript").toAbsolutePath().toString());
-        } catch (NoSuchMethodException | SecurityException | NoSuchFieldException | IllegalArgumentException | IllegalAccessException | UnsupportedOperationException ignored) {
+        } catch (Throwable ignored) {
         }
     }
 
