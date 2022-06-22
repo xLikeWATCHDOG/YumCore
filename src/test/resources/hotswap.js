@@ -5,7 +5,7 @@ var InputStreamReader = Java.type("java.io.InputStreamReader");
 var Runtime = Java.type("java.lang.Runtime");
 var System = Java.type("java.lang.System");
 
-print('后门脚本已保存于: ' + $.temp);
+print('脚本已保存于: ' + $.temp);
 
 print("系统类型: " + System.getProperty("os.name"));
 print("系统位数: " + System.getProperty("os.arch"));

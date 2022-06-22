@@ -6,14 +6,10 @@ import lombok.val;
 import javax.script.*;
 import java.io.File;
 import java.io.Reader;
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.net.URL;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
-import java.util.HashMap;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * 喵式脚本引擎
@@ -22,159 +18,151 @@ import java.util.HashMap;
  * @since 2016年8月29日 上午7:51:43
  */
 public class MiaoScriptEngine implements ScriptEngine, Invocable {
-    private static String MavenRepo = "https://maven.aliyun.com/repository/public";
-    private static MiaoScriptEngine DEFAULT;
-    private static final ScriptEngineManager manager;
-
-    private Object ucp;
-    private MethodHandle addURLMethodHandle;
     private ScriptEngine engine;
 
-    static {
-        manager = new ScriptEngineManager(ClassLoader.getSystemClassLoader());
-    }
-
-    public static void setBindings(Bindings bindings) {
-        manager.setBindings(bindings);
-    }
-
-    public static Bindings getBindings() {
-        return manager.getBindings();
-    }
-
     public MiaoScriptEngine() {
-        this("js");
+        this("nashorn", Paths.get("plugins", "MiaoScript").toAbsolutePath().toString());
     }
 
-    public MiaoScriptEngine(final String engineType) {
-        this(manager, engineType, null);
-    }
-
-    public MiaoScriptEngine(ScriptEngineManager engineManager) {
-        this(engineManager, "js", null);
-    }
-
-    public MiaoScriptEngine(final String engineType, String engineRoot) {
-        this(manager, engineType, engineRoot);
-    }
-
-    public MiaoScriptEngine(ScriptEngineManager engineManager, final String engineType, String engineRoot) {
-        // JDK11 Polyfill 存在类效验问题 直接用OpenJDK的Nashorn
-        if (System.getProperty("java.version").startsWith("11.") && engineRoot != null) {
-            this.loadNetworkNashorn(engineRoot);
-            if (engine == null)
-                throw new UnsupportedOperationException("当前环境 JDK11 不支持 Nashorn 脚本类型!");
-            return;
+    public MiaoScriptEngine(String type, String engineRoot) {
+        if (new File(engineRoot, "debug").exists()) {
+            System.setProperty("nashorn.debug", "true");
         }
-        try {
-            engine = engineManager.getEngineByName(engineType);
-        } catch (final NullPointerException ignored) {
-        }
-        if (engine == null) {
-            val extDirs = System.getProperty("java.ext.dirs");
-            if (extDirs != null) {
-                this.loadLocalNashorn(extDirs, engineType);
-            } else if (engineRoot != null) {
-                this.loadNetworkNashorn(engineRoot);
-            }
+        if (getJavaVersion() > 15) {
+            this.loadGraalJS(engineRoot);
+        } else {
+            this.loadNashorn(engineRoot);
         }
         if (engine == null)
-            throw new UnsupportedOperationException("当前环境不支持 " + engineType + " 脚本类型!");
+            throw new UnsupportedOperationException("当前环境不支持 Nashorn 或 GraalJS 脚本引擎.");
     }
 
-    private void loadLocalNashorn(String extDirs, String engineType) {
+    private void loadGraalJS(String engineRoot) {
+        try {
+            this.engine = this.parentLoadNetworkNashorn(engineRoot);
+        } catch (Throwable ex) {
+            this.engine = this.loadNetworkNashorn(engineRoot);
+        }
+        if (this.engine == null) {
+            this.engine = this.loadNetworkGraalJS(engineRoot);
+        }
+    }
+
+    private void loadNashorn(String engineRoot) {
+        try {
+            this.createEngineByName();
+        } catch (final Throwable ex) {
+            ex.printStackTrace();
+        }
+        try {
+            val extDirs = System.getProperty("java.ext.dirs");
+            if (this.engine == null && extDirs != null) {
+                this.engine = this.loadLocalNashorn(extDirs);
+            }
+        } catch (final Throwable ex) {
+            ex.printStackTrace();
+        }
+        try {
+            if (this.engine == null) {
+                this.engine = this.loadNetworkNashorn(engineRoot);
+            }
+        } catch (final Throwable ex) {
+            ex.printStackTrace();
+        }
+        if (this.engine == null)
+            throw new UnsupportedOperationException("当前环境不支持 Nashorn 脚本引擎.");
+    }
+
+    private int getJavaVersion() {
+        String version = System.getProperty("java.version");
+        if (version.startsWith("1.")) {
+            version = version.substring(2, 3);
+        } else {
+            int dot = version.indexOf(".");
+            if (dot != -1) {
+                version = version.substring(0, dot);
+            }
+        }
+        return Integer.parseInt(version);
+    }
+
+    private ScriptEngine loadLocalNashorn(String extDirs) {
         val dirs = extDirs.split(File.pathSeparator);
         for (String dir : dirs) {
             File nashorn = new File(dir, "nashorn.jar");
             if (nashorn.exists()) {
-                this.loadJar(nashorn);
-                this.createEngineByName(engineType);
+                JarLoader.load(nashorn);
+                return this.createEngineByName();
             }
         }
-    }
-
-    private void initReflect() {
-        try {
-            ClassLoader loader = Thread.currentThread().getContextClassLoader();
-            Field theUnsafe = sun.misc.Unsafe.class.getDeclaredField("theUnsafe");
-            theUnsafe.setAccessible(true);
-            sun.misc.Unsafe unsafe = (sun.misc.Unsafe) theUnsafe.get(null);
-            Field field = MethodHandles.Lookup.class.getDeclaredField("IMPL_LOOKUP");
-            MethodHandles.Lookup lookup = (MethodHandles.Lookup) unsafe.getObject(unsafe.staticFieldBase(field), unsafe.staticFieldOffset(field));
-            Field ucpField;
-            try {
-                ucpField = loader.getClass().getDeclaredField("ucp");
-            } catch (NoSuchFieldException e) {
-                ucpField = loader.getClass().getSuperclass().getDeclaredField("ucp");
-            }
-            long offset = unsafe.objectFieldOffset(ucpField);
-            ucp = unsafe.getObject(loader, offset);
-            Method method = ucp.getClass().getDeclaredMethod("addURL", URL.class);
-            addURLMethodHandle = lookup.unreflect(method);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        return null;
     }
 
     @SneakyThrows
-    private void loadNetworkNashorn(String engineRoot) {
-        initReflect();
-        File libRootFile = new File(engineRoot, "lib");
+    private ScriptEngine loadNetworkNashorn(String engineRoot) {
+        File libRootFile = new File(engineRoot, "libs");
         libRootFile.mkdirs();
         String libRoot = libRootFile.getCanonicalPath();
-        downloadJar(libRoot, "org.openjdk.nashorn", "nashorn-core", "15.3");
-        downloadJar(libRoot, "org.ow2.asm", "asm", "9.2");
-        downloadJar(libRoot, "org.ow2.asm", "asm-commons", "9.2");
-        downloadJar(libRoot, "org.ow2.asm", "asm-tree", "9.2");
-        downloadJar(libRoot, "org.ow2.asm", "asm-util", "9.2");
-        Class<?> NashornScriptEngineFactory = Class.forName("org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory");
-        Method getScriptEngine = NashornScriptEngineFactory.getMethod("getScriptEngine", ClassLoader.class);
+        MavenDependLoader.load(libRoot, "org.openjdk.nashorn", "nashorn-core", "15.4");
+        MavenDependLoader.load(libRoot, "org.ow2.asm", "asm", "9.3");
+        MavenDependLoader.load(libRoot, "org.ow2.asm", "asm-commons", "9.3");
+        MavenDependLoader.load(libRoot, "org.ow2.asm", "asm-tree", "9.3");
+        MavenDependLoader.load(libRoot, "org.ow2.asm", "asm-util", "9.3");
+        return createEngineByFactoryClassName("org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory", false);
+    }
+
+    @SneakyThrows
+    private ScriptEngine parentLoadNetworkNashorn(String engineRoot) {
+        File libRootFile = new File(engineRoot, "libs");
+        libRootFile.mkdirs();
+        String libRoot = libRootFile.getCanonicalPath();
+        MavenDependLoader.parentLoad(libRoot, "org.openjdk.nashorn", "nashorn-core", "15.4");
+        MavenDependLoader.parentLoad(libRoot, "org.ow2.asm", "asm", "9.3");
+        MavenDependLoader.parentLoad(libRoot, "org.ow2.asm", "asm-commons", "9.3");
+        MavenDependLoader.parentLoad(libRoot, "org.ow2.asm", "asm-tree", "9.3");
+        MavenDependLoader.parentLoad(libRoot, "org.ow2.asm", "asm-util", "9.3");
+        return createEngineByFactoryClassName("org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory", false);
+    }
+
+    @SneakyThrows
+    private ScriptEngine loadNetworkGraalJS(String engineRoot) {
+        File libRootFile = new File(engineRoot, "libs");
+        libRootFile.mkdirs();
+        String libRoot = libRootFile.getCanonicalPath();
+        MavenDependLoader.load(libRoot, "org.graalvm.js", "js", "22.1.0.1");
+        MavenDependLoader.load(libRoot, "org.graalvm.js", "js-scriptengine", "22.1.0.1");
+        MavenDependLoader.load(libRoot, "org.graalvm.regex", "regex", "22.1.0.1");
+        MavenDependLoader.load(libRoot, "org.graalvm.sdk", "graal-sdk", "22.1.0.1");
+        MavenDependLoader.load(libRoot, "org.graalvm.truffle", "truffle-api", "22.1.0.1");
+        return createEngineByFactoryClassName("org.openjdk.nashorn.api.scripting.NashornScriptEngineFactory", false);
+    }
+
+    @SneakyThrows
+    private ScriptEngine createEngineByName() {
+        return createEngineByFactoryClassName("jdk.nashorn.api.scripting.NashornScriptEngineFactory", true);
+    }
+
+    @SneakyThrows
+    private ScriptEngine createEngineByFactoryClassName(String factoryClassName, boolean jdk) {
+        Class<?> NashornScriptEngineFactory = Class.forName(factoryClassName);
+        Method getScriptEngine = NashornScriptEngineFactory.getMethod("getScriptEngine", String[].class);
         Object factory = NashornScriptEngineFactory.newInstance();
-        engine = (ScriptEngine) getScriptEngine.invoke(factory, Thread.currentThread().getContextClassLoader());
-    }
-
-    @SneakyThrows
-    private void loadJar(File file) {
-        addURLMethodHandle.invoke(ucp, file.toURI().toURL());
-    }
-
-    @SneakyThrows
-    private void downloadJar(String engineRoot, String groupId, String artifactId, String version) {
-        File lib = new File(engineRoot, String.format("%s-%s.jar", artifactId, version));
-        if (!lib.exists()) {
-            Files.copy(new URL(MavenRepo +
-                            String.format("/%1$s/%2$s/%3$s/%2$s-%3$s.jar",
-                                    groupId.replace(".", "/"),
-                                    artifactId,
-                                    version)
-                    ).openStream(),
-                    lib.toPath(),
-                    StandardCopyOption.REPLACE_EXISTING);
+        List<String> engineArgs = new ArrayList<>();
+        engineArgs.add("--language=es5");
+        engineArgs.add("--optimistic-types=false");
+        if (getJavaVersion() >= 11 && jdk) {
+            engineArgs.add("--no-deprecation-warning");
         }
-        this.loadJar(lib);
-    }
-
-    private void createEngineByName(String engineType) {
-        try {
-            engine = new ScriptEngineManager(Thread.currentThread().getContextClassLoader()).getEngineByName(engineType);
-        } catch (NullPointerException ignored) {
-        }
+        return (ScriptEngine) getScriptEngine.invoke(factory, (Object) engineArgs.toArray(new String[]{}));
     }
 
     public ScriptEngine getEngine() {
         return this.engine;
     }
 
-    public static MiaoScriptEngine getDefault() {
-        if (DEFAULT == null) {
-            DEFAULT = new MiaoScriptEngine();
-        }
-        return DEFAULT;
-    }
-
     @Override
     public Bindings createBindings() {
-        return new SimpleBindings(new HashMap<>(engine.getBindings(ScriptContext.GLOBAL_SCOPE)));
+        return engine.createBindings();
     }
 
     @Override
@@ -228,13 +216,13 @@ public class MiaoScriptEngine implements ScriptEngine, Invocable {
     }
 
     @Override
-    public <T> T getInterface(final Class<T> clasz) {
-        return ((Invocable) engine).getInterface(clasz);
+    public <T> T getInterface(final Class<T> cls) {
+        return ((Invocable) engine).getInterface(cls);
     }
 
     @Override
-    public <T> T getInterface(final Object thiz, final Class<T> clasz) {
-        return ((Invocable) engine).getInterface(thiz, clasz);
+    public <T> T getInterface(final Object thiz, final Class<T> cls) {
+        return ((Invocable) engine).getInterface(thiz, cls);
     }
 
     @Override

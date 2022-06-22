@@ -41,7 +41,7 @@ public class SubscribeTask implements Runnable, Listener {
     /**
      * 插件实例
      */
-    private static JavaPlugin instance = P.instance;
+    private static final JavaPlugin instance = P.instance;
     /**
      * 是否禁止更新
      */
@@ -49,17 +49,17 @@ public class SubscribeTask implements Runnable, Listener {
     /**
      * 检查间隔
      */
-    private static int interval = 25;
+    private static final int interval = 25;
 
-    private UpdateType updateType;
+    private final UpdateType updateType;
     /**
      * 更新文件
      */
-    private UpdateFile updateFile;
+    private final UpdateFile updateFile;
     /**
      * 版本信息
      */
-    private VersionInfo versionInfo;
+    private final VersionInfo versionInfo;
 
     /**
      * 自动更新
@@ -249,7 +249,7 @@ public class SubscribeTask implements Runnable, Listener {
         /**
          * 插件信息地址
          */
-        private String info;
+        private final String info;
         /**
          * POM文件文档
          */
@@ -296,9 +296,9 @@ public class SubscribeTask implements Runnable, Listener {
             final String des = getPluginInfo("update.changes", null);
             if (des == null) {return new String[]{};}
             String[] temp = ChatColor.translateAlternateColorCodes('&', des).replaceAll("\n", "").replaceAll("\u0009", "").split(";");
-            List<String> ltemp = new ArrayList<>();
-            Arrays.stream(temp).forEach(s -> ltemp.add(s.trim()));
-            return ltemp.toArray(new String[]{});
+            List<String> array = new ArrayList<>();
+            Arrays.stream(temp).forEach(s -> array.add(s.trim()));
+            return array.toArray(new String[]{});
         }
 
         /**
@@ -316,7 +316,7 @@ public class SubscribeTask implements Runnable, Listener {
          *
          * @return 最后版本
          */
-        private String getLastestVersion() {
+        private String getLatestVersion() {
             return getPluginInfo("version", "0.0.0").split("-")[0];
         }
 
@@ -326,7 +326,7 @@ public class SubscribeTask implements Runnable, Listener {
          * @param sender 命令接受者
          */
         public void notify(CommandSender sender) {
-            Log.sender(sender, "§a插件更新: §b" + name + " §a已更新到最新版本 §bv" + getLastestVersion());
+            Log.sender(sender, "§a插件更新: §b" + name + " §a已更新到最新版本 §bv" + getLatestVersion());
             Log.sender(sender, "§e版本简介: §a" + getUpdateDescription());
             final String[] changes = getUpdateChanges();
             if (changes.length != 0) {
@@ -367,7 +367,7 @@ public class SubscribeTask implements Runnable, Listener {
 
         public String getNewVersion() {
             try {
-                String result = getLastestVersion();
+                String result = getLatestVersion();
                 if (Log.isDebug() && !Log.isGlobalDebug()) {
                     Log.console("§4注意: §c当前版本为开发版本 且未开启全局调试 已自动下载最新稳定版!");
                     return result;
