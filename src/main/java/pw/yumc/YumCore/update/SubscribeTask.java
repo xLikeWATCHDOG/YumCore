@@ -108,7 +108,7 @@ public class SubscribeTask implements Runnable, Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         final Player player = e.getPlayer();
-        if (player.isOp() && updateFile.isUpdated()) {
+        if (player.isOp() && versionInfo.hasNewVersion() && updateFile.isUpdated()) {
             Bukkit.getScheduler().runTaskLater(instance, () -> versionInfo.notify(player), 10);
         }
     }
@@ -255,10 +255,13 @@ public class SubscribeTask implements Runnable, Listener {
          */
         private Document document;
 
+        private boolean hasNewVersion;
+
         public VersionInfo(Plugin plugin, String branch, boolean isSecret) {
             this.name = plugin.getName();
             this.version = plugin.getDescription().getVersion().split("-")[0];
             this.info = String.format(isSecret ? pom : url, name, branch);
+            this.hasNewVersion = false;
         }
 
         /**
@@ -372,7 +375,10 @@ public class SubscribeTask implements Runnable, Listener {
                     Log.console("§4注意: §c当前版本为开发版本 且未开启全局调试 已自动下载最新稳定版!");
                     return result;
                 }
-                if (needUpdate(result, version)) {return result;}
+                if (needUpdate(result, version)) {
+                    this.hasNewVersion = true;
+                    return result;
+                }
             } catch (Exception e) {
                 Log.d(e);
             }
@@ -381,6 +387,10 @@ public class SubscribeTask implements Runnable, Listener {
 
         public void update() throws ParserConfigurationException, IOException, SAXException {
             document = DocumentBuilderFactory.newInstance().newDocumentBuilder().parse(info);
+        }
+
+        public boolean hasNewVersion() {
+            return hasNewVersion;
         }
     }
 }

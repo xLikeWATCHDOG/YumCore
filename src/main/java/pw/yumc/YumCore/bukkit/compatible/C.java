@@ -23,67 +23,54 @@ import java.util.UUID;
  */
 public class C {
     public static boolean init;
-    private static boolean above_1_16 = false;
     private static Class<?> nmsIChatBaseComponent;
     private static Constructor<?> packetTypeConstructor;
     private static Method chatSerializer;
     private static Method getHandle;
-    private static Method nmsChatMessageTypeClassValueOf;
     private static String version;
     private static boolean newversion;
     private static Field playerConnection;
     private static Method sendPacket;
-    private static Object[] chatMessageTypes;
 
     static {
         try {
-            version = getNMSVersion();
-            Integer subVersion = Integer.parseInt(version.split("_")[1]);
-            newversion = subVersion > 7;
-            Class<?> nmsChatSerializer = subVersion < 17 ?
-                    Class.forName(a(newversion ? "IChatBaseComponent$ChatSerializer" : "ChatSerializer")) :
-                    Class.forName("net.minecraft.network.chat.IChatBaseComponent$ChatSerializer");
-            chatSerializer = nmsChatSerializer.getMethod("a", String.class);
-            nmsIChatBaseComponent = subVersion < 17 ?
-                    Class.forName(a("IChatBaseComponent")) :
-                    Class.forName("net.minecraft.network.chat.IChatBaseComponent");
-            Class<?> packetType = subVersion < 17 ?
-                    Class.forName(a("PacketPlayOutChat")) :
-                    Class.forName("net.minecraft.network.protocol.game.PacketPlayOutChat");
-            Arrays.stream(packetType.getConstructors()).forEach(c -> {
-                if (c.getParameterTypes().length == 2) {
-                    packetTypeConstructor = c;
+            try {
+                version = getNMSVersion();
+                Integer subVersion = Integer.parseInt(version.split("_")[1]);
+                newversion = subVersion > 7;
+                Class<?> nmsChatSerializer = subVersion < 17 ?
+                        Class.forName(a(newversion ? "IChatBaseComponent$ChatSerializer" : "ChatSerializer")) :
+                        Class.forName("net.minecraft.network.chat.IChatBaseComponent$ChatSerializer");
+                chatSerializer = nmsChatSerializer.getMethod("a", String.class);
+                nmsIChatBaseComponent = subVersion < 17 ?
+                        Class.forName(a("IChatBaseComponent")) :
+                        Class.forName("net.minecraft.network.chat.IChatBaseComponent");
+                Class<?> packetType = subVersion < 17 ?
+                        Class.forName(a("PacketPlayOutChat")) :
+                        Class.forName("net.minecraft.network.protocol.game.PacketPlayOutChat");
+                Arrays.stream(packetType.getConstructors()).forEach(c -> {
+                    if (c.getParameterTypes().length == 2) {
+                        packetTypeConstructor = c;
+                    }
+                    if (c.getParameterTypes().length == 3) {
+                        packetTypeConstructor = c;
+                    }
+                });
+                Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
+                Class<?> typeNMSPlayer = subVersion < 17 ? Class.forName(a("EntityPlayer")) : Class.forName("net.minecraft.server.level.EntityPlayer");
+                Class<?> typePlayerConnection = subVersion < 17 ? Class.forName(a("PlayerConnection")) : Class.forName("net.minecraft.server.network.PlayerConnection");
+                getHandle = typeCraftPlayer.getMethod("getHandle");
+                playerConnection = subVersion < 17 ? typeNMSPlayer.getField("playerConnection") : typeNMSPlayer.getField("b");
+                if (subVersion < 17) {
+                    sendPacket = typePlayerConnection.getMethod("sendPacket", Class.forName(a("Packet")));
+                } else if (subVersion == 17) {
+                    sendPacket = typePlayerConnection.getMethod("sendPacket", Class.forName("net.minecraft.network.protocol.Packet"));
+                } else {
+                    sendPacket = typePlayerConnection.getMethod("a", Class.forName("net.minecraft.network.protocol.Packet"));
                 }
-                if (c.getParameterTypes().length == 3) {
-                    packetTypeConstructor = c;
-                    above_1_16 = true;
-                }
-            });
-            Class<?> nmsChatMessageTypeClass = packetTypeConstructor.getParameterTypes()[1];
-            if (nmsChatMessageTypeClass.isEnum()) {
-                chatMessageTypes = nmsChatMessageTypeClass.getEnumConstants();
-            } else {
-                switch (nmsChatMessageTypeClass.getName()) {
-                    case "int":
-                        nmsChatMessageTypeClass = Integer.class;
-                        break;
-                    case "byte":
-                        nmsChatMessageTypeClass = Byte.class;
-                        break;
-                }
-                nmsChatMessageTypeClassValueOf = nmsChatMessageTypeClass.getDeclaredMethod("valueOf", String.class);
-            }
-            Class<?> typeCraftPlayer = Class.forName(b("entity.CraftPlayer"));
-            Class<?> typeNMSPlayer = subVersion < 17 ? Class.forName(a("EntityPlayer")) : Class.forName("net.minecraft.server.level.EntityPlayer");
-            Class<?> typePlayerConnection = subVersion < 17 ? Class.forName(a("PlayerConnection")) : Class.forName("net.minecraft.server.network.PlayerConnection");
-            getHandle = typeCraftPlayer.getMethod("getHandle");
-            playerConnection = subVersion < 17 ? typeNMSPlayer.getField("playerConnection") : typeNMSPlayer.getField("b");
-            if (subVersion < 17) {
-                sendPacket = typePlayerConnection.getMethod("sendPacket", Class.forName(a("Packet")));
-            } else if (subVersion == 17) {
-                sendPacket = typePlayerConnection.getMethod("sendPacket", Class.forName("net.minecraft.network.protocol.Packet"));
-            } else {
-                sendPacket = typePlayerConnection.getMethod("a", Class.forName("net.minecraft.network.protocol.Packet"));
+            } catch (Exception ex) {
+                Log.d(ex);
+                Chat.getBukkitChatInvoke();
             }
             init = true;
         } catch (Exception e) {
@@ -122,17 +109,7 @@ public class C {
      *                        2. ActionBar
      */
     public static void sendJson(org.bukkit.entity.Player receivingPacket, String json, int type) {
-        try {
-            Object serialized = chatSerializer.invoke(null, json);
-            Object player = getHandle.invoke(receivingPacket);
-            Object connection = playerConnection.get(player);
-            Object typeObj = chatMessageTypes == null ? nmsChatMessageTypeClassValueOf.invoke(null, String.valueOf(type)) : chatMessageTypes[type];
-            sendPacket.invoke(connection, above_1_16
-                    ? packetTypeConstructor.newInstance(serialized, typeObj, receivingPacket.getUniqueId())
-                    : packetTypeConstructor.newInstance(serialized, typeObj));
-        } catch (Exception ex) {
-            Log.d("Json发包错误 " + version, ex);
-        }
+        Chat.getBukkitChatInvoke().send(receivingPacket, json, type);
     }
 
     public static class ActionBar {
